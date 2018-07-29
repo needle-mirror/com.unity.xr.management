@@ -1,7 +1,11 @@
 using System;
 
 using UnityEngine;
+#if UNITY_2019_1_OR_NEWER
+using UnityEngine.UIElements;
+#else
 using UnityEngine.Experimental.UIElements;
+#endif
 
 using UnityEditor;
 
@@ -17,7 +21,7 @@ namespace UnityEditor.XR.Management
         Editor m_CachedEditor;
         SerializedObject m_SettingsWrapper;
 
-        public XRConfigurationProvider(string path, string displayName, string buildSettingsKey, Type buildDataType, SettingsScopes scopes = SettingsScopes.Any) : base(path, scopes)
+        public XRConfigurationProvider(string path, string displayName, string buildSettingsKey, Type buildDataType, SettingsScope scopes = SettingsScope.Project) : base(path, scopes)
         {
             m_DisplayName = displayName;
             m_BuildDataType = buildDataType;
