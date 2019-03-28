@@ -4,6 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-preview.6] - 2019-3-29
+Fix up package repo information for rel mgmt.
+
+## [2.0.0-preview.5] - 2019-2-5
+* Split documentation into separate audience files for End Users and Providers.
+* Update package target Unity version to Unity 2019.1.
+
+## [2.0.0-preview.4] - 2019-2-5
+* Fix an issue with with an NRE in the build processor.
+
+## [2.0.0-preview.3] - 2019-1-22
+* Add missing repo url to package json file
+* Fix NRE issue in build processor
+
 ## [2.0.0-preview.3] - 2019-1-22
 * Fix error in general build processor due to a potential null deref.
 * Fix missing check for unity version when referencing UIElements.
