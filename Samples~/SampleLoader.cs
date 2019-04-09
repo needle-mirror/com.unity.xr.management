@@ -7,6 +7,7 @@ using UnityEngine.XR.Management;
 
 using UnityEngine.Experimental;
 using UnityEngine.Experimental.XR;
+using UnityEngine.XR;
 
 namespace Samples
 {

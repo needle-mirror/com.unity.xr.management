@@ -4,28 +4,17 @@
 
 At package install time, the package may prompt you to create an instance of a loader and an instance of settings for the package. This step is entirely optional and is there simply to help the user get things going at installation time.
 
-If you wish not to create this at installation time, the appropriate portion of the editor that require them (**XRManager** and **Unified Settings** will) prompt you to create them as well.
+If you wish not to create this at installation time, the appropriate portion of the editor that require them (**XRManagerSettingsSettings** and **Unified Settings** will) prompt you to create them as well.
 
-## Add an **XRManager** instance to your scene
+### Set up XR SDK settings with loaders you want to run.
+* Navigate to **Unified Settings**.
+* Select the top level **XR** node.
+* Modify loaders
+
+**NOTE**: You can always manually control the XR SDK system by accessing the **XRManagerSettingsSettings.activeLoader** field once XR SDK has been initialized.
 
 ### If you wish to start XR SDK on a per scene basis (i.e. start in 2D and transition into VR)
-* Create a new empty Game Object in your scene.
-* Add an instance of the **XRManager** component to this new Game Object.
-* Use the **XRManager** component Inspector UI to add/create, remove and reorder the loaders you wish to use.
-
-When the scene loads, XR Manager will attempt to create and start the set of subsystems for the first loader that successfully initializes. Unless otherwise specified, XR Manager will manage the lifetime of the XR SDK session within the life time of the scene.
-
-### If you wish to start XR SDK at launch and keep it running throughout the app lifetime.
-* Open and scene and create an empty **Game Object**. Add an **XR Manager** component to that **Game Object**. 
-* Drag the **Game Object** to the Project heirarchy and create a prefab from that instance. Delete the **Game Object** instance from the scene.
-* Open the prefab in the Prefab Editor and go to the inspector for the prefab.
-* Populate the **XR Manager** instance with the set of loaders you wish to use for your application.
-* Navigate to **Unified Settings**.
-* Select the top level **XR** node. Drag the prefab to the XR Manager Instance and drop it. This prefab is now assigned to the global XR settings system and will be used to manage the lifetime of the XR SDK for the lifetime of the application.
-
-The instance of the **Game Object** that contains the **XR Manager** component instance you wish to use can be set/accessed using **XRGeneralSettings.Instance.m_LoaderManagerInstance**. This allows you to change the prefab instance that you want to use at build time so that you can change loader configuration depending on build target.
-
-**NOTE**: You can always manually control the XR SDK system by accessing the **XRManager.activeLoader** field once XR SDK has been initialized.
+* Use the **XRGeneralSettings.Instance.m_LoaderManagerInstance** to add/create, remove and reorder the loaders you wish to use from the script.
 
 ## Customize build and runtime settings
 

@@ -16,18 +16,18 @@ namespace UnityEngine.XR.Management
         internal static XRGeneralSettings s_RuntimeSettingsInstance = null;
 
         [SerializeField]
-        internal GameObject m_LoaderManagerInstance = null;
+        internal XRManagerSettings m_LoaderManagerInstance = null;
 
         [SerializeField]
         internal bool m_InitManagerOnStart = true;
 
-        public GameObject Manager
+        public XRManagerSettings Manager
         {
             get { return m_LoaderManagerInstance; }
             set { m_LoaderManagerInstance = value; }
         }
 
-        private XRManager m_XRManager = null;
+        private XRManagerSettings m_XRManager = null;
 
         public static XRGeneralSettings Instance
         {
@@ -37,7 +37,7 @@ namespace UnityEngine.XR.Management
             }
         }
 
-        public GameObject LoaderManagerInstance
+        public XRManagerSettings AssignedSettings
         {
             get
             {
@@ -46,17 +46,6 @@ namespace UnityEngine.XR.Management
 #if UNITY_EDITOR
             set
             {
-                GameObject go = value as GameObject;
-                if (go != null)
-                {
-                    XRManager goc = go.GetComponent<XRManager>() as XRManager;
-                    if (goc == null)
-                    {
-                        Debug.LogError("Attempting to assing a game object intance that does not contaion an XRManager component on it.");
-                        return;
-                    }
-                }
-
                 m_LoaderManagerInstance = value;
             }
 #endif            
@@ -180,7 +169,7 @@ namespace UnityEngine.XR.Management
             if (XRGeneralSettings.Instance == null || XRGeneralSettings.Instance.m_LoaderManagerInstance == null || XRGeneralSettings.Instance.m_InitManagerOnStart == false)
                 return;
 
-            m_XRManager = XRGeneralSettings.Instance.m_LoaderManagerInstance.GetComponent<XRManager>();
+            m_XRManager = XRGeneralSettings.Instance.m_LoaderManagerInstance;
             if (m_XRManager == null)
             {
                 Debug.LogError("Assigned GameObject for XR Management loading is invalid. XR SDK will not be automatically loaded.");
@@ -194,7 +183,7 @@ namespace UnityEngine.XR.Management
 
         private void StartXRSDK()
         {
-            if (m_XRManager != null && XRManager.activeLoader != null)
+            if (m_XRManager != null && m_XRManager.activeLoader != null)
             {
                 m_XRManager.StartSubsystems();
             }
@@ -202,7 +191,7 @@ namespace UnityEngine.XR.Management
 
         private void StopXRSDK()
         {
-            if (m_XRManager != null && XRManager.activeLoader != null)
+            if (m_XRManager != null && m_XRManager.activeLoader != null)
             {
                 m_XRManager.StopSubsystems();
             }
@@ -210,7 +199,7 @@ namespace UnityEngine.XR.Management
 
         private void DeInitXRSDK()
         {
-            if (m_XRManager != null && XRManager.activeLoader != null)
+            if (m_XRManager != null && m_XRManager.activeLoader != null)
             {
                 m_XRManager.DeinitializeLoader();
                 m_XRManager = null;

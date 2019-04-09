@@ -2,7 +2,7 @@
 
 ## Lifecycle Management
 
-This package provides for management of **XR SDK** subsystem lifecycle without the need for boilerplate code. The **XRManager** class provides a component that can be added to a game object in the scene that will manage initialization, start, stop and de-initialization of a set of subsystems defined by an **XRLoader** instance. The **XRManager** instance can handle all of the lifecycle management, init/de-init only, subsystem start/stop only or can leave all of it up to the user.
+This package provides for management of **XR SDK** subsystem lifecycle without the need for boilerplate code. The **XRManagerSettings** class provides a scriptable object that can be used by the app for start, stop and de-initialization of a set of subsystems defined by an **XRLoader** instance.
 
 A provider must create a subclass of **XRLoader** to make a loader available for their particular runtime scheme.
 
@@ -27,9 +27,9 @@ There is a class called **XRLoaderHelper** which you can derive from to handle s
 
 An **XRLoader** is simply a **ScriptableObject** and as such, the user is able to create and instance (or more if they want) of the loader. Each **XRLoader** subclass defines the subsystems and their load order and is responsible for managing the set of subsystems they require.
 
-A user will add all the **XRLoaders** instances they created to the Loaders property on the **XRManager**, arranging them in the load order that they desire.
+A user will add all the **XRLoaders** instances they created to the Loaders property on the **XRManagerSettings**, arranging them in the load order that they desire.
 
-When asked to initialize, **XRManager** will call each **XRLoader** instance it has a reference to in the order it has and attempt to initialize each one. The first loader that succeeds initialization becomes the active loader and all further attempts to initialize are stopped. From this point the user can ask for the static **XRManager.ActiveLoader** instance to get access to the active loader. If initialization fails for all loaders, **ActiveLoader** is set to null.
+When asked to initialize, **XRManagerSettings** will call each **XRLoader** instance it has a reference to in the order it has and attempt to initialize each one. The first loader that succeeds initialization becomes the active loader and all further attempts to initialize are stopped. From this point the user can ask for the static **XRManagerSettings.ActiveLoader** instance to get access to the active loader. If initialization fails for all loaders, **ActiveLoader** is set to null.
 
 Scene based Automatic lifecycle management hooks into the following **MonoBehaviour** callback points:
 
@@ -109,7 +109,7 @@ If you need more extensive support and/or absolute control you can copy the **Sa
 
 ## Package Initialization
 
-Given the need for **ScriptableObject** instance to support loaders and settings, the user will be forced to create these instances at some point. Both **XRManager** and the **Unified Settings** support can handle creating the necessary instances on demand but it may be beneficial to create these up front at package installation. If you derive a class from **XRPackageInitializationBase** and fill out the interface properties and methods the management system will provide for creation of default instances of your loader and settings at installation. Creation of each one is driven by prompting the user if it is OK to do that and, if so, creating the instance in the appropriate default location in the Assets folder. For loaders this is Assets/XR/Loaders. For settings this is Assets/XR/Settings. While these are the recommended locations for putting these package based objects they do not have to be located there. The user is free to move them around as long as we can find at least one instance of each type for each package.
+Given the need for **ScriptableObject** instance to support loaders and settings, the user will be forced to create these instances at some point. Both **XRManagerSettings** and the **Unified Settings** support can handle creating the necessary instances on demand but it may be beneficial to create these up front at package installation. If you derive a class from **XRPackageInitializationBase** and fill out the interface properties and methods the management system will provide for creation of default instances of your loader and settings at installation. Creation of each one is driven by prompting the user if it is OK to do that and, if so, creating the instance in the appropriate default location in the Assets folder. For loaders this is Assets/XR/Loaders. For settings this is Assets/XR/Settings. While these are the recommended locations for putting these package based objects they do not have to be located there. The user is free to move them around as long as we can find at least one instance of each type for each package.
 
 # Installing *XR SDK Management*
 

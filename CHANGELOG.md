@@ -4,8 +4,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-preview.9] - 2019-4-10
+* Fix package validation console errors.
+
+## [2.0.0-preview.8] - 2019-4-10
+* Fix package validation compilation errors.
+* Remove .github folder from npm packaging.
+
+## [2.0.0-preview.7] - 2019-4-10
+* Streamlining of the management system. Move XR Manager to a singleton instance on XRGeneralSettings that is populated by an XRManagerSettings instance that the user can switch in and out. __NOTE: This removes the ability to use XRManagement for per scene situations. For hybrid or manual scenes the user will be responsible for instantiating/loading the XRManagerSettings instance they want and dealing with lifecycle themselves.__
+
 ## [2.0.0-preview.6] - 2019-3-29
-Fix up package repo information for rel mgmt.
+* Fix up package repo information for rel mgmt.
 
 ## [2.0.0-preview.5] - 2019-2-5
 * Split documentation into separate audience files for End Users and Providers.

@@ -36,15 +36,25 @@ namespace UnityEngine.XR.Management
     /// * OnDisable -> <see cref="StopSubsystems"/>. Ask the active loader to stop all subsystems.
     /// * OnDestroy -> <see cref="DeinitializeLoader"/>. Deinitialize and remove the active loader.
     /// </summary>
-    public sealed class XRManager : MonoBehaviour
+    [CreateAssetMenu(fileName = "XRSettings", menuName = "XRSettings", order = 1)]
+    public sealed class XRManagerSettings : ScriptableObject
     {
         [HideInInspector]
         bool m_InitializationComplete = false;
 
+#pragma warning disable 414
+        // This property is only used by the scriptable object editing part of the system and as such no one
+        // directly references it. Have to manually disable the console warning here so that we can
+        // get a clean console report.
+        [HideInInspector]
+        [SerializeField]
+        bool m_RequiresSettingsUpdate = false;
+#pragma warning restore 414
+
         [SerializeField]
         [Tooltip("Determines if the XR Manager instance is responsible for creating and destroying the appropriate loader instance.")]
         [FormerlySerializedAs("AutomaticLoading")]
-        bool m_AutomaticLoading = true;
+        bool m_AutomaticLoading = false;
 
         /// <summary>
         /// Get and set Automatic Loading state for this manager. When this is true, the manager will automatically call
@@ -61,7 +71,7 @@ namespace UnityEngine.XR.Management
         [SerializeField]
         [Tooltip("Determines if the XR Manager instance is responsible for starting and stopping subsystems for the active loader instance.")]
         [FormerlySerializedAs("AutomaticRunning")]
-        bool m_AutomaticRunning = true;
+        bool m_AutomaticRunning = false;
 
         /// <summary>
         /// Get and set automatic running state for this manager. When set to true the manager will call <see cref="StartSubsystems"/>
@@ -96,7 +106,7 @@ namespace UnityEngine.XR.Management
         /// </summary>
         public bool isInitializationComplete
         {
-            get { return m_InitializationComplete;  }
+            get { return m_InitializationComplete; }
         }
 
         [HideInInspector]
@@ -107,7 +117,7 @@ namespace UnityEngine.XR.Management
         ///
         ///</summary>
         [HideInInspector]
-        public static XRLoader activeLoader { get { return s_ActiveLoader; } private set { s_ActiveLoader = value; }}
+        public XRLoader activeLoader { get { return s_ActiveLoader; } private set { s_ActiveLoader = value; } }
 
         /// <summary>
         /// Return the current active loader, cast to the requested type. Useful shortcut when you need
@@ -117,7 +127,7 @@ namespace UnityEngine.XR.Management
         /// <paramref name="T">< Requested type of the loader></paramref>
         ///
         /// <returns>< The active loader as requested type, or null.></returns>
-        public static T ActiveLoaderAs<T>() where T : XRLoader
+        public T ActiveLoaderAs<T>() where T : XRLoader
         {
             return activeLoader as T;
         }
@@ -260,14 +270,6 @@ namespace UnityEngine.XR.Management
             }
 
             m_InitializationComplete = false;
-        }
-
-        void OnEnable()
-        {
-            if (automaticLoading)
-            {
-                StartCoroutine(InitializeLoader());
-            }
         }
 
         // Use this for initialization

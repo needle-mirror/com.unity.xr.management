@@ -18,7 +18,7 @@ namespace Unity.XR.Management.Tests
     [TestFixture(3, 2)]
     class ManualLifetimeTests
     {
-        GameObject m_GameManager = null;
+        XRManagerSettings m_Manager;
         List<XRLoader> m_Loaders = new List<XRLoader>();
         int m_LoaderCount;
         int m_LoaderIndexToWin;
@@ -32,8 +32,7 @@ namespace Unity.XR.Management.Tests
         [SetUp]
         public void SetupXRManagerTest()
         {
-            m_GameManager = new GameObject();
-            XRManager manager = m_GameManager.AddComponent<XRManager>() as XRManager;
+            var manager = ScriptableObject.CreateInstance<XRManagerSettings>();
             manager.automaticLoading = false;
 
             m_Loaders = new List<XRLoader>();
@@ -51,35 +50,32 @@ namespace Unity.XR.Management.Tests
         [TearDown]
         public void TeardownXRManagerTest()
         {
-            Object.Destroy(m_GameManager);
-            m_GameManager = null;
+            Object.Destroy(m_Manager);
+            m_Manager = null;
         }
 
         [UnityTest]
         public IEnumerator CheckActivatedLoader()
         {
-            Assert.IsNotNull(m_GameManager);
+            Assert.IsNotNull(m_Manager);
 
-            XRManager manager = m_GameManager.GetComponent<XRManager>() as XRManager;
-            Assert.IsNotNull(manager);
-
-            yield return manager.InitializeLoader();
+            yield return m_Manager.InitializeLoader();
 
             if (m_LoaderIndexToWin < 0 || m_LoaderIndexToWin >= m_Loaders.Count)
             {
-                Assert.IsNull(XRManager.activeLoader);
+                Assert.IsNull(m_Manager.activeLoader);
             }
             else
             {
-                Assert.IsNotNull(XRManager.activeLoader);
-                Assert.AreEqual(m_Loaders[m_LoaderIndexToWin], XRManager.activeLoader);
+                Assert.IsNotNull(m_Manager.activeLoader);
+                Assert.AreEqual(m_Loaders[m_LoaderIndexToWin], m_Manager.activeLoader);
             }
 
-            manager.DeinitializeLoader();
+            m_Manager.DeinitializeLoader();
 
-            Assert.IsNull(XRManager.activeLoader);
+            Assert.IsNull(m_Manager.activeLoader);
 
-            manager.loaders.Clear();
+            m_Manager.loaders.Clear();
         }
     }
 }

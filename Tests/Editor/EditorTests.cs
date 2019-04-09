@@ -23,14 +23,13 @@ namespace Unity.XR.Management.EditorTests
 
         UnityEngine.Object currentSettings = null;
 
-        GameObject testManager = null;
+        XRManagerSettings testManager = null;
         XRGeneralSettings testSettings = null;
 
         [SetUp]
         public void SetupTest()
         {
-            testManager = new GameObject("Test Manager");
-            testManager.AddComponent<XRManager>();
+            testManager = ScriptableObject.CreateInstance<XRManagerSettings>();
 
             testSettings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
             testSettings.Manager = testManager;

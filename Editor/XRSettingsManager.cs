@@ -23,8 +23,11 @@ namespace UnityEditor.XR.Management
 
         static GUIContent s_LoaderXRManagerLabel = new GUIContent("XR Manager Instance");
         static GUIContent s_LoaderInitOnStartLabel = new GUIContent("Initialize on Startup");
+        static GUIContent s_SettingsDetailsFoldout = new GUIContent("Details");
 
         SerializedObject m_SettingsWrapper;
+
+        private Dictionary<BuildTargetGroup, Editor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, Editor>();
 
         static XRGeneralSettingsPerBuildTarget currentSettings
         {
@@ -121,6 +124,8 @@ namespace UnityEditor.XR.Management
         public override void OnDeactivate()
         {
             m_SettingsWrapper = null;
+
+            CachedSettingsEditor.Clear();
         }
 
         public override void OnGUI(string searchContext)
@@ -143,13 +148,46 @@ namespace UnityEditor.XR.Management
                 serializedSettingsObject.Update();
 
                 SerializedProperty loaderProp = serializedSettingsObject.FindProperty("m_LoaderManagerInstance");
-                var obj = EditorGUILayout.ObjectField(s_LoaderXRManagerLabel, loaderProp.objectReferenceValue, typeof(GameObject), false) as GameObject;
-                if (obj != null && obj.GetComponent<XRManager>() != null)
+
+                if (!CachedSettingsEditor.ContainsKey(buildTargetGroup))
                 {
-                    XRManager inst = obj.GetComponent<XRManager>();
-                    inst.automaticLoading = false;
-                    inst.automaticRunning = false;
+                    CachedSettingsEditor.Add(buildTargetGroup, null);
+                }
+
+                if (loaderProp.objectReferenceValue == null)
+                {
+                    var xrManagerSettings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
+                    AssetDatabase.AddObjectToAsset(xrManagerSettings, AssetDatabase.GetAssetOrScenePath(currentSettings));
+                    loaderProp.objectReferenceValue = xrManagerSettings;
+                    serializedSettingsObject.ApplyModifiedProperties();
+                }
+
+                EditorGUI.BeginChangeCheck();
+                var obj = EditorGUILayout.ObjectField(s_LoaderXRManagerLabel, loaderProp.objectReferenceValue, typeof(XRManagerSettings), false) as XRManagerSettings;
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CachedSettingsEditor[buildTargetGroup] = null;
+                }
+                
+                if (obj != null)
+                {
                     loaderProp.objectReferenceValue = obj;
+
+                    if(CachedSettingsEditor[buildTargetGroup] == null)
+                    {
+                        CachedSettingsEditor[buildTargetGroup] = Editor.CreateEditor(obj);
+
+                        if (CachedSettingsEditor[buildTargetGroup] == null)
+                        {
+                            Debug.LogError("Failed to create a view for XR Settings Instance");
+                        }
+                    }
+
+                    if (CachedSettingsEditor[buildTargetGroup] != null)
+                    {
+                        CachedSettingsEditor[buildTargetGroup].OnInspectorGUI();
+                    }
                 }
                 else if (obj != null)
                 {
@@ -157,24 +195,18 @@ namespace UnityEditor.XR.Management
                 }
                 else if (obj == null)
                 {
-                    settings.LoaderManagerInstance = null;
+                    settings.AssignedSettings = null;
                     loaderProp.objectReferenceValue = null;
                 }
                 
-                SerializedProperty initOnStartProp = serializedSettingsObject.FindProperty("m_InitManagerOnStart");
-                EditorGUILayout.PropertyField(initOnStartProp, s_LoaderInitOnStartLabel);
-
-                EditorGUILayout.HelpBox("Select a prefab that has an XRManager component assigned to it." +
-                    " If initialize is enabled, this will be used to initialize the XR SDK at application start, " +
-                    "and the assigned manager instance will have automatic loading and running disabled.\n\n" +
-                    "If initialize is disabled, the manager will only be used to do minimal pre-initialization at engine startup.", MessageType.Info);
-
                 serializedSettingsObject.ApplyModifiedProperties();
 
                 EditorGUILayout.EndBuildTargetSelectionGrouping();
 
                 m_SettingsWrapper.ApplyModifiedProperties();
             }
+
+            base.OnGUI(searchContext);
         }
 
     }

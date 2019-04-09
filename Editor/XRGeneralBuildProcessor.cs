@@ -61,17 +61,13 @@ namespace UnityEditor.XR.Management
 
             // store off some info about the first loader in the list for PreInit boot.config purposes
             preInitInfo = null;
-            GameObject loaderManager = settings.LoaderManagerInstance;
+            XRManagerSettings loaderManager = settings.AssignedSettings;
             if (loaderManager != null)
             {
-                XRManager manager = loaderManager.GetComponent<XRManager>() as XRManager;
-                if (manager != null)
+                List<XRLoader> loaders = loaderManager.loaders;
+                if (loaders.Count >= 1)
                 {
-                    List<XRLoader> loaders = manager.loaders;
-                    if (loaders.Count >= 1)
-                    {
-                        preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);
-                    }
+                    preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);
                 }
             }
 
