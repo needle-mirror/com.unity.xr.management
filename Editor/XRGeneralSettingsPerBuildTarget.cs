@@ -54,6 +54,22 @@ namespace UnityEditor.XR.Management
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void AttemptInitializeXRSDKBeforePlayModeStarted()
+        {
+            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            if (buildTargetSettings == null)
+                return;
+
+            XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
+            if (instance == null || !instance.InitManagerOnStart)
+                return;
+
+            instance.InternalPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode);
+        }
+
+
         static void PlayModeStateChanged(PlayModeStateChange state)
         {
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
@@ -62,7 +78,7 @@ namespace UnityEditor.XR.Management
                 return;
 
             XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
-            if (instance == null)
+            if (instance == null || !instance.InitManagerOnStart)
                 return;
 
             instance.InternalPlayModeStateChanged(state);

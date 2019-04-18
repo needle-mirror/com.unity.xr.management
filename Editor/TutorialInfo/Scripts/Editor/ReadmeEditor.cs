@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using System.Reflection;
 
+using UnityEditorInternal;
+
 [CustomEditor(typeof(XRReadme))]
 [InitializeOnLoad]
 public class ReadmeEditor : Editor {
@@ -21,6 +23,9 @@ public class ReadmeEditor : Editor {
 
 	static void SelectReadmeAutomatically()
 	{
+        if (!InternalEditorUtility.isHumanControllingUs || InternalEditorUtility.inBatchMode)
+            return;
+
 		if (!SessionState.GetBool(kShowedReadmeSessionStateName, false ))
 		{
 			var readme = SelectReadme();

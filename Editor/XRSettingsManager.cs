@@ -147,6 +147,9 @@ namespace UnityEditor.XR.Management
                 var serializedSettingsObject = new SerializedObject(settings);
                 serializedSettingsObject.Update();
 
+                SerializedProperty initOnStart = serializedSettingsObject.FindProperty("m_InitManagerOnStart");
+                EditorGUILayout.PropertyField(initOnStart, s_LoaderInitOnStartLabel);
+                
                 SerializedProperty loaderProp = serializedSettingsObject.FindProperty("m_LoaderManagerInstance");
 
                 if (!CachedSettingsEditor.ContainsKey(buildTargetGroup))

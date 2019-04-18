@@ -79,6 +79,33 @@ namespace UnityEngine.XR.Management
 #if UNITY_EDITOR
         bool m_IsPlaying = false;
 
+        void EnterPlayMode()
+        {
+            if (!m_IsPlaying)
+            {
+                if (s_RuntimeSettingsInstance == null)
+                    s_RuntimeSettingsInstance = this;
+
+                InitXRSDK();
+                StartXRSDK();
+                m_IsPlaying = true;
+            }
+        }
+
+        void ExitPlayMode()
+        {
+            if (m_IsPlaying)
+            {
+                m_IsPlaying = false;
+                StopXRSDK();
+                DeInitXRSDK();
+
+                if (s_RuntimeSettingsInstance != null)
+                    s_RuntimeSettingsInstance = null;
+
+            }
+        }
+
         public void InternalPlayModeStateChanged(PlayModeStateChange state)
         {
             switch (state)
@@ -86,27 +113,10 @@ namespace UnityEngine.XR.Management
                 case PlayModeStateChange.ExitingEditMode:
                     break;
                 case PlayModeStateChange.EnteredPlayMode:
-                    if (!m_IsPlaying)
-                    {
-                        if (s_RuntimeSettingsInstance == null)
-                            s_RuntimeSettingsInstance = this;
-
-                        InitXRSDK();
-                        StartXRSDK();
-                        m_IsPlaying = true;
-                    }
+                    EnterPlayMode();
                     break;
                 case PlayModeStateChange.ExitingPlayMode:
-                    if (m_IsPlaying)
-                    {
-                        m_IsPlaying = false;
-                        StopXRSDK();
-                        DeInitXRSDK();
-
-                        if (s_RuntimeSettingsInstance != null)
-                            s_RuntimeSettingsInstance = null;
-
-                    }
+                    ExitPlayMode();
                     break;
                 case PlayModeStateChange.EnteredEditMode:
                     break;
@@ -145,7 +155,7 @@ namespace UnityEngine.XR.Management
         {
 #if !UNITY_EDITOR
             XRGeneralSettings instance = XRGeneralSettings.Instance;
-            if (instance == null)
+            if (instance == null || !instance.InitManagerOnStart)
                 return;
 
             instance.InitXRSDK();
@@ -157,7 +167,7 @@ namespace UnityEngine.XR.Management
         {
 #if !UNITY_EDITOR
             XRGeneralSettings instance = XRGeneralSettings.Instance;
-            if (instance == null)
+            if (instance == null || !instance.InitManagerOnStart)
                 return;
 
             instance.StartXRSDK();

@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-preview.10] - 2019-4-19
+* Add ability for users to disable auto initialize at start. This should allow for hybrid applications that want to start in non-XR mode and manually switch.
+* Fix play mode initialization so that we can guarantee that XR has been initialized (or at least attempted initialization) by the time the Start method is called on MonoBehaviours.
+* Documentation updated to cover the above.
+* Fixed a bug in the new Readme script code that caused a crash in headless mode. Seems the code was launching an Editor window and causing UIElements to crash on an attempt to repaint. We have a workaround to make sure we don't load the window if in headless mode and a bug is filed with the responsible team to correct the crash.
+
 ## [2.0.0-preview.9] - 2019-4-10
 * Fix package validation console errors.
 
