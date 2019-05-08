@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR SDK Management",
-  "version": "2.0.0-preview.10",
+  "version": "2.0.0-preview.13",
   "unity": "2019.1",
   "description": "Package to provide for simple management of XR SDK loading, unloading and configuration.",
   "keywords": [
@@ -17,8 +17,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.cds.internal.unity3d.com/xr/sdk/xr-management.git",
-    "revision": "8df08aeba2a00bd045be53da07a31b1f19a48191"
+    "url": "git@github.cds.internal.unity3d.com:unity/xr.sdk.management.git",
+    "revision": "96ff61b24e3a3594d7c22f3d61ce894a559a8db8"
   },
   "samples": [
     {

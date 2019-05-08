@@ -12,7 +12,7 @@ namespace UnityEngine.XR.Management
 
     public class XRGeneralSettings : ScriptableObject
     {
-        public static string k_SettingsKey = "com.unity.xr.managment.loader_settings";
+        public static string k_SettingsKey = "com.unity.xr.management.loader_settings";
         internal static XRGeneralSettings s_RuntimeSettingsInstance = null;
 
         [SerializeField]

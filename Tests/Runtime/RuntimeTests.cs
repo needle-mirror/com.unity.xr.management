@@ -32,8 +32,8 @@ namespace Unity.XR.Management.Tests
         [SetUp]
         public void SetupXRManagerTest()
         {
-            var manager = ScriptableObject.CreateInstance<XRManagerSettings>();
-            manager.automaticLoading = false;
+            m_Manager = ScriptableObject.CreateInstance<XRManagerSettings>();
+            m_Manager.automaticLoading = false;
 
             m_Loaders = new List<XRLoader>();
 
@@ -43,7 +43,7 @@ namespace Unity.XR.Management.Tests
                 dl.id = i;
                 dl.shouldFail = (i != m_LoaderIndexToWin);
                 m_Loaders.Add(dl);
-                manager.loaders.Add(dl);
+                m_Manager.loaders.Add(dl);
             }
         }
 

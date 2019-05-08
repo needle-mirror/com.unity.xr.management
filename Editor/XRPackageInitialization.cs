@@ -154,6 +154,9 @@ namespace UnityEditor.XR.Management
         static bool InitializeLoaderInstance(XRPackageInitializationBase packageInit)
         {
             bool ret = EditorUtilities.AssetDatabaseHasInstanceOfType(packageInit.LoaderTypeName);
+            if (Application.isBatchMode)
+                return true;
+
             if (!ret)
             {
                 ret = EditorUtility.DisplayDialog(
@@ -173,9 +176,13 @@ namespace UnityEditor.XR.Management
 
             return ret;
         }
+
         static bool InitializeSettingsInstance(XRPackageInitializationBase packageInit)
         {
             bool ret = EditorUtilities.AssetDatabaseHasInstanceOfType(packageInit.SettingsTypeName);
+            if (Application.isBatchMode)
+                return true;
+
             if (!ret)
             {
                 ret = EditorUtility.DisplayDialog(
