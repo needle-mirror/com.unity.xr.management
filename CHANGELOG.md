@@ -4,6 +4,33 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-preview.21] - 2019-6-10
+* Downgrade Legacy Input Helpers dependency to corredct production version.
+
+## [2.0.0-preview.20] - 2019-6-10
+* Downgrade Legacy Input Helpers dependency to help get package to production.
+
+## [2.0.0-preview.19] - 2019-6-4
+* Fix package name and description.
+
+## [2.0.0-preview.18] - 2019-6-3
+* Minor corrections in samples header file.
+* Remove Windows from log message.
+* Remove tutorial UI and unsupported data.
+
+## [2.0.0-preview.17] - 2019-5-28
+* Fix issue where no settings object would cause an error to be logged at build time incorrectly.
+* Add helper method to get XRGeneralSettings instance for a specific build target.
+
+## [2.0.0-preview.16] - 2019-5-28
+* Move PR template to correct location.
+
+## [2.0.0-preview.15] - 2019-5-23
+* Fix the readme help page to only appear once on initial add of package.
+* Fix up test namespaces to use correct namespace naming
+
+## [2.0.0-preview.14] - 2019-5-23
+* updating number for yamato, adds depednency to com.unity.xr.legacyinputhelpers
 
 ## [2.0.0-preview.13] - 2019-5-09
 * Fix more output logging for Yamato.

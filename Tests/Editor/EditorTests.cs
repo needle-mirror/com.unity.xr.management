@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 using UnityEngine.XR.Management;
 
 
-namespace Unity.XR.Management.EditorTests
+namespace UnityEditor.XR.Management.Tests
 {
 
     class XRGeneralSettingsTests
@@ -34,7 +34,7 @@ namespace Unity.XR.Management.EditorTests
             testSettings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
             testSettings.Manager = testManager;
 
-            testPathToSettings = XRGeneralSettingsTests.GetAssetPathForComponents(XRGeneralSettingsTests.s_TempSettingsPath);            
+            testPathToSettings = XRGeneralSettingsTests.GetAssetPathForComponents(XRGeneralSettingsTests.s_TempSettingsPath);
             if (!string.IsNullOrEmpty(testPathToSettings))
             {
                 testPathToSettings = Path.Combine(testPathToSettings, "Test_XRGeneralSettings.asset");

@@ -18,7 +18,7 @@ namespace Samples
     /// as they are considered unreferenced assets. In order to get them to the runtime side of things, they need
     /// to be serialized to the build app and deserialized at runtime. Previously this would be a manual process
     /// requiring the implementor to manually serialize to some location that can then be read from to deserialize
-    /// at runtime. With thenew PlayerSettings Prelaoded Assets API we can now just add our asset to the prelaoded
+    /// at runtime. With the new PlayerSettings Preloaded Assets API we can now just add our asset to the preloaded
     /// list and have it be instantiated at app launch.
     ///
     /// Note that the preloaded assets are only notified with Awake, so anything you want or need to do with the
@@ -26,8 +26,8 @@ namespace Samples
     ///
     /// More info on APIs used here:
     /// * <a href="https://docs.unity3d.com/ScriptReference/EditorBuildSettings.html">EditorBuildSettings</a>
-    /// * <a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.GetPreloadedAssets.html">PlayerSettings.GetPrelaodedAssets</a>
-    /// * <a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.SetPreloadedAssets.html">PlayerSettings.SetPrelaodedAssets</a>
+    /// * <a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.GetPreloadedAssets.html">PlayerSettings.GetPreloadedAssets</a>
+    /// * <a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.SetPreloadedAssets.html">PlayerSettings.SetPreloadedAssets</a>
     /// </summary>
     public class SampleBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {

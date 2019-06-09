@@ -8,10 +8,10 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Unity.XR.Management.Tests.Standalone;
-using Unity.XR.Management.Tests.Standalone.Providing;
+using UnityEngine.XR.Management.Tests.Standalone;
+using UnityEngine.XR.Management.Tests.Standalone.Providing;
 
-namespace Unity.XR.Management.EditorTests
+namespace UnityEditor.XR.Management.Tests
 {
     class EditorTests
     {

@@ -12,11 +12,8 @@ MonoBehaviour:
   m_GeneratorAsset: {fileID: 0}
   m_Script: {fileID: 11500000, guid: e5b070e20b4035c43810cb53fceb8a3b, type: 3}
   m_Name: XRCuratedPackages
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   CuratedPackages:
   - MenuTitle: Oculus Loader
     PackageName: com.unity.xr.oculus
     LoaderTypeInfo: Oculus Loader
-  - MenuTitle: Windows MR Loader
-    PackageName: com.unity.xr.windowsmr
-    LoaderTypeInfo: Windows MR Loader

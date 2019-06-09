@@ -6,12 +6,12 @@ using UnityEngine.Experimental;
 using UnityEngine.Experimental.XR;
 using UnityEngine.XR.Management;
 
-namespace Unity.XR.Management.Tests.Standalone
+namespace UnityEngine.XR.Management.Tests.Standalone
 {
     public class StandaloneLoader : XRLoaderHelper
     {
         static List<StandaloneSubsystemDescriptor> s_StandaloneSubsystemDescriptors = new List<StandaloneSubsystemDescriptor>();
- 
+
         public StandaloneSubsystem standaloneSubsystem
         {
             get

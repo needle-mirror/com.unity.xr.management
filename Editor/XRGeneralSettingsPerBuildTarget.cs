@@ -28,8 +28,8 @@ namespace UnityEditor.XR.Management
         {
             static bool m_Upgrade = true;
             static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-            {             
-                if (m_Upgrade)  
+            {
+                if (m_Upgrade)
                 {
                     m_Upgrade = false;
                     BeginUpgradeSettings();
@@ -47,8 +47,8 @@ namespace UnityEditor.XR.Management
                 }
             }
         }
-        
-        
+
+
         static XRGeneralSettingsPerBuildTarget()
         {
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
@@ -116,6 +116,16 @@ namespace UnityEditor.XR.Management
             {
                 Settings.Add(Keys[i], Values[i]);
             }
+        }
+
+        public static XRGeneralSettings XRGeneralSettingsForBuildTarget(BuildTargetGroup targetGroup)
+        {
+            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            if (buildTargetSettings == null)
+                return null;
+
+            return buildTargetSettings.SettingsForBuildTarget(targetGroup);
         }
     }
 }

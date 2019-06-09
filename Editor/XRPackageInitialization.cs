@@ -121,13 +121,13 @@ namespace UnityEditor.XR.Management
             if (!InitializeLoaderInstance(packageInit))
             {
                 Debug.LogWarning(
-                    String.Format("{0} Loader Initialization not completed. You will need to create an instance of the loader using an instance of XRManager before you can use the Windows MR Package.", packageInit.PackageName));
+                    String.Format("{0} Loader Initialization not completed. You will need to create an instance of the loader using an instance of XRManager before you can use the intended XR Package.", packageInit.PackageName));
             }
 
             if (!InitializeSettingsInstance(packageInit))
             {
                 Debug.LogWarning(
-                    String.Format("{0} Settings Initialization not completed. You will need to create an instance of settings to customize options specific to this pacakge. This can be done by selecting Edit->Settings and navigating to the XR/Windows Mixed Reality panel.", packageInit.PackageName));
+                    String.Format("{0} Settings Initialization not completed. You will need to create an instance of settings to customize options specific to this pacakge.", packageInit.PackageName));
             }
 
             PackageInitializationSettings.Instance.AddSettings(packageInit.PackageInitKey);

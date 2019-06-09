@@ -40,6 +40,9 @@ namespace UnityEditor.XR.Management
             // dirty later builds with assets that may not be needed or are out of date.
             CleanOldSettings();
 
+            if (settingsObj == null)
+                return;
+
             if (!(settingsObj is T))
             {
                 Type typeOfT = typeof(T);

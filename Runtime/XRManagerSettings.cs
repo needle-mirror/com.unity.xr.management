@@ -160,10 +160,10 @@ namespace UnityEngine.XR.Management
 
         /// <summary>
         /// Iterate over the configured list of loaders and attempt to initialize each one. The first one
-        /// that succeeds is set as the active loader and initiialization imediately terminates.
+        /// that succeeds is set as the active loader and initialization immediately terminates.
         ///
         /// When complete <see cref="isInitializationComplete"> will be set to true. This will mark that it is safe to
-        /// call other parts of the API. This does not guarantee that init successfully create a loader. For that
+        /// call other parts of the API. This does not guarantee that init successfully created a loader. For that
         /// you need to check that ActiveLoader is not null.
         ///
         /// Note that there can only be one active loader. Any attempt to initialize a new active loader with one

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Experimental;
 using UnityEngine.Experimental.XR;
 
-namespace Unity.XR.Management.Tests.Standalone
+namespace UnityEngine.XR.Management.Tests.Standalone
 {
     namespace Providing
     {
