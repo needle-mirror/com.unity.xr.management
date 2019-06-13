@@ -29,7 +29,7 @@ An **XRLoader** is simply a **ScriptableObject** and as such, the user is able t
 
 A user will add all the **XRLoaders** instances they created to the Loaders property on the **XRManagerSettings**, arranging them in the load order that they desire.
 
-When asked to initialize, **XRManagerSettings** will call each **XRLoader** instance it has a reference to in the order it has and attempt to initialize each one. The first loader that succeeds initialization becomes the active loader and all further attempts to initialize are stopped. From this point the user can ask for the static **XRManagerSettings.ActiveLoader** instance to get access to the active loader. If initialization fails for all loaders, **ActiveLoader** is set to null.
+When asked to initialize, **XRManagerSettings** will call each **XRLoader** instance it has a reference to in the order it has and attempt to initialize each one. The first loader that succeeds initialization becomes the active loader and all further attempts to initialize are stopped. From this point the user can ask for the static **XRManagerSettings.ActiveLoader** instance to get access to the active loader. If initialization fails for all loaders, **activeLoader** is set to null.
 
 Scene based Automatic lifecycle management hooks into the following **MonoBehaviour** callback points:
 
@@ -51,7 +51,7 @@ App lifetime based Automatic lifecycle management hooks into the following callb
 
 ## Build and Runtime settings through *Unified Settings*
 
-A provider may need optional settings to help manage build issues or runtime configuration. They can do this by adding the **XRConfigurationData** attribute to a ScriptableObject and providing the set of properties they want to surface for users to control configuration. Configuration options will be surfaced in the **Unified Settings** window under the **XR** top level entry. We will manage the lifecycle for one instance of the class marked with the attribute through the EditorBuildSettings config object API. If no special UI is provided, the **Unified Settings** window will display the configuration settings using the standard **ScriptableObject** UI Inspector. A provider can extend the UI by creating a custom **Editor** for their configuration settings type and that will be used in the **Unified Settings** window instead. 
+A provider may need optional settings to help manage build issues or runtime configuration. They can do this by adding the **XRConfigurationData** attribute to a ScriptableObject and providing the set of properties they want to surface for users to control configuration. Configuration options will be surfaced in the **Unified Settings** window under the **XR** entry. We will manage the lifecycle for one instance of the class marked with the attribute through the EditorBuildSettings config object API. If no special UI is provided, the **Unified Settings** window will display the configuration settings using the standard **ScriptableObject** UI Inspector. A provider can extend the UI by creating a custom **Editor** for their configuration settings type and that will be used in the **Unified Settings** window instead. 
 
 The provider will need to handle getting the settings from **EditorUserBuildSettings** into the build application. This can be done with a custom build processing script. If all you need for build support is to make sure that you have access to the same settings at runtime you can derive from **XRBuildHelper<T>**. This is a generic abstract base class that handles the necessary work of getting the build settings stored in EditorUserBuildSettings and getting them into the build application for access at runtime. Simplest build script for your package would look like this:
 
@@ -114,8 +114,3 @@ Given the need for **ScriptableObject** instance to support loaders and settings
 # Installing *XR SDK Management*
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
-
-
-|Date|Reason|
-|---|---|
-|March 8, 2019|Create document.|

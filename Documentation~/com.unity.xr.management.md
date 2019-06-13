@@ -17,18 +17,6 @@ For a released version of the package in production, referencing the package is 
 	}
 ```
 
-## Using a staging version of the package
-
-For a pre-released version of the package you will need to edit the manifest.json file directly. You'll also need to add a `registry` entry to make sure that Package Manager knows to look in the staging repository for the package you want. 
-
-```json
-    "registry": "https://staging-packages.unity.com",
-	"dependencies": {
-        ...
-		"com.unity.xr.management":"<full version number>"
-	}
-```
-
 ## Using a local clone of the package
 
 If you want to use a cloned version of the package directly, you can point the Package Manager at a local folder as the location from which to get the package from.
@@ -73,17 +61,3 @@ This version of **XR SDK Management** includes:
 * **XRBuildHelper** - Abstract class useful for handling some boilerplate around moving settings from Editor -> Runtime. Derive from this class and specific the appropriate settings type and the system will take care of marshaling that type from EditorUserBuildSettings to PlayerSettings to be used at runtime.
 * **XRGeneralSettings** - Contains settings specifix to all of XR SDK and not to any single provider.
 * **Samples** - There is a samples folder in the package that contains an implementation of all parts of XR Management. Copy that folder to a location in your project/package to get started with implementing XR Management for your needs.
-
-## Document revision history
-
-|Date|Reason|
-|---|---|
-|March 8, 2019|Move docs into separate files for End User and Providers.|
-|January 8, 2019|Remove not about loader instance creation as it is now fixed. Providers can ship instances of the loaders they make for ready use by developers.|
-|October 8, 2018|Add documentation around package installation.|
-|October 5, 2018|Fix typos.|
-|October 4, 2018|Add info on package initialization.|
-|September 25, 2018|Clarify a bit and correct some spelling.|
-|July 25, 2018|Update docs to reflect API changes.|
-|June 22, 2018|Added updated information about the XRBuildData Attribute.|
-|June 21, 2018|Document created.|

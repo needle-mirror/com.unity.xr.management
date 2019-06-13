@@ -19,9 +19,10 @@ namespace UnityEditor.XR.Management
 {
     class XRSettingsManager : SettingsProvider
     {
+        static string s_SettingsRootTitle = "Project/XR Plugin Management";
         static XRSettingsManager s_SettingsManager = null;
 
-        static GUIContent s_LoaderXRManagerLabel = new GUIContent("XR Manager Instance");
+        // static GUIContent s_LoaderXRManagerLabel = new GUIContent("XR Manager Instance");
         static GUIContent s_LoaderInitOnStartLabel = new GUIContent("Initialize on Startup");
         static GUIContent s_SettingsDetailsFoldout = new GUIContent("Details");
 
@@ -81,7 +82,7 @@ namespace UnityEditor.XR.Management
         {
             if (s_SettingsManager == null)
             {
-                s_SettingsManager = new XRSettingsManager("XR");
+                s_SettingsManager = new XRSettingsManager(s_SettingsRootTitle);
             }
 
             return s_SettingsManager;
@@ -98,7 +99,7 @@ namespace UnityEditor.XR.Management
                 foreach (var at in ats)
                 {
                     XRConfigurationDataAttribute xrbda = at.GetCustomAttributes(typeof(XRConfigurationDataAttribute), true)[0] as XRConfigurationDataAttribute;
-                    string settingsPath = String.Format("XR/{0}", xrbda.displayName);
+                    string settingsPath = String.Format("{1}/{0}", xrbda.displayName, s_SettingsRootTitle);
                     var resProv = new XRConfigurationProvider(settingsPath, xrbda.buildSettingsKey, at);
                     ret.Add(resProv);
                 }
@@ -149,7 +150,7 @@ namespace UnityEditor.XR.Management
 
                 SerializedProperty initOnStart = serializedSettingsObject.FindProperty("m_InitManagerOnStart");
                 EditorGUILayout.PropertyField(initOnStart, s_LoaderInitOnStartLabel);
-                
+
                 SerializedProperty loaderProp = serializedSettingsObject.FindProperty("m_LoaderManagerInstance");
 
                 if (!CachedSettingsEditor.ContainsKey(buildTargetGroup))
@@ -165,14 +166,8 @@ namespace UnityEditor.XR.Management
                     serializedSettingsObject.ApplyModifiedProperties();
                 }
 
-                EditorGUI.BeginChangeCheck();
-                var obj = EditorGUILayout.ObjectField(s_LoaderXRManagerLabel, loaderProp.objectReferenceValue, typeof(XRManagerSettings), false) as XRManagerSettings;
+                var obj = loaderProp.objectReferenceValue;
 
-                if (EditorGUI.EndChangeCheck())
-                {
-                    CachedSettingsEditor[buildTargetGroup] = null;
-                }
-                
                 if (obj != null)
                 {
                     loaderProp.objectReferenceValue = obj;
@@ -183,7 +178,7 @@ namespace UnityEditor.XR.Management
 
                         if (CachedSettingsEditor[buildTargetGroup] == null)
                         {
-                            Debug.LogError("Failed to create a view for XR Settings Instance");
+                            Debug.LogError("Failed to create a view for XR Manager Settings Instance");
                         }
                     }
 
@@ -192,16 +187,12 @@ namespace UnityEditor.XR.Management
                         CachedSettingsEditor[buildTargetGroup].OnInspectorGUI();
                     }
                 }
-                else if (obj != null)
-                {
-                    Debug.LogError("The chosen prefab is missing an instance of the XRManager component.");
-                }
                 else if (obj == null)
                 {
                     settings.AssignedSettings = null;
                     loaderProp.objectReferenceValue = null;
                 }
-                
+
                 serializedSettingsObject.ApplyModifiedProperties();
 
                 EditorGUILayout.EndBuildTargetSelectionGrouping();

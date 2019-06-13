@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-preview.24] - 2019-6-14
+* Tie version to 2019.2 exclusively for preview.
+* Strip document revision history.
+* Remove third party notice as unneeded.
+
+## [2.0.0-preview.23] - 2019-6-10
+* Add promotion pipeline yaml file to get promotion to production working again.
+
 ## [2.0.0-preview.22] - 2019-6-11
 * Revert Legacy Input Helpers dependency to newly pushed 1.3.2 production version.
 
