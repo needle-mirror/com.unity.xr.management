@@ -19,3 +19,6 @@ MonoBehaviour:
   - MenuTitle: Windows MR Loader
     PackageName: com.unity.xr.windowsmr
     LoaderTypeInfo: Windows MR Loader
+  - MenuTitle: Magic Leap Loader
+    PackageName: com.unity.xr.magicleap
+    LoaderTypeInfo: Magic Leap Loader

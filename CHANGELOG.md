@@ -4,6 +4,9 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-preview.25] - 2019-7-09
+* Add MagicLeap to curated packages list
+
 ## [2.0.0-preview.24] - 2019-6-14
 * Tie version to 2019.2 exclusively for preview.
 * Strip document revision history.
