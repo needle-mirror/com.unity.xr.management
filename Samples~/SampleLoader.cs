@@ -3,11 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.XR.Management;
-
-using UnityEngine.Experimental;
-using UnityEngine.Experimental.XR;
 using UnityEngine.XR;
+using UnityEngine.XR.Management;
 
 namespace Samples
 {

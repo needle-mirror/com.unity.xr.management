@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.Experimental;
-using UnityEngine.Experimental.XR;
+using UnityEngine.XR;
 using UnityEngine.XR.Management;
 
 namespace UnityEngine.XR.Management.Tests.Standalone

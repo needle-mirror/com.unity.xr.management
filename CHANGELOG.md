@@ -4,8 +4,24 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.0.0-preview.25] - 2019-7-09
-* Add MagicLeap to curated packages list
+## [3.0.1] - 2019-07-11
+* Update base Unity release version after namespace changes.
+
+## [3.0.0] - 2019-07-09
+* Update docs to add more information around correct usage.
+* add useful names to sub objects of general settings.
+* Add Magic Leap to curated packages list.
+
+## [2.99.0-preview.2] - 2019-06-19
+* Pick up 2019.2 preview changes that are applicable to 2019.3.
+* Fix up the code after Experimental namespace change.
+
+## [2.99.0-preview.1] - 2019-06-14
+* Update package to support 2019.3+ only.
+
+## [2.99.0-preview] - 2019-06-14
+* Update package to support 2019.3+ only.
+* Rev version to almost 3. This is to make space for 2019.2 preview versions and in acknowledgement of the breaking changes that will happen soon.
 
 ## [2.0.0-preview.24] - 2019-6-14
 * Tie version to 2019.2 exclusively for preview.

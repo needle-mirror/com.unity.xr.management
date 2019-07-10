@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.XR;
-using UnityEngine.Experimental;
 
 namespace UnityEngine.XR.Management
 {

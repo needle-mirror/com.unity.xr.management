@@ -8,11 +8,7 @@ using System.Reflection;
 using UnityEditor;
 
 using UnityEngine;
-#if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
-#else
-using UnityEngine.Experimental.UIElements;
-#endif
 using UnityEngine.XR.Management;
 
 namespace UnityEditor.XR.Management
@@ -22,10 +18,9 @@ namespace UnityEditor.XR.Management
         static string s_SettingsRootTitle = "Project/XR Plugin Management";
         static XRSettingsManager s_SettingsManager = null;
 
-        // static GUIContent s_LoaderXRManagerLabel = new GUIContent("XR Manager Instance");
         static GUIContent s_LoaderInitOnStartLabel = new GUIContent("Initialize on Startup");
         static GUIContent s_SettingsDetailsFoldout = new GUIContent("Details");
-
+     
         SerializedObject m_SettingsWrapper;
 
         private Dictionary<BuildTargetGroup, Editor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, Editor>();
@@ -105,6 +100,10 @@ namespace UnityEditor.XR.Management
                 }
             }
 
+            // LIH Package Provider
+            string settingsPathLIH = String.Format("{1}/{0}", "Input Helpers", s_SettingsRootTitle); 
+            var lihProv = new InputHelpersConfigurationProvider(settingsPathLIH);
+            ret.Add(lihProv);
             return ret.ToArray();
         }
 
@@ -113,7 +112,7 @@ namespace UnityEditor.XR.Management
             if (settings != null)
             {
                 m_SettingsWrapper = new SerializedObject(settings);
-            }
+            }                        
         }
 
 
@@ -129,6 +128,8 @@ namespace UnityEditor.XR.Management
             CachedSettingsEditor.Clear();
         }
 
+    
+
         public override void OnGUI(string searchContext)
         {
             if (m_SettingsWrapper != null  && m_SettingsWrapper.targetObject != null)
@@ -142,6 +143,7 @@ namespace UnityEditor.XR.Management
                 {
                     settings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
                     currentSettings.SetSettingsForBuildTarget(buildTargetGroup, settings);
+                    settings.name = $"{buildTargetGroup.ToString()} Settings";
                     AssetDatabase.AddObjectToAsset(settings, AssetDatabase.GetAssetOrScenePath(currentSettings));
                 }
 
@@ -161,6 +163,7 @@ namespace UnityEditor.XR.Management
                 if (loaderProp.objectReferenceValue == null)
                 {
                     var xrManagerSettings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
+                    xrManagerSettings.name = $"{buildTargetGroup.ToString()} Loaders";
                     AssetDatabase.AddObjectToAsset(xrManagerSettings, AssetDatabase.GetAssetOrScenePath(currentSettings));
                     loaderProp.objectReferenceValue = xrManagerSettings;
                     serializedSettingsObject.ApplyModifiedProperties();
@@ -197,11 +200,11 @@ namespace UnityEditor.XR.Management
 
                 EditorGUILayout.EndBuildTargetSelectionGrouping();
 
-                m_SettingsWrapper.ApplyModifiedProperties();
+                m_SettingsWrapper.ApplyModifiedProperties();             
             }
 
             base.OnGUI(searchContext);
         }
-
     }
 }
+

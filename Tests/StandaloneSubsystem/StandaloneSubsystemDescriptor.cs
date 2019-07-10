@@ -1,8 +1,7 @@
 using System;
 
 using UnityEngine;
-using UnityEngine.Experimental;
-using UnityEngine.Experimental.XR;
+using UnityEngine.XR;
 
 namespace UnityEngine.XR.Management.Tests.Standalone
 {

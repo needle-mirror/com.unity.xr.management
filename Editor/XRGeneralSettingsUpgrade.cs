@@ -30,6 +30,7 @@ namespace UnityEditor.XR.Management
             AssetDatabase.CreateAsset(buildTargetSettings, path);
 
             buildTargetSettings.SetSettingsForBuildTarget(EditorUserBuildSettings.selectedBuildTargetGroup, newSettings);
+            newSettings.name = $"{EditorUserBuildSettings.selectedBuildTargetGroup.ToString()} Settings";
             AssetDatabase.AddObjectToAsset(newSettings, path);
             AssetDatabase.SaveAssets();
 

@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using UnityEngine;
-using UnityEngine.Experimental.XR;
-using UnityEngine.Experimental;
+using UnityEngine.XR;
 
 namespace UnityEngine.XR.Management
 {
@@ -112,10 +111,10 @@ namespace UnityEngine.XR.Management
             }
         }
 
-        
+
         /// <summary>
         /// Creates a native, integrated subsystem given a list of descriptors and a specific subsystem id.
-        /// DEPRECATED: Please use the geenric CreateSubsystem method. This method is soley retained for 
+        /// DEPRECATED: Please use the geenric CreateSubsystem method. This method is soley retained for
         /// backwards compatibility and will be removed in a future release.
         /// </summary>
         ///
@@ -133,7 +132,7 @@ namespace UnityEngine.XR.Management
 
         /// <summary>
         /// Creates a managed, standalone subsystem given a list of descriptors and a specific subsystem id.
-        /// DEPRECATED: Please use the geenric CreateSubsystem method. This method is soley retained for 
+        /// DEPRECATED: Please use the geenric CreateSubsystem method. This method is soley retained for
         /// backwards compatibility and will be removed in a future release.
         /// </summary>
         ///
