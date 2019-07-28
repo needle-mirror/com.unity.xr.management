@@ -22,3 +22,6 @@ MonoBehaviour:
   - MenuTitle: Magic Leap Loader
     PackageName: com.unity.xr.magicleap
     LoaderTypeInfo: Magic Leap Loader
+  - MenuTitle: Google VR Loader
+    PackageName: com.unity.xr.googlevr
+    LoaderTypeInfo: Google Cardboard XR Loader
