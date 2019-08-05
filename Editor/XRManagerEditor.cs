@@ -41,11 +41,11 @@ namespace UnityEditor.XR.Management
 
     class LoaderOrderUI
     {
-        const string k_ErrorGettingProviderSubsystem = "Error attempting to get object data for xr manager loaders.";
         const string k_AtLeastOneLoaderInstance = "Must add at least one XRLoader instance.";
 
         const string k_AvailableMenuSeparator = "Available/";
         const string k_SuggestedMenuSeparator = "Download/";
+        public static string s_DownloadingPackageKey = "defferedLoadPackage";
 
         ReorderableList m_OrderedList = null;
         List<LoaderInfo> m_LoadersInUse = new List<LoaderInfo>();
@@ -56,21 +56,19 @@ namespace UnityEditor.XR.Management
         bool m_ShouldReload = false;
         Action m_onUpdate;
 
-        public LoaderOrderUI(List<LoaderInfo> loaderInfos, XRCuratedPackages curatedPackages, List<LoaderInfo> loadersInUse, SerializedProperty loaderProperty, Action onUpdate)
-        {
-            Reset(loaderInfos, curatedPackages, loadersInUse, loaderProperty, onUpdate);
-        }
-
-        public void Reset(List<LoaderInfo> loaderInfos, XRCuratedPackages curatedInfo, List<LoaderInfo> loadersInUse, SerializedProperty loaderProperty, Action onUpdate)
+        public LoaderOrderUI(Action onUpdate)
         {
             m_onUpdate = onUpdate;
+        }
 
+        public void Reset(List<LoaderInfo> loaderInfos, XRCuratedPackages curatedInfo, List<LoaderInfo> loadersInUse, SerializedProperty loaderProperty)
+        {
             m_LoaderProperty = loaderProperty;
             m_CuratedLoaders = curatedInfo;
 
             m_LoadersInUse = loadersInUse;
             m_LoadersNotInUse.Clear();
-            
+
             foreach (var info in loaderInfos)
             {
                 if (!m_LoadersInUse.Contains(info))
@@ -86,8 +84,8 @@ namespace UnityEditor.XR.Management
 
         void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
         {
-            LoaderInfo info = m_LoadersInUse[index];
-            var label = (info.instance == null) ? EditorGUIUtility.TrTextContent("Missing (XRLoader)") : EditorGUIUtility.TrTextContent(info.assetName);
+            LoaderInfo info = index < m_LoadersInUse.Count ? m_LoadersInUse[index] : null;
+            var label = (info == null || info.instance == null) ? EditorGUIUtility.TrTextContent("Missing (XRLoader)") : EditorGUIUtility.TrTextContent(info.assetName);
             EditorGUI.LabelField(rect, label);
         }
 
@@ -108,7 +106,7 @@ namespace UnityEditor.XR.Management
                     if(info.instance != target)
                     {
                         return true;
-                    }                   
+                    }
                     index++;
                 }
             }
@@ -166,11 +164,23 @@ namespace UnityEditor.XR.Management
                 }
             }
 
+            string downloadingPackage = "";
+
+            if (EditorPrefs.HasKey(s_DownloadingPackageKey))
+            {
+                downloadingPackage = EditorPrefs.GetString(s_DownloadingPackageKey);
+            }
+
             index = 0;
             if (m_CuratedLoaders != null)
             {
                 foreach (var info in m_CuratedLoaders.CuratedPackages)
                 {
+                    if (CheckIfPackageAvailable(m_LoadersInUse, info) || CheckIfPackageAvailable(m_LoadersNotInUse, info))
+                    {
+                        continue;
+                    }
+
                     if (CheckIfCuratedLoaderExists(m_LoadersInUse, info) || CheckIfCuratedLoaderExists(m_LoadersNotInUse, info))
                     {
                         continue;
@@ -178,12 +188,28 @@ namespace UnityEditor.XR.Management
 
                     string name = info.MenuTitle;
 
-                    menu.AddItem(new GUIContent(string.Format("{1}{0}. {2}", index + 1, k_SuggestedMenuSeparator, name)), false, DownloadLoaderMenuSelected, info);
+                    if (m_CurrentDownloadRequest != null)
+                    {
+                        menu.AddDisabledItem(new GUIContent(string.Format("{1}{0}. {2}", index + 1, k_SuggestedMenuSeparator, name)));
+                    }
+                    else
+                    {
+                        menu.AddItem(new GUIContent(string.Format("{1}{0}. {2}", index + 1, k_SuggestedMenuSeparator, name)), false, DownloadLoaderMenuSelected, info);
+                    }
                     index++;
                 }
             }
 
             menu.ShowAsContext();
+        }
+
+        private bool CheckIfPackageAvailable(List<LoaderInfo> loaders, CuratedInfo info)
+        {
+            var packages = from loader in loaders
+                           where String.Compare(EditorUtilities.TypeNameToString(loader.loaderType), info.LoaderTypeInfo) == 0
+                           select loader;
+
+            return packages.Any();
         }
 
         private bool CheckIfCuratedLoaderExists(List<LoaderInfo> loaders, CuratedInfo info)
@@ -210,16 +236,14 @@ namespace UnityEditor.XR.Management
             return skip;
         }
 
-        static List<string> m_defferedLoadPackages = new List<string>();
-        static PackageManager.Requests.ListRequest m_listRequest;
+        PackageManager.Requests.ListRequest m_listRequest = null;
+        PackageManager.Requests.AddRequest m_CurrentDownloadRequest = null;
 
         void DownloadLoaderMenuSelected(object data)
         {
             var info = (CuratedInfo)data;
-            PackageManager.Client.Add(info.PackageName);
-
-            EditorPrefs.SetString("defferedLoadPackage", info.PackageName);
-            
+            m_CurrentDownloadRequest = PackageManager.Client.Add(info.PackageName);
+            EditorPrefs.SetString(s_DownloadingPackageKey, info.PackageName);
             AssetDatabase.Refresh();
         }
 
@@ -234,16 +258,16 @@ namespace UnityEditor.XR.Management
             {
                 var listResult = m_listRequest.Result;
 
-                if (EditorPrefs.HasKey("defferedLoadPackage"))
+                if (EditorPrefs.HasKey(s_DownloadingPackageKey))
                 {
-                    var loadPackage = EditorPrefs.GetString("defferedLoadPackage");
+                    var loadPackage = EditorPrefs.GetString(s_DownloadingPackageKey);
 
                     PackageManager.PackageInfo info = listResult.FirstOrDefault(p => p.name == loadPackage);
                     if (info != null)
                     {
                         if (InsertPackageXRLoaderToList(info))
                         {
-                            EditorPrefs.DeleteKey("defferedLoadPackage");
+                            EditorPrefs.DeleteKey(s_DownloadingPackageKey);
                         }
                     }
                     else
@@ -310,18 +334,31 @@ namespace UnityEditor.XR.Management
             UpdateSerializedProperty();
         }
 
+        void RemoveInfo(LoaderInfo info)
+        {
+            m_LoadersInUse.Remove(info);
+            m_ShouldReload = true;
+        }
+
         void RemoveInstanceFromList(ReorderableList list)
         {
             LoaderInfo info = m_LoadersInUse[list.index];
-            m_LoadersInUse.Remove(info);
-
-            if (info.loaderType != null)
-            {
-                m_LoadersInUse.Remove(info);
-                
-                m_ShouldReload = true;
-            }
+            RemoveInfo(info);
             UpdateSerializedProperty();
+        }
+
+        void QueryCleanupOfLostLoaders()
+        {
+            var missingLoaders = from info in m_LoadersInUse
+                                where info.instance == null
+                                select info;
+
+            if (missingLoaders.Any())
+            {
+                m_LoadersInUse = m_LoadersInUse.Except(missingLoaders).ToList();
+                m_ShouldReload = true;
+                UpdateSerializedProperty();
+            }
         }
 
         public bool OnGUI()
@@ -330,6 +367,23 @@ namespace UnityEditor.XR.Management
                 return false;
 
             m_ShouldReload = false;
+
+            if (EditorPrefs.HasKey(s_DownloadingPackageKey))
+            {
+                if (m_CurrentDownloadRequest == null || m_CurrentDownloadRequest.IsCompleted)
+                {
+                    EditorPrefs.DeleteKey(s_DownloadingPackageKey);
+                    m_ShouldReload = true;
+                }
+            }
+
+            QueryCleanupOfLostLoaders();
+
+            if (!m_LoadersInUse.Any())
+            {
+                EditorGUILayout.HelpBox(k_AtLeastOneLoaderInstance, MessageType.Warning);
+            }
+
             if (m_OrderedList == null)
             {
                 m_OrderedList = new ReorderableList(m_LoadersInUse, typeof(XRLoader), true, true, true, true);
@@ -342,11 +396,6 @@ namespace UnityEditor.XR.Management
             }
 
             m_OrderedList.DoLayoutList();
-
-            if (!m_LoadersInUse.Any())
-            {
-                EditorGUILayout.HelpBox(k_AtLeastOneLoaderInstance, MessageType.Warning);
-            }
 
             return m_ShouldReload;
         }
@@ -389,30 +438,32 @@ namespace UnityEditor.XR.Management
         SerializedProperty m_RequiresSettingsUpdate = null;
         SerializedProperty m_LoaderList = null;
 
-        static GUIContent k_AutoLoadLabel = EditorGUIUtility.TrTextContent("Automatic Loading");
-        static GUIContent k_AutoRunLabel = EditorGUIUtility.TrTextContent("Automatic Running");
-
         List<LoaderInfo> m_AllLoaderInfos = new List<LoaderInfo>();
         List<LoaderInfo> m_AssignedLoaderInfos = new List<LoaderInfo>();
         XRCuratedPackages m_CuratedInfo;
 
         LoaderOrderUI m_LoadOrderUI = null;
-        bool m_MustReloadData = true;
 
         void AssetProcessorCallback()
         {
-            m_MustReloadData = true;
+            ShouldReload = true;
         }
 
         void OnEnable()
         {
-            PopulateCuratedLoaders();
-            
+            if (m_LoadOrderUI == null)
+            {
+                m_LoadOrderUI = new LoaderOrderUI(() =>
+                {
+                    ShouldReload = true;
+                });
+            }
+
             AssetCallbacks.Callback += AssetProcessorCallback;
-            ReloadData();
+            ShouldReload = true;
         }
 
-        public bool ShouldReloadInSettings
+        bool ShouldReload
         {
             get
             {
@@ -432,7 +483,7 @@ namespace UnityEditor.XR.Management
                 if (m_RequiresSettingsUpdate != null)
                 {
                     m_RequiresSettingsUpdate.boolValue = value;
-                    
+
                     serializedObject.ApplyModifiedProperties();
                 }
             }
@@ -447,9 +498,9 @@ namespace UnityEditor.XR.Management
         {
             if (m_LoaderList == null || m_LoaderList.serializedObject == null)
                 return;
-            
+
             m_AllLoaderInfos.Clear();
-            
+
             m_AssignedLoaderInfos.Clear();
 
             PopulateCuratedLoaders();
@@ -458,7 +509,7 @@ namespace UnityEditor.XR.Management
 
             PopulateLoaderInfosFromUnassignedLoaders();
         }
-        
+
         void PopulateCuratedLoaders()
         {
             var assets = AssetDatabase.FindAssets(String.Format("t:{0}", typeof(XRCuratedPackages)));
@@ -475,7 +526,7 @@ namespace UnityEditor.XR.Management
         void PopulateLoaderInfosFromUnassignedLoaders()
         {
             List<LoaderInfo> newInfos = new List<LoaderInfo>();
-            
+
             GetAllKnownLoaderInfos(newInfos);
             MergeLoaderInfos(newInfos);
         }
@@ -558,7 +609,7 @@ namespace UnityEditor.XR.Management
                 info.loaderType = (prop.objectReferenceValue == null) ? null : prop.objectReferenceValue.GetType();
                 info.assetName = AssetNameFromInstance(prop.objectReferenceValue);
                 info.instance = prop.objectReferenceValue as XRLoader;
-                
+
                 m_AssignedLoaderInfos.Add(info);
                 m_AllLoaderInfos.Add(info);
             }
@@ -573,35 +624,20 @@ namespace UnityEditor.XR.Management
         {
             if (serializedObject == null || serializedObject.targetObject == null)
                 return;
-            
+
             PopulateProperty("m_RequiresSettingsUpdate", ref m_RequiresSettingsUpdate);
             PopulateProperty("m_Loaders", ref m_LoaderList);
 
             serializedObject.Update();
-            m_LoaderList.serializedObject.ApplyModifiedProperties();
 
-            if (m_MustReloadData)
-                ReloadData();
-            
-            if (m_LoadOrderUI == null)
+            if (ShouldReload || m_LoadOrderUI.CheckIfChanged(m_AssignedLoaderInfos))
             {
-                m_LoadOrderUI = new LoaderOrderUI(m_AllLoaderInfos, m_CuratedInfo, m_AssignedLoaderInfos, m_LoaderList, () =>
-                {
-                    m_RequiresSettingsUpdate.boolValue = true;
-                    LoaderOrderUICallback();
-                });
-            }
-            else
-            {
-                if (m_RequiresSettingsUpdate.boolValue == true || m_LoadOrderUI.CheckIfChanged(m_AssignedLoaderInfos) || EditorPrefs.HasKey("defferedLoadPackage"))
-                {
-                    ReloadData();
-
-                    m_LoadOrderUI.Reset(m_AllLoaderInfos, m_CuratedInfo, m_AssignedLoaderInfos, m_LoaderList, null);
-                }
+                ShouldReload = false;
+                LoaderOrderUICallback();
+                m_LoadOrderUI.Reset(m_AllLoaderInfos, m_CuratedInfo, m_AssignedLoaderInfos, m_LoaderList);
             }
 
-            m_MustReloadData = m_LoadOrderUI.OnGUI();
+            ShouldReload = m_LoadOrderUI.OnGUI();
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -609,8 +645,6 @@ namespace UnityEditor.XR.Management
         private void LoaderOrderUICallback()
         {
             m_LoaderList.serializedObject.ApplyModifiedProperties();
-
-            m_MustReloadData = true;
             ReloadData();
         }
     }

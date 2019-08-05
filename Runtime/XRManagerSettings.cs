@@ -19,7 +19,7 @@ namespace UnityEngine.XR.Management
     ///
     /// Depending on configuration the XRManager component will automatically manage the active loader at correct points in the scene lifecycle.
     /// The user can override certain points in the active loader lifecycle and manually manage them by toggling the *Automatic Loading* and *Automatic Running*
-    /// properties through the inspector UI. Disabling *Automatic Loading* implies the the user is responsibile for the full lifecycle
+    /// properties through the inspector UI. Disabling *Automatic Loading* implies the the user is responsible for the full lifecycle
     /// of the manager. Toggling this to false also toggles automatic running to false.
     ///
     /// Disabling *Automatic Running* implies that the user is responsible for starting and stopping
@@ -32,7 +32,6 @@ namespace UnityEngine.XR.Management
     /// * OnDisable -> <see cref="StopSubsystems"/>. Ask the active loader to stop all subsystems.
     /// * OnDestroy -> <see cref="DeinitializeLoader"/>. Deinitialize and remove the active loader.
     /// </summary>
-    [CreateAssetMenu(fileName = "XRSettings", menuName = "XRSettings", order = 1)]
     public sealed class XRManagerSettings : ScriptableObject
     {
         [HideInInspector]

@@ -50,7 +50,7 @@ namespace UnityEditor.XR.Management
 
         internal static string TypeNameToString(Type type)
         {
-            return TypeNameToString(type.FullName);
+            return type == null ? "" : TypeNameToString(type.FullName);
         }
 
         internal static string TypeNameToString(string type)
