@@ -9,8 +9,12 @@ using UnityEngine.XR.Management;
 
 namespace UnityEditor.XR.Management
 {
+    /// <summary>Helper class to auto update settings across versions.</summary>
     public static class XRGeneralSettingsUpgrade
     {
+        /// <summary>Worker API to do the actual upgrade</summary>
+        /// <param name="path">Path to asset to upgrade</param>
+        /// <returns>True if settings were successfullly upgraded, else false.</returns>
         public static bool UpgradeSettingsToPerBuildTarget(string path)
         {
             var generalSettings = GetXRGeneralSettingsInstance(path);
@@ -26,7 +30,7 @@ namespace UnityEditor.XR.Management
 
             AssetDatabase.DeleteAsset(path);
 
-            XRGeneralSettingsPerBuildTarget buildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>() as XRGeneralSettingsPerBuildTarget;            
+            XRGeneralSettingsPerBuildTarget buildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>() as XRGeneralSettingsPerBuildTarget;
             AssetDatabase.CreateAsset(buildTargetSettings, path);
 
             buildTargetSettings.SetSettingsForBuildTarget(EditorUserBuildSettings.selectedBuildTargetGroup, newSettings);

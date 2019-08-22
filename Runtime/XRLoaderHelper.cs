@@ -5,6 +5,10 @@ using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.XR;
+#if !UNITY_2019_3_OR_NEWER
+using UnityEngine.Experimental.XR;
+using UnityEngine.Experimental;
+#endif
 
 namespace UnityEngine.XR.Management
 {
@@ -26,7 +30,7 @@ namespace UnityEngine.XR.Management
         /// know what they have loaded and how best to get it..
         /// </summary>
         ///
-        /// <paramref name="T">Type of the subsystem to get.</paramref>
+        /// <typeparam name="T">Type of the subsystem to get.</typeparam>
         ///
         /// <returns>The loaded subsystem or null if not found.</returns>
         public override T GetLoadedSubsystem<T>()
@@ -42,7 +46,7 @@ namespace UnityEngine.XR.Management
         /// a previous call to CreateSubsystem
         /// </summary>
         ///
-        /// <paramref name="T">A subclass of <see cref="ISubsystem">ISubsystem</see></paramref>
+        /// <typeparam name="T">A subclass of <see cref="ISubsystem"></typeparam>
         protected void StartSubsystem<T>() where T : class, ISubsystem
         {
             T subsystem = GetLoadedSubsystem<T>();
@@ -55,7 +59,7 @@ namespace UnityEngine.XR.Management
         /// a previous call to CreateSubsystem
         /// </summary>
         ///
-        /// <paramref name="T">A subclass of <see cref="ISubsystem">ISubsystem</see></paramref>
+        /// <typeparam name="T">A subclass of <see cref="ISubsystem"></typeparam>
         protected void StopSubsystem<T>() where T : class, ISubsystem
         {
             T subsystem = GetLoadedSubsystem<T>();
@@ -68,7 +72,7 @@ namespace UnityEngine.XR.Management
         /// a previous call to CreateSubsystem
         /// </summary>
         ///
-        /// <paramref name="T">A subclass of <see cref="ISubsystem">ISubsystem</see></paramref>
+        /// <typeparam name="T">A subclass of <see cref="ISubsystem"></typeparam>
         protected void DestroySubsystem<T>() where T : class, ISubsystem
         {
             T subsystem = GetLoadedSubsystem<T>();
@@ -80,8 +84,8 @@ namespace UnityEngine.XR.Management
         /// Creates a subsystem given a list of descriptors and a specific subsystem id.
         /// </summary>
         ///
-        /// <paramref name="TDescriptor">The descriptor type being passed in.</paramref>
-        /// <paramref name="TSubsystem">The subsystem type being requested</paramref>
+        /// <typeparam name="TDescriptor">The descriptor type being passed in.</typeparam>
+        /// <typeparam name="TSubsystem">The subsystem type being requested</typeparam>
         /// <param name="descriptors">List of TDescriptor instances to use for subsystem matching.</param>
         /// <param name="id">The identifier key of the particualr subsystem implementation being requested.</param>
         protected void CreateSubsystem<TDescriptor, TSubsystem>(List<TDescriptor> descriptors, string id)
@@ -118,8 +122,8 @@ namespace UnityEngine.XR.Management
         /// backwards compatibility and will be removed in a future release.
         /// </summary>
         ///
-        /// <paramref name="TDescriptor">The descriptor type being passed in.</paramref>
-        /// <paramref name="TSubsystem">The subsystem type being requested</paramref>
+        /// <typeparam name="TDescriptor">The descriptor type being passed in.</typeparam>
+        /// <typeparam name="TSubsystem">The subsystem type being requested</typeparam>
         /// <param name="descriptors">List of TDescriptor instances to use for subsystem matching.</param>
         /// <param name="id">The identifier key of the particualr subsystem implementation being requested.</param>
         [Obsolete("This method is obsolete. Please use the geenric CreateSubsystem method.", false)]
@@ -136,8 +140,8 @@ namespace UnityEngine.XR.Management
         /// backwards compatibility and will be removed in a future release.
         /// </summary>
         ///
-        /// <paramref name="TDescriptor">The descriptor type being passed in.</paramref>
-        /// <paramref name="TSubsystem">The subsystem type being requested</paramref>
+        /// <typeparam name="TDescriptor">The descriptor type being passed in.</typeparam>
+        /// <typeparam name="TSubsystem">The subsystem type being requested</typeparam>
         /// <param name="descriptors">List of TDescriptor instances to use for subsystem matching.</param>
         /// <param name="id">The identifier key of the particualr subsystem implementation being requested.</param>
         [Obsolete("This method is obsolete. Please use the geenric CreateSubsystem method.", false)]

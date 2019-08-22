@@ -23,7 +23,7 @@ namespace UnityEditor.XR.Management
         private int m_Count = 1000;
         PackageManager.Requests.ListRequest m_LIHSearchRequest = null;
 
-        private readonly string s_LegacyInputHelpersPackage = "com.unity.xr.legacyinputhelpers@1.3.2";
+        private readonly string s_LegacyInputHelpersPackage = "com.unity.xr.legacyinputhelpers@1.*";
         private readonly string s_LegacyInputHelpersPackageName = "com.unity.xr.legacyinputhelpers";
 
         public InputHelpersConfigurationProvider(string path, SettingsScope scopes = SettingsScope.Project) : base(path, scopes)

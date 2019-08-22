@@ -20,7 +20,7 @@ namespace UnityEditor.XR.Management
 
         static GUIContent s_LoaderInitOnStartLabel = new GUIContent("Initialize on Startup");
         static GUIContent s_SettingsDetailsFoldout = new GUIContent("Details");
-     
+
         SerializedObject m_SettingsWrapper;
 
         private Dictionary<BuildTargetGroup, Editor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, Editor>();
@@ -101,7 +101,7 @@ namespace UnityEditor.XR.Management
             }
 
             // LIH Package Provider
-            string settingsPathLIH = String.Format("{1}/{0}", "Input Helpers", s_SettingsRootTitle); 
+            string settingsPathLIH = String.Format("{1}/{0}", "Input Helpers", s_SettingsRootTitle);
             var lihProv = new InputHelpersConfigurationProvider(settingsPathLIH);
             ret.Add(lihProv);
             return ret.ToArray();
@@ -112,15 +112,17 @@ namespace UnityEditor.XR.Management
             if (settings != null)
             {
                 m_SettingsWrapper = new SerializedObject(settings);
-            }                        
+            }
         }
 
 
+        /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             InitEditorData(currentSettings);
         }
 
+        /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
         public override void OnDeactivate()
         {
             m_SettingsWrapper = null;
@@ -128,8 +130,9 @@ namespace UnityEditor.XR.Management
             CachedSettingsEditor.Clear();
         }
 
-    
 
+
+        /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
         public override void OnGUI(string searchContext)
         {
             if (m_SettingsWrapper != null  && m_SettingsWrapper.targetObject != null)
@@ -200,7 +203,7 @@ namespace UnityEditor.XR.Management
 
                 EditorGUILayout.EndBuildTargetSelectionGrouping();
 
-                m_SettingsWrapper.ApplyModifiedProperties();             
+                m_SettingsWrapper.ApplyModifiedProperties();
             }
 
             base.OnGUI(searchContext);

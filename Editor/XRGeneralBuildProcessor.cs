@@ -105,8 +105,13 @@ namespace UnityEditor.XR.Management
                                 string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget,
                                     preInitInfo.buildTargetGroup);
                                 preInitInfo = null;
+ #if UNITY_2019_3_OR_NEWER
                                 UnityEditor.XR.BootOptions.SetXRSDKPreInitLibrary(file.path,
                                     preInitLibraryName);
+ #else
+                                UnityEditor.Experimental.XR.BootOptions.SetXRSDKPreInitLibrary(file.path,
+                                    preInitLibraryName);
+ #endif
                             }
                         }
                         catch (Exception e)
@@ -136,7 +141,11 @@ namespace UnityEditor.XR.Management
                     string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget,
                         preInitInfo.buildTargetGroup);
                     preInitInfo = null;
+ #if UNITY_2019_3_OR_NEWER
                     UnityEditor.XR.BootOptions.SetXRSDKPreInitLibrary(fullPath, preInitLibraryName);
+ #else
+                    UnityEditor.Experimental.XR.BootOptions.SetXRSDKPreInitLibrary(fullPath, preInitLibraryName);
+ #endif
                 }
             }
             catch (Exception e)

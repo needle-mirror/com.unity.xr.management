@@ -25,12 +25,13 @@ namespace Samples
     /// asset after launch needs to be handled there.
     ///
     /// More info on APIs used here:
-    /// * <a href="https://docs.unity3d.com/ScriptReference/EditorBuildSettings.html">EditorBuildSettings</a>
-    /// * <a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.GetPreloadedAssets.html">PlayerSettings.GetPreloadedAssets</a>
-    /// * <a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.SetPreloadedAssets.html">PlayerSettings.SetPreloadedAssets</a>
+    /// * &lt;a href="https://docs.unity3d.com/ScriptReference/EditorBuildSettings.html"&gt;EditorBuildSettings&lt;/a&gt;
+    /// * &lt;a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.GetPreloadedAssets.html&gt;PlayerSettings.GetPreloadedAssets&lt;/a&gt;
+    /// * &lt;a href="https://docs.unity3d.com/ScriptReference/PlayerSettings.SetPreloadedAssets.html"&gt;PlayerSettings.SetPreloadedAssets&lt;/a&gt;
     /// </summary>
     public class SampleBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
+        /// <summary>Override of <see cref="IPreprocessBuildWithReport"> and <see cref="IPostprocessBuildWithReport"></summary>
         public int callbackOrder
         {
             get { return 0;  }
@@ -58,6 +59,8 @@ namespace Samples
             }
         }
 
+        /// <summary>Override of <see cref="IPreprocessBuildWithReport"></summary>
+        /// <param name="report">Build report.</param>
         public void OnPreprocessBuild(BuildReport report)
         {
             // Always remember to cleanup preloaded assets after build to make sure we don't
@@ -79,6 +82,8 @@ namespace Samples
             }
         }
 
+        /// <summary>Override of <see cref="IPostprocessBuildWithReport"></summary>
+        /// <param name="report">Build report.</param>
         public void OnPostprocessBuild(BuildReport report)
         {
             // Always remember to cleanup preloaded assets after build to make sure we don't

@@ -56,12 +56,12 @@ namespace UnityEditor.XR.Management
         bool m_ShouldReload = false;
         Action m_onUpdate;
 
-        public LoaderOrderUI(Action onUpdate)
+        internal LoaderOrderUI(Action onUpdate)
         {
             m_onUpdate = onUpdate;
         }
 
-        public void Reset(List<LoaderInfo> loaderInfos, XRCuratedPackages curatedInfo, List<LoaderInfo> loadersInUse, SerializedProperty loaderProperty)
+        internal void Reset(List<LoaderInfo> loaderInfos, XRCuratedPackages curatedInfo, List<LoaderInfo> loadersInUse, SerializedProperty loaderProperty)
         {
             m_LoaderProperty = loaderProperty;
             m_CuratedLoaders = curatedInfo;
@@ -94,7 +94,7 @@ namespace UnityEditor.XR.Management
             return m_OrderedList.elementHeight;
         }
 
-        public bool CheckIfChanged(List<LoaderInfo> listToCompare)
+        internal bool CheckIfChanged(List<LoaderInfo> listToCompare)
         {
             if (m_LoaderProperty != null && m_LoaderProperty.isArray)
             {
@@ -361,7 +361,7 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        public bool OnGUI()
+        internal bool OnGUI()
         {
             if (m_LoaderProperty == null)
                 return false;
@@ -403,13 +403,13 @@ namespace UnityEditor.XR.Management
 
 
     [CustomEditor(typeof(XRManagerSettings))]
-    public class XRManagerSettingsEditor : Editor
+    internal class XRManagerSettingsEditor : Editor
     {
         // Simple class to give us updates when the asset database changes.
-        public class AssetCallbacks : AssetPostprocessor
+        internal class AssetCallbacks : AssetPostprocessor
         {
             static bool s_EditorUpdatable = false;
-            public static System.Action Callback { get; set; }
+            internal static System.Action Callback { get; set; }
 
             static AssetCallbacks()
             {
@@ -489,7 +489,7 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        public void OnDisable()
+        void OnDisable()
         {
             AssetCallbacks.Callback -= null;
         }
@@ -620,6 +620,7 @@ namespace UnityEditor.XR.Management
             if (prop == null) prop = serializedObject.FindProperty(propertyPath);
         }
 
+        /// <summary><see href="https://docs.unity3d.com/ScriptReference/Editor.OnInspectorGUI.html">Editor Documentation</see></summary>
         public override void OnInspectorGUI()
         {
             if (serializedObject == null || serializedObject.targetObject == null)

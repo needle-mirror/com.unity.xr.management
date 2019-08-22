@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if !UNITY_2019_3_OR_NEWER
+using UnityEngine.Experimental.XR;
+using UnityEngine.Experimental;
+#endif
 
 namespace UnityEngine.XR.Management
 {
@@ -45,7 +49,7 @@ namespace UnityEngine.XR.Management
         /// know what they have loaded and how best to get it..
         /// </summary>
         ///
-        /// <paramref name="T">< Type of the subsystem to get ></paramref>
+        /// <typeparam name="T">< Type of the subsystem to get ></typeparam>
         ///
         /// <returns>The loaded subsystem or null if not found.</returns>
         public abstract T GetLoadedSubsystem<T>()  where T : class, ISubsystem;

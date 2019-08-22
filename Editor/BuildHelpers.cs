@@ -14,9 +14,9 @@ using UnityEngine;
 
 namespace UnityEditor.XR.Management
 {
-    public static class BuildHelpers
+    internal static class BuildHelpers
     {
-        public static void CleanOldSettings<T>()
+        internal static void CleanOldSettings<T>()
         {
             UnityEngine.Object[] preloadedAssets = PlayerSettings.GetPreloadedAssets();
             if (preloadedAssets == null)

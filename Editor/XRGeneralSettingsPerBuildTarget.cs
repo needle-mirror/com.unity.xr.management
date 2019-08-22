@@ -12,6 +12,7 @@ namespace UnityEditor.XR.Management
  #if UNITY_EDITOR
     [InitializeOnLoad]
 #endif
+   /// <summary>Container class that holds general settings for each build target group installed in Unity.</summary>
    public class XRGeneralSettingsPerBuildTarget : ScriptableObject, ISerializationCallbackReceiver
     {
         [SerializeField]
@@ -85,11 +86,18 @@ namespace UnityEditor.XR.Management
         }
 #endif
 
-        public void SetSettingsForBuildTarget(BuildTargetGroup targetGrroup, XRGeneralSettings settings)
+        /// <summary>Set specific settings for a given build target.</summary>
+        ///
+        /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
+        /// <param name="settings">An instance of <see cref="XRGeneralSettings"> to assign for the given key.</param>
+        public void SetSettingsForBuildTarget(BuildTargetGroup targetGroup, XRGeneralSettings settings)
         {
-            Settings[targetGrroup] = settings;
+            Settings[targetGroup] = settings;
         }
 
+        /// <summary>Get specific settings for a given build target.</summary>
+        /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
+        /// <returns>The instance of <see cref="XRGeneralSettings"> assigned to the key, or null if not.</returns>
         public XRGeneralSettings SettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
             XRGeneralSettings ret = null;
@@ -97,6 +105,7 @@ namespace UnityEditor.XR.Management
             return ret;
         }
 
+        /// <summary>Serialization override.</summary>
         public void OnBeforeSerialize()
         {
             Keys.Clear();
@@ -109,6 +118,7 @@ namespace UnityEditor.XR.Management
             }
         }
 
+        /// <summary>Serialization override.</summary>
         public void OnAfterDeserialize()
         {
             Settings = new Dictionary<BuildTargetGroup, XRGeneralSettings>();
@@ -118,6 +128,9 @@ namespace UnityEditor.XR.Management
             }
         }
 
+        /// <summary>Given a build target, get the general settings container assigned to it.</summary>
+        /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
+        /// <returns>The instance of <see cref="XRGeneralSettings"> assigned to the key, or null if not.</returns>
         public static XRGeneralSettings XRGeneralSettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;

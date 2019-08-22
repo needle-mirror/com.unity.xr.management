@@ -9,9 +9,12 @@ using UnityEditor;
 
 namespace UnityEngine.XR.Management
 {
-
+    /// <summary>General settings container used to house the instance of the active settings as well as the manager
+    /// instance used to load the loaders with.
+    /// </summary>
     public class XRGeneralSettings : ScriptableObject
     {
+        /// <summary>The key used to query to get the current loader settings.</summary>
         public static string k_SettingsKey = "com.unity.xr.management.loader_settings";
         internal static XRGeneralSettings s_RuntimeSettingsInstance = null;
 
@@ -21,6 +24,7 @@ namespace UnityEngine.XR.Management
         [SerializeField]
         internal bool m_InitManagerOnStart = true;
 
+        /// <summary>The current active manager used to manage XR lifetime.</summary>
         public XRManagerSettings Manager
         {
             get { return m_LoaderManagerInstance; }
@@ -29,6 +33,7 @@ namespace UnityEngine.XR.Management
 
         private XRManagerSettings m_XRManager = null;
 
+        /// <summary>The current settings instance.</summary>
         public static XRGeneralSettings Instance
         {
             get
@@ -37,6 +42,7 @@ namespace UnityEngine.XR.Management
             }
         }
 
+        /// <summary>The current active manager used to manage XR lifetime.</summary>
         public XRManagerSettings AssignedSettings
         {
             get
@@ -48,9 +54,10 @@ namespace UnityEngine.XR.Management
             {
                 m_LoaderManagerInstance = value;
             }
-#endif            
+#endif
         }
-        
+
+        /// <summary>Used to set if the manager is activated and initialized on startup.</summary>
         public bool InitManagerOnStart
         {
             get
@@ -106,6 +113,7 @@ namespace UnityEngine.XR.Management
             }
         }
 
+        /// <summary>For internal use only.</summary>
         public void InternalPlayModeStateChanged(PlayModeStateChange state)
         {
             switch (state)
@@ -131,7 +139,7 @@ namespace UnityEngine.XR.Management
                 return;
 
             instance.OnDisable();
-            instance.OnDestroy();                
+            instance.OnDestroy();
         }
 
         void Start()

@@ -10,15 +10,31 @@ using UnityEditor;
 
 namespace UnityEditor.XR.Management
 {
+    /// <summary>Interface for specifying package initialization information</summary>
     public interface XRPackageInitializationBase
     {
+        /// <summary>Package name property</summary>
+        /// <value>The name of the package</value>
         string PackageName { get; }
+        /// <summary>The loader full type name for this package</summary>
+        /// <value>Loader fulltype name</value>
         string LoaderFullTypeName { get; }
+        /// <summary>The loader type name for this package</summary>
+        /// <value>Loader type name</value>
         string LoaderTypeName { get; }
+        /// <summary>The settings full type name for this package</summary>
+        /// <value>Settings full type name</value>
         string SettingsFullTypeName { get; }
+        /// <summary>The settings type name for this package</summary>
+        /// <value>Settings type name</value>
         string SettingsTypeName { get; }
+        /// <summary>Package initialization key</summary>
+        /// <value>The init key for the package</value>
         string PackageInitKey { get; }
 
+        /// <summary>Initialize package settings</summary>
+        /// <param name="obj">The scriptable object instance to initialize</param>
+        /// <returns>True if successful, false if not.</returns>
         bool PopulateSettingsOnInitialization(ScriptableObject obj);
     }
 
@@ -32,7 +48,7 @@ namespace UnityEditor.XR.Management
 
         private PackageInitializationSettings(){ }
 
-        public static PackageInitializationSettings Instance
+        internal static PackageInitializationSettings Instance
         {
             get
             {
@@ -50,7 +66,7 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        public void LoadSettings()
+        internal void LoadSettings()
         {
             string packageInitPath = Path.Combine("ProjectSettings", "XRPackageSettings.asset");
 
@@ -65,7 +81,7 @@ namespace UnityEditor.XR.Management
         }
 
 
-        public void SaveSettings()
+        internal void SaveSettings()
         {
             string packageInitPath = Path.Combine("ProjectSettings", "XRPackageSettings.asset");
             using (StreamWriter sw = new StreamWriter(packageInitPath))
@@ -75,12 +91,12 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        public bool HasSettings(string key)
+        internal bool HasSettings(string key)
         {
             return m_Settings.Contains(key);
         }
 
-        public void AddSettings(string key)
+        internal void AddSettings(string key)
         {
             if (!HasSettings(key))
                 m_Settings.Add(key);

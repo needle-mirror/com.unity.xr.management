@@ -27,6 +27,7 @@ namespace Samples
         SerializedProperty m_RequiesItemProperty;
         SerializedProperty m_RuntimeToggleProperty;
 
+        /// <summary>Override of Editor callback.</summary>
         public override void OnInspectorGUI()
         {
             if (serializedObject == null || serializedObject.targetObject == null)
