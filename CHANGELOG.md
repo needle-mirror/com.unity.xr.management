@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.3] - 2019-08-29
+* Fix package dependency version for subsystem registrion pacakge.
+
+## [3.0.2] - 2019-08-29
+* Release package for verification.
+
+## [3.0.2-preview.3] - 2019-08-29
+* Update to reflect changes in downstream subsystem definitions in 19.3+.
+
 ## [3.0.2-preview.2] - 2019-08-23
 * Change legacy input helpers version to 1.*
 * Fix documentation validation errors.

@@ -40,7 +40,11 @@ namespace UnityEngine.XR.Management.Tests.Standalone
                 stopCalled.Invoke();
         }
 
+#if UNITY_2019_3_OR_NEWER
+        protected override void OnDestroy()
+#else
         public override void Destroy()
+#endif
         {
             isRunning = false;
             if (destroyCalled != null)
