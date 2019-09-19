@@ -117,6 +117,7 @@ namespace UnityEditor.XR.Management
 
         static void BeginPackageInitialization()
         {
+            EditorApplication.update -= BeginPackageInitialization;
 
             foreach (var t in TypeLoaderExtensions.GetAllTypesWithInterface<XRPackageInitializationBase>())
             {
@@ -131,8 +132,6 @@ namespace UnityEditor.XR.Management
 
             if (PackageInitializationSettings.Instance.HasSettings(packageInit.PackageInitKey))
                 return;
-
-            EditorApplication.update -= BeginPackageInitialization;
 
             if (!InitializeLoaderInstance(packageInit))
             {

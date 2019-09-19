@@ -132,8 +132,20 @@ namespace UnityEngine.XR.Management
             return activeLoader as T;
         }
 
-
-        internal void InitializeLoaderSync()
+        /// <summary>
+        /// Iterate over the configured list of loaders and attempt to initialize each one. The first one
+        /// that succeeds is set as the active loader and initialization immediately terminates.
+        ///
+        /// When complete <see cref="isInitializationComplete"> will be set to true. This will mark that it is safe to
+        /// call other parts of the API. This does not guarantee that init successfully created a loader. For that
+        /// you need to check that ActiveLoader is not null.
+        ///
+        /// Note that there can only be one active loader. Any attempt to initialize a new active loader with one
+        /// already set will cause a warning to be logged and immediate exit of this function.
+        ///
+        /// This method is synchronous and on return all state should be immediately checkable.
+        /// </summary>
+        public void InitializeLoaderSync()
         {
             if (activeLoader != null)
             {
@@ -169,6 +181,8 @@ namespace UnityEngine.XR.Management
         ///
         /// Note that there can only be one active loader. Any attempt to initialize a new active loader with one
         /// already set will cause a warning to be logged and immediate exit of this function.
+        ///
+        /// Iteration is done asynchronously and this method must be called within the context of a Coroutine.
         /// </summary>
         ///
         /// <returns>Enumerator marking the next spot to continue execution at.</returns>
