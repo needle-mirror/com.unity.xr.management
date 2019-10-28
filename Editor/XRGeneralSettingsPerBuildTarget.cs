@@ -53,23 +53,13 @@ namespace UnityEditor.XR.Management
         static XRGeneralSettingsPerBuildTarget()
         {
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
+            EditorApplication.pauseStateChanged += PauseStateChange;
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void AttemptInitializeXRSDKBeforePlayModeStarted()
+        void OnEnable()
         {
-            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
-            if (buildTargetSettings == null)
-                return;
-
-            XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
-            if (instance == null || !instance.InitManagerOnStart)
-                return;
-
-            instance.InternalPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode);
+            XRGeneralSettings.Instance = XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
         }
-
 
         static void PlayModeStateChanged(PlayModeStateChange state)
         {
@@ -84,6 +74,19 @@ namespace UnityEditor.XR.Management
 
             instance.InternalPlayModeStateChanged(state);
         }
+        static void PauseStateChange(PauseState state)
+        {
+            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            if (buildTargetSettings == null)
+                return;
+
+            XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
+            if (instance == null || !instance.InitManagerOnStart)
+                return;
+
+            instance.InternalPauseStateChanged(state);
+        }
 #endif
 
         /// <summary>Set specific settings for a given build target.</summary>
@@ -92,6 +95,9 @@ namespace UnityEditor.XR.Management
         /// <param name="settings">An instance of <see cref="XRGeneralSettings"> to assign for the given key.</param>
         public void SetSettingsForBuildTarget(BuildTargetGroup targetGroup, XRGeneralSettings settings)
         {
+            // Ensures the editor's "runtime instance" is the most current for standalone settings
+            if (targetGroup == BuildTargetGroup.Standalone)
+                XRGeneralSettings.Instance = settings;
             Settings[targetGroup] = settings;
         }
 

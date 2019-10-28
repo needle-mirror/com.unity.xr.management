@@ -12,7 +12,7 @@ namespace UnityEditor.XR.Management
 {
     internal class InputHelpersConfigurationProvider : SettingsProvider
     {
-        const string s_LIHReasonText = "It is required that the Tracked Pose Driver be used to enable a game camera to follow an XR device. The Tracked Pose Driver component is part of the com.unity.xr.legacyinputhelpers package. This package is not currently installed. Please press the button below to install the package.";
+        const string s_LIHReasonText = "It is recommended that the Tracked Pose Driver be used to enable a game camera to follow an XR device. The Tracked Pose Driver component is part of the com.unity.xr.legacyinputhelpers package. This package is not currently installed. Please press the button below to install the package.";
 
         static GUIContent s_InstallLIHLabel = new GUIContent("Install Legacy Input Helpers Package");
 

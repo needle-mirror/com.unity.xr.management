@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.4-preview.3] - 2019-10-29
+* Update minimum compatible Editor version to 2019.3.0b9
+* Fixes an issue where subsystems could not be initialized before awake in the editor
+* Fixes an issue where subsystems were not re-started after a pause in the editor
+* Removes dialog boxes for creating Loaders and initializing settings.
+
+## [3.0.4-preview.2] - 2019-10-23
+* Modifies wording of LIH inclusion page from "required" to recommended.
+
 ## [3.0.4-preview.1] - 2019-09-20
 * Public API InitializeLoaderAsync was erroneously made internal. Move back to being publicly accessible.
 * Fix editor application perf issue due to not unhooking update callback.

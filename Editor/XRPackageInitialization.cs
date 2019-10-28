@@ -159,7 +159,6 @@ namespace UnityEditor.XR.Management
                     string fileName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(typeName));
                     string targetPath = Path.Combine(path, fileName);
                     AssetDatabase.CreateAsset(obj, targetPath);
-                    Debug.LogFormat("{0} package initialization created default {1} instance at path {2}", packageName, instanceType.ToLower(), path);
                     return obj;
                 }
             }
@@ -169,24 +168,14 @@ namespace UnityEditor.XR.Management
         static bool InitializeLoaderInstance(XRPackageInitializationBase packageInit)
         {
             bool ret = EditorUtilities.AssetDatabaseHasInstanceOfType(packageInit.LoaderTypeName);
-            if (Application.isBatchMode)
-                return true;
 
             if (!ret)
             {
-                ret = EditorUtility.DisplayDialog(
-                    String.Format("{0} Package Initialization", packageInit.PackageName),
-                    String.Format("Before using the {0} package you need to create an instance of the {0} Loader. Would you like to do that now?", packageInit.PackageName),
-                    "Create Loader",
-                    "Cancel");
-                if (ret)
-                {
-                    var obj = CreateScriptableObjectInstance(packageInit.PackageName,
-                        packageInit.LoaderFullTypeName,
-                        "Loader",
-                        EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultLoaderPath));
-                    ret = (obj != null);
-                }
+                var obj = CreateScriptableObjectInstance(packageInit.PackageName,
+                    packageInit.LoaderFullTypeName,
+                    "Loader",
+                    EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultLoaderPath));
+                ret = (obj != null);
             }
 
             return ret;
@@ -195,24 +184,14 @@ namespace UnityEditor.XR.Management
         static bool InitializeSettingsInstance(XRPackageInitializationBase packageInit)
         {
             bool ret = EditorUtilities.AssetDatabaseHasInstanceOfType(packageInit.SettingsTypeName);
-            if (Application.isBatchMode)
-                return true;
 
             if (!ret)
             {
-                ret = EditorUtility.DisplayDialog(
-                    String.Format("{0} Package Initialization", packageInit.PackageName),
-                    String.Format("Before using the {0} package you should create an instance of {0} Settings to provide for custom configuration. Would you like to do that now?", packageInit.PackageName),
-                    "Create Settings",
-                    "Cancel");
-                if (ret)
-                {
-                    var obj = CreateScriptableObjectInstance(packageInit.PackageName,
-                        packageInit.SettingsFullTypeName,
-                        "Settings",
-                        EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath));
-                    ret = packageInit.PopulateSettingsOnInitialization(obj);
-                }
+                var obj = CreateScriptableObjectInstance(packageInit.PackageName,
+                    packageInit.SettingsFullTypeName,
+                    "Settings",
+                    EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath));
+                ret = packageInit.PopulateSettingsOnInitialization(obj);
             }
 
             return ret;

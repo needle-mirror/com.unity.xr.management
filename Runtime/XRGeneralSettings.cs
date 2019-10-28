@@ -33,6 +33,9 @@ namespace UnityEngine.XR.Management
 
         private XRManagerSettings m_XRManager = null;
 
+        private bool m_ProviderIntialized = false;
+        private bool m_ProviderStarted = false;
+
         /// <summary>The current settings instance.</summary>
         public static XRGeneralSettings Instance
         {
@@ -40,6 +43,12 @@ namespace UnityEngine.XR.Management
             {
                 return s_RuntimeSettingsInstance;
             }
+#if UNITY_EDITOR
+            set
+            {
+                s_RuntimeSettingsInstance = value;
+            }
+#endif
         }
 
         /// <summary>The current active manager used to manage XR lifetime.</summary>
@@ -84,32 +93,33 @@ namespace UnityEngine.XR.Management
 #endif
 
 #if UNITY_EDITOR
-        bool m_IsPlaying = false;
 
-        void EnterPlayMode()
+        void Pause()
         {
-            if (!m_IsPlaying)
+            if (m_ProviderIntialized && m_ProviderStarted)
             {
-                if (s_RuntimeSettingsInstance == null)
-                    s_RuntimeSettingsInstance = this;
-
-                InitXRSDK();
-                StartXRSDK();
-                m_IsPlaying = true;
+                StopXRSDK();
             }
         }
 
-        void ExitPlayMode()
+        void Unpause()
         {
-            if (m_IsPlaying)
+            if (m_ProviderIntialized && !m_ProviderStarted)
             {
-                m_IsPlaying = false;
-                StopXRSDK();
-                DeInitXRSDK();
+                StartXRSDK();
+            }
+        }
 
-                if (s_RuntimeSettingsInstance != null)
-                    s_RuntimeSettingsInstance = null;
-
+        public void InternalPauseStateChanged(PauseState state)
+        {
+            switch (state)
+            {
+                case PauseState.Paused:
+                    Pause();
+                    break;
+                case PauseState.Unpaused:
+                    Unpause();
+                    break;
             }
         }
 
@@ -118,20 +128,16 @@ namespace UnityEngine.XR.Management
         {
             switch (state)
             {
-                case PlayModeStateChange.ExitingEditMode:
-                    break;
-                case PlayModeStateChange.EnteredPlayMode:
-                    EnterPlayMode();
-                    break;
                 case PlayModeStateChange.ExitingPlayMode:
-                    ExitPlayMode();
+                    Quit();
                     break;
+                case PlayModeStateChange.ExitingEditMode:
+                case PlayModeStateChange.EnteredPlayMode:
                 case PlayModeStateChange.EnteredEditMode:
                     break;
             }
         }
-#else
-
+#endif
         static void Quit()
         {
             XRGeneralSettings instance = XRGeneralSettings.Instance;
@@ -156,30 +162,25 @@ namespace UnityEngine.XR.Management
         {
             DeInitXRSDK();
         }
-#endif
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         internal static void AttemptInitializeXRSDKOnLoad()
         {
-#if !UNITY_EDITOR
             XRGeneralSettings instance = XRGeneralSettings.Instance;
             if (instance == null || !instance.InitManagerOnStart)
                 return;
 
             instance.InitXRSDK();
-#endif
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         internal static void AttemptStartXRSDKOnBeforeSplashScreen()
         {
-#if !UNITY_EDITOR
             XRGeneralSettings instance = XRGeneralSettings.Instance;
             if (instance == null || !instance.InitManagerOnStart)
                 return;
 
             instance.StartXRSDK();
-#endif
         }
 
         private void InitXRSDK()
@@ -197,6 +198,7 @@ namespace UnityEngine.XR.Management
             m_XRManager.automaticLoading = false;
             m_XRManager.automaticRunning = false;
             m_XRManager.InitializeLoaderSync();
+            m_ProviderIntialized = true;
         }
 
         private void StartXRSDK()
@@ -204,6 +206,7 @@ namespace UnityEngine.XR.Management
             if (m_XRManager != null && m_XRManager.activeLoader != null)
             {
                 m_XRManager.StartSubsystems();
+                m_ProviderStarted = true;
             }
         }
 
@@ -212,6 +215,7 @@ namespace UnityEngine.XR.Management
             if (m_XRManager != null && m_XRManager.activeLoader != null)
             {
                 m_XRManager.StopSubsystems();
+                m_ProviderStarted = false;
             }
         }
 
@@ -221,6 +225,7 @@ namespace UnityEngine.XR.Management
             {
                 m_XRManager.DeinitializeLoader();
                 m_XRManager = null;
+                m_ProviderIntialized = false;
             }
         }
 
