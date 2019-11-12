@@ -13,21 +13,21 @@ namespace UnityEngine.XR.Management
 {
     /// <summary>
     /// Class to handle active loader and subsystem management for XR SDK. This class is to be added as a
-    /// ScriptableObject asset in your project and should only be referenced by the an <see cref="XRGeneralSettings">
+    /// ScriptableObject asset in your project and should only be referenced by the an <see cref="XRGeneralSettings"/>
     /// instance for its use.
     ///
     /// Given a list of loaders, it will attempt to load each loader in the given order. The first
     /// loader that is successful wins and all remaining loaders are ignored. The loader
     /// that succeeds is accessible through the <see cref="activeLoader"/> property on the manager.
     ///
-    /// Depending on configuration the <see cref="XRGeneralSettings"> instance will automatically manage the active loader
+    /// Depending on configuration the <see cref="XRGeneralSettings"/> instance will automatically manage the active loader
     /// at correct points in the application lifecycle. The user can override certain points in the active loader lifecycle
-    /// and manually manage them by toggling the <see cref="XRGeneralSettings.automaticLoading"> and <see cref="XRGeneralSettings.automaticRunning">
-    /// properties. Disabling <see cref="XRGeneralSettings.automaticLoading"> implies the the user is responsible for the full lifecycle
-    /// of the XR session normally handled by the <see cref="XRGeneralSettings"> instance. Toggling this to false also toggles
-    /// <see cref="XRGeneralSettings.automaticRunning"> false.
+    /// and manually manage them by toggling the <see cref="XRGeneralSettings.automaticLoading"/> and <see cref="XRGeneralSettings.automaticRunning"/>
+    /// properties. Disabling <see cref="XRGeneralSettings.automaticLoading"/> implies the the user is responsible for the full lifecycle
+    /// of the XR session normally handled by the <see cref="XRGeneralSettings"/> instance. Toggling this to false also toggles
+    /// <see cref="XRGeneralSettings.automaticRunning"/> false.
     ///
-    /// Disabling <see cref="XRGeneralSettings.automaticRunning"> only implies that the user is responsible for starting and stopping
+    /// Disabling <see cref="XRGeneralSettings.automaticRunning"/> only implies that the user is responsible for starting and stopping
     /// the <see cref="activeLoader"/> through the <see cref="StartSubsystems"/> and <see cref="StopSubsystems"/> APIs.
     ///
     /// Automatic lifecycle management is executed as follows
@@ -124,9 +124,9 @@ namespace UnityEngine.XR.Management
         /// to get the active loader as something less generic than XRLoader.
         /// </summary>
         ///
-        /// <typeparam name="T">< Requested type of the loader></typeparam>
+        /// <typeparam name="T">Requested type of the loader</typeparam>
         ///
-        /// <returns>< The active loader as requested type, or null.></returns>
+        /// <returns>The active loader as requested type, or null.</returns>
         public T ActiveLoaderAs<T>() where T : XRLoader
         {
             return activeLoader as T;
@@ -175,7 +175,7 @@ namespace UnityEngine.XR.Management
         /// Iterate over the configured list of loaders and attempt to initialize each one. The first one
         /// that succeeds is set as the active loader and initialization immediately terminates.
         ///
-        /// When complete <see cref="isInitializationComplete"> will be set to true. This will mark that it is safe to
+        /// When complete <see cref="isInitializationComplete"/> will be set to true. This will mark that it is safe to
         /// call other parts of the API. This does not guarantee that init successfully created a loader. For that
         /// you need to check that ActiveLoader is not null.
         ///
@@ -218,7 +218,7 @@ namespace UnityEngine.XR.Management
         /// If there is an active loader, this will request the loader to start all the subsystems that it
         /// is managing.
         ///
-        /// You must wait for <see cref="isInitializationComplete"> to be set to true prior to calling this API.
+        /// You must wait for <see cref="isInitializationComplete"/> to be set to true prior to calling this API.
         /// </summary>
         public void StartSubsystems()
         {
@@ -240,7 +240,7 @@ namespace UnityEngine.XR.Management
         /// If there is an active loader, this will request the loader to stop all the subsystems that it
         /// is managing.
         ///
-        /// You must wait for <see cref="isInitializationComplete"> to be set to tru prior to calling this API.
+        /// You must wait for <see cref="isInitializationComplete"/> to be set to tru prior to calling this API.
         /// </summary>
         public void StopSubsystems()
         {
@@ -263,9 +263,9 @@ namespace UnityEngine.XR.Management
         /// management. We will automatically call <see cref="StopSubsystems"/> prior to deinitialization to make sure
         /// that things are cleaned up appropriately.
         ///
-        /// You must wait for <see cref="isInitializationComplete"> to be set to tru prior to calling this API.
+        /// You must wait for <see cref="isInitializationComplete"/> to be set to tru prior to calling this API.
         ///
-        /// Upon return <see cref="isInitializationComplete"> will be rest to false;
+        /// Upon return <see cref="isInitializationComplete"/> will be rest to false;
         /// </summary>
         public void DeinitializeLoader()
         {

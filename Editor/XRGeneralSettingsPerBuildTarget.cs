@@ -92,7 +92,7 @@ namespace UnityEditor.XR.Management
         /// <summary>Set specific settings for a given build target.</summary>
         ///
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
-        /// <param name="settings">An instance of <see cref="XRGeneralSettings"> to assign for the given key.</param>
+        /// <param name="settings">An instance of <see cref="XRGeneralSettings"/> to assign for the given key.</param>
         public void SetSettingsForBuildTarget(BuildTargetGroup targetGroup, XRGeneralSettings settings)
         {
             // Ensures the editor's "runtime instance" is the most current for standalone settings
@@ -103,7 +103,7 @@ namespace UnityEditor.XR.Management
 
         /// <summary>Get specific settings for a given build target.</summary>
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
-        /// <returns>The instance of <see cref="XRGeneralSettings"> assigned to the key, or null if not.</returns>
+        /// <returns>The instance of <see cref="XRGeneralSettings"/> assigned to the key, or null if not.</returns>
         public XRGeneralSettings SettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
             XRGeneralSettings ret = null;
@@ -136,7 +136,7 @@ namespace UnityEditor.XR.Management
 
         /// <summary>Given a build target, get the general settings container assigned to it.</summary>
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
-        /// <returns>The instance of <see cref="XRGeneralSettings"> assigned to the key, or null if not.</returns>
+        /// <returns>The instance of <see cref="XRGeneralSettings"/> assigned to the key, or null if not.</returns>
         public static XRGeneralSettings XRGeneralSettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;

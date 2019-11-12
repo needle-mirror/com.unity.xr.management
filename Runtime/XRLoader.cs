@@ -49,7 +49,7 @@ namespace UnityEngine.XR.Management
         /// know what they have loaded and how best to get it..
         /// </summary>
         ///
-        /// <typeparam name="T">< Type of the subsystem to get ></typeparam>
+        /// <typeparam name="T">Type of the subsystem to get</typeparam>
         ///
         /// <returns>The loaded subsystem or null if not found.</returns>
         public abstract T GetLoadedSubsystem<T>()  where T : class, ISubsystem;

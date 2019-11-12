@@ -13,59 +13,24 @@ namespace UnityEditor.XR.Management
 {
     internal static class TypeLoaderExtensions
     {
-        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        public static TypeCache.TypeCollection GetTypesWithInterface<T>(this Assembly asm)
         {
-            if (assembly == null) throw new ArgumentNullException("assembly");
-            try
-            {
-                return assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                return e.Types.Where(t => t != null);
-            }
+            return TypeCache.GetTypesDerivedFrom(typeof(T));
         }
 
-        public static IEnumerable<Type> GetTypesWithInterface<T>(this Assembly asm)
+        public static TypeCache.TypeCollection GetAllTypesWithInterface<T>()
         {
-            var it = typeof(T);
-            return from lt in asm.GetLoadableTypes()
-                where it.IsAssignableFrom(lt) && !lt.IsAbstract && !lt.IsInterface
-                select lt;
+            return TypeCache.GetTypesDerivedFrom(typeof(T));
         }
 
-        public static IEnumerable<Type> GetAllTypesWithInterface<T>()
+        public static TypeCache.TypeCollection GetTypesWithAttribute<T>(this Assembly asm)
         {
-            IEnumerable<Type> ret = new List<Type>();
-
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                var vendorTypes = asm.GetTypesWithInterface<T>().ToList<Type>();
-                ret = ret.Concat(vendorTypes);
-            }
-
-            return ret;
+            return TypeCache.GetTypesWithAttribute(typeof(T));
         }
 
-        public static IEnumerable<Type> GetTypesWithAttribute<T>(this Assembly asm)
+        public static TypeCache.TypeCollection GetAllTypesWithAttribute<T>()
         {
-            var it = typeof(T);
-            return from lt in asm.GetLoadableTypes()
-                where (lt.GetCustomAttributes(it, true).Length > 0) && !lt.IsAbstract && !lt.IsInterface
-                select lt;
-        }
-
-        public static IEnumerable<Type> GetAllTypesWithAttribute<T>()
-        {
-            IEnumerable<Type> ret = new List<Type>();
-
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                var vendorTypes = asm.GetTypesWithAttribute<T>().ToList<Type>();
-                ret = ret.Concat(vendorTypes);
-            }
-
-            return ret;
+            return TypeCache.GetTypesWithAttribute(typeof(T));
         }
     }
 }

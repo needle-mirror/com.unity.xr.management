@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.5-preview.1] - 2019-11-13
+* UI rework to provide for simpler installation and management of XR Plugin Providers.
+* Reworked the underlying data handling and maintenance to be more streamlines and less coupled.
+
 ## [3.0.4-preview.3] - 2019-10-29
 * Update minimum compatible Editor version to 2019.3.0b9
 * Fixes an issue where subsystems could not be initialized before awake in the editor

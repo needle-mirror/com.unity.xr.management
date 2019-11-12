@@ -46,7 +46,7 @@ namespace UnityEngine.XR.Management
         /// a previous call to CreateSubsystem
         /// </summary>
         ///
-        /// <typeparam name="T">A subclass of <see cref="ISubsystem"></typeparam>
+        /// <typeparam name="T">A subclass of <see cref="ISubsystem"/></typeparam>
         protected void StartSubsystem<T>() where T : class, ISubsystem
         {
             T subsystem = GetLoadedSubsystem<T>();
@@ -59,7 +59,7 @@ namespace UnityEngine.XR.Management
         /// a previous call to CreateSubsystem
         /// </summary>
         ///
-        /// <typeparam name="T">A subclass of <see cref="ISubsystem"></typeparam>
+        /// <typeparam name="T">A subclass of <see cref="ISubsystem"/></typeparam>
         protected void StopSubsystem<T>() where T : class, ISubsystem
         {
             T subsystem = GetLoadedSubsystem<T>();
@@ -72,7 +72,7 @@ namespace UnityEngine.XR.Management
         /// a previous call to CreateSubsystem
         /// </summary>
         ///
-        /// <typeparam name="T">A subclass of <see cref="ISubsystem"></typeparam>
+        /// <typeparam name="T">A subclass of <see cref="ISubsystem"/></typeparam>
         protected void DestroySubsystem<T>() where T : class, ISubsystem
         {
             T subsystem = GetLoadedSubsystem<T>();
@@ -144,7 +144,7 @@ namespace UnityEngine.XR.Management
         /// <typeparam name="TSubsystem">The subsystem type being requested</typeparam>
         /// <param name="descriptors">List of TDescriptor instances to use for subsystem matching.</param>
         /// <param name="id">The identifier key of the particualr subsystem implementation being requested.</param>
-        [Obsolete("This method is obsolete. Please use the geenric CreateSubsystem method.", false)]
+        [Obsolete("This method is obsolete. Please use the generic CreateSubsystem method.", false)]
         protected void CreateStandaloneSubsystem<TDescriptor, TSubsystem>(List<TDescriptor> descriptors, string id)
             where TDescriptor : SubsystemDescriptor
             where TSubsystem : Subsystem

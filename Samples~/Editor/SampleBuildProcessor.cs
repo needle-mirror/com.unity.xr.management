@@ -31,7 +31,7 @@ namespace Samples
     /// </summary>
     public class SampleBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
-        /// <summary>Override of <see cref="IPreprocessBuildWithReport"> and <see cref="IPostprocessBuildWithReport"></summary>
+        /// <summary>Override of <see cref="IPreprocessBuildWithReport"/> and <see cref="IPostprocessBuildWithReport"/></summary>
         public int callbackOrder
         {
             get { return 0;  }
@@ -59,7 +59,7 @@ namespace Samples
             }
         }
 
-        /// <summary>Override of <see cref="IPreprocessBuildWithReport"></summary>
+        /// <summary>Override of <see cref="IPreprocessBuildWithReport"/></summary>
         /// <param name="report">Build report.</param>
         public void OnPreprocessBuild(BuildReport report)
         {
@@ -82,7 +82,7 @@ namespace Samples
             }
         }
 
-        /// <summary>Override of <see cref="IPostprocessBuildWithReport"></summary>
+        /// <summary>Override of <see cref="IPostprocessBuildWithReport"/></summary>
         /// <param name="report">Build report.</param>
         public void OnPostprocessBuild(BuildReport report)
         {
