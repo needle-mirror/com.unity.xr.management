@@ -23,7 +23,7 @@ namespace UnityEditor.XR.Management
             internal static GUIContent s_ProvidersToInstall = new GUIContent("Installable XR Plugin Providers");
             internal static GUIContent s_LookingForProviders = new GUIContent("Looking for installable provider packages... ");
             internal static GUIContent s_NoInstallablePackages = new GUIContent("No installable provider packages found.");
-            internal static string k_NeedToInstallAProvider = "Before you can use the XR system you need to install at least one provider from the list above.";
+            internal static string k_NeedToInstallAProvider = "Before you can use the XR system you need to install at least one provider from the list.";
             internal static string k_ProvidersUnavailable = "We are unable to find any providers usable within Unity at this time. XR is currently unavailable to use.";
             internal static GUIContent s_InstallPackage = new GUIContent("Install");
             internal static GUIContent s_InstallingPackage = new GUIContent("Installing");

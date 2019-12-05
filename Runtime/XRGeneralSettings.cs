@@ -33,8 +33,10 @@ namespace UnityEngine.XR.Management
 
         private XRManagerSettings m_XRManager = null;
 
+#pragma warning disable 414 // Suppress warning for needed variables.
         private bool m_ProviderIntialized = false;
         private bool m_ProviderStarted = false;
+#pragma warning restore 414
 
         /// <summary>The current settings instance.</summary>
         public static XRGeneralSettings Instance
@@ -191,7 +193,7 @@ namespace UnityEngine.XR.Management
             m_XRManager = XRGeneralSettings.Instance.m_LoaderManagerInstance;
             if (m_XRManager == null)
             {
-                Debug.LogError("Assigned GameObject for XR Management loading is invalid. XR SDK will not be automatically loaded.");
+                Debug.LogError("Assigned GameObject for XR Management loading is invalid. No XR Providers will be automatically loaded.");
                 return;
             }
 

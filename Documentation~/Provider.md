@@ -2,13 +2,13 @@
 
 ## Lifecycle Management
 
-This package provides for management of **XR SDK** subsystem lifecycle without the need for boilerplate code. The **XRManagerSettings** class provides a scriptable object that can be used by the app for start, stop and de-initialization of a set of subsystems defined by an **XRLoader** instance.
+This package provides for management of **XR** subsystem lifecycle without the need for boilerplate code. The **XRManagerSettings** class provides a scriptable object that can be used by the app for start, stop and de-initialization of a set of subsystems defined by an **XRLoader** instance.
 
 A provider must create a subclass of **XRLoader** to make a loader available for their particular runtime scheme.
 
 The **XRLoader** interface looks like this:
 
-```csharp
+```
 public abstract class XRLoader : ScriptableObject
 {
     public virtual bool Initialize() { return false; }
@@ -55,7 +55,7 @@ A provider may need optional settings to help manage build issues or runtime con
 
 The provider will need to handle getting the settings from **EditorUserBuildSettings** into the build application. This can be done with a custom build processing script. If all you need for build support is to make sure that you have access to the same settings at runtime you can derive from **XRBuildHelper<T>**. This is a generic abstract base class that handles the necessary work of getting the build settings stored in EditorUserBuildSettings and getting them into the build application for access at runtime. Simplest build script for your package would look like this:
 
-```csharp
+```
 public class MyBuildProcessor : XRBuildHelper<MySettings> 
 {
     public override string BuildSettingsKey { get { return "MyPackageSettingsKey"; } }
@@ -64,7 +64,7 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 
 You can override the build processing steps from **IPreprocessBuildWithReport** and **IPostprocessBuildWithReport** but make sure that you call to the base class implementation or else your settings will not be copied.
 
-```csharp
+```
 public class MyBuildProcessor : XRBuildHelper<MySettings> 
 { 
     public override string BuildSettingsKey { get { return "MyPackageSettingsKey"; } }
@@ -85,7 +85,7 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 
 If you wish to support per platform settings at build time, you can override `UnityEngine.Object SettingsForBuildTargetGroup(BuildTargetGroup buildTargetGroup)` and use the passed in buildTargetGroup to retrieve the appropriate platform settings. By default this method just uses the key associated with the settings instance to copy the entire settings object from EditorUserBuildSettings to PlayerSettings.
 
-```csharp
+```
 public class MyBuildProcessor : XRBuildHelper<MySettings> 
 { 
     public override string BuildSettingsKey { get { return "MyPackageSettingsKey"; } }
@@ -111,6 +111,6 @@ If you need more extensive support and/or absolute control you can copy the **Sa
 
 Given the need for **ScriptableObject** instance to support loaders and settings, the user will be forced to create these instances at some point. Both **XRManagerSettings** and the **Unified Settings** support can handle creating the necessary instances on demand but it may be beneficial to create these up front at package installation. If you derive a class from **XRPackageInitializationBase** and fill out the interface properties and methods the management system will provide for creation of default instances of your loader and settings at installation. Creation of each one is driven by prompting the user if it is OK to do that and, if so, creating the instance in the appropriate default location in the Assets folder. For loaders this is Assets/XR/Loaders. For settings this is Assets/XR/Settings. While these are the recommended locations for putting these package based objects they do not have to be located there. The user is free to move them around as long as we can find at least one instance of each type for each package.
 
-# Installing *XR SDK Management*
+# Installing *XR Management*
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).

@@ -12,7 +12,7 @@ using UnityEngine.XR.Management;
 namespace UnityEngine.XR.Management
 {
     /// <summary>
-    /// Class to handle active loader and subsystem management for XR SDK. This class is to be added as a
+    /// Class to handle active loader and subsystem management for XR. This class is to be added as a
     /// ScriptableObject asset in your project and should only be referenced by the an <see cref="XRGeneralSettings"/>
     /// instance for its use.
     ///
@@ -136,7 +136,7 @@ namespace UnityEngine.XR.Management
         /// Iterate over the configured list of loaders and attempt to initialize each one. The first one
         /// that succeeds is set as the active loader and initialization immediately terminates.
         ///
-        /// When complete <see cref="isInitializationComplete"> will be set to true. This will mark that it is safe to
+        /// When complete <see cref="isInitializationComplete"/> will be set to true. This will mark that it is safe to
         /// call other parts of the API. This does not guarantee that init successfully created a loader. For that
         /// you need to check that ActiveLoader is not null.
         ///

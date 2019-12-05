@@ -1,6 +1,6 @@
-# About *XR SDK Management* package
+# About *XR Management* package
 
-Use the **XR SDK Management** package to help streamline **XR SDK** lifecycle management and potentially provide users with build time UI through the Unity **Unified Settings** system.
+Use the **XR Management** package to help streamline **XR** lifecycle management and potentially provide users with build time UI through the Unity **Unified Settings** system.
 
 # Installation
 
@@ -31,9 +31,9 @@ If you want to use a cloned version of the package directly, you can point the P
 NOTE: The package root is not necessarily the root of the cloned repo. The package root the folder where the package's package.json file located.
 
 
-# Using XR SDK Management
+# Using XR Management
 
-There are two target audiences for XR SDK Management: The End User and the Provider. Documentation for those can be found here:
+There are two target audiences for XR Management: The End User and the Provider. Documentation for those can be found here:
 
 * [End Users Documentation](./EndUser.md)
 * [Provider Documentation](./Provider.md)
@@ -42,7 +42,7 @@ There are two target audiences for XR SDK Management: The End User and the Provi
 
 ## Requirements
 
-This version of **XR SDK Management** is compatible with the following versions of the Unity Editor:
+This version of **XR Management** is compatible with the following versions of the Unity Editor:
 
 * 2019.1 and later (recommended)
 
@@ -52,12 +52,12 @@ This version of **XR SDK Management** is compatible with the following versions 
 
 ## Package contents
 
-This version of **XR SDK Management** includes:
+This version of **XR Management** includes:
 
 * **XRManagerSettings** - This is a **ScriptableObject** that can be accessed from the script and provides for management of **XRLoader** instances and their lifecycle.
 * **XRLoader** - This is the base class all loaders should derive from. It provides a basic the **XRManagerSettings** can use to manage lifecycle and a simple API to allow users to request specific subsystems from the loader as and when needed.
 * **XRConfigurationData** - This is an attribute that allows for build and runtime settings to be hosted within the **Unified Settings** window. All instances will be hosted under the top level **XR** entry within the **Unified Settings** window under the name supplied as part of the attribute. The management package will maintain and manage the lifecycle for one instance of the build settings using **EditorBuildSettings** config object API, stored with the key provided in the attribute. At any time, the provider or the user is free access the configuration settings instance by asking **EditorBuildSettings** for the instance associated with the chosen key (as set in the attribute).
 * **XRPackageInitializationBase** - Helper class to derive from that simplifies some of the busy work for package initialization. Helps to create a default instance of the packages XRLoader and default settings at the time of package installation. Initialization is run once only and the package developer should not depend on the user creating the specified instances.
 * **XRBuildHelper** - Abstract class useful for handling some boilerplate around moving settings from Editor -> Runtime. Derive from this class and specific the appropriate settings type and the system will take care of marshaling that type from EditorUserBuildSettings to PlayerSettings to be used at runtime.
-* **XRGeneralSettings** - Contains settings specific to all of XR SDK and not to any single provider.
+* **XRGeneralSettings** - Contains settings specific to all of XR and not to any single provider.
 * **Samples** - There is a samples folder in the package that contains an implementation of all parts of XR Management. Copy that folder to a location in your project/package to get started with implementing XR Management for your needs.

@@ -4,9 +4,29 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [3.0.5] - 2019-12-06
+* Fix package validation errors.
+* Release for verification.
+
+## [3.0.5-preview.4] - 2019-12-06
+* Release for verification.
+* Remove build target filtering support. Will be added back into 3.1.0.
+
+## [3.0.5-preview.3] - 2019-11-22
+* Correct Samples code to make sure that it compiles correctly.
+* Make some documentation fixes for inline code.
+* Replace XR SDK text with just XR or other appropriate messaging.
+
+## [3.0.5-preview.2] - 2019-11-18
+* New attribute was incorrectly placed into Runtime instead of Editor. Moved to Editor where it belongs.
+
 ## [3.0.5-preview.1] - 2019-11-13
 * UI rework to provide for simpler installation and management of XR Plugin Providers.
 * Reworked the underlying data handling and maintenance to be more streamlines and less coupled.
+
+## [3.0.4] - 2019-11-04
+* Release package for verification.
 
 ## [3.0.4-preview.3] - 2019-10-29
 * Update minimum compatible Editor version to 2019.3.0b9
@@ -34,7 +54,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Change legacy input helpers version to 1.*
 * Fix documentation validation errors.
 * Allow 3.x to work with Unity 2019.2.
-  * This package will not work with 2019.3a1 - a11.
+* This package will not work with 2019.3a1 - a11.
 
 ## [3.0.2-preview.1] - 2019-08-06
 * Remove asset menu creation entry for XR Settings as it is unsupported now.
@@ -210,4 +230,4 @@ Added code to auto create the first SO settings instance using a file panel sinc
 
 ## [0.1.0-preview.1] - 2018-06-21
 
-### This is the first release of *Unity Package XR SDK Management*.
+### This is the first release of *Unity Package XR Management*.

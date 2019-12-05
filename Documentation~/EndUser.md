@@ -15,7 +15,7 @@ At package install time, the package may prompt you to create an instance of a l
 
 If you wish not to create this at installation time, the appropriate portion of the editor that require them (**XRManagerSettings** and **Unified Settings** will) prompt you to create them as well.
 
-**NOTE**: You can always manually control the XR SDK system by accessing the **XRGeneralSettings.Instance.Manager.activeLoader** field once XR SDK has been initialized.
+**NOTE**: You can always manually control the XR system by accessing the **XRGeneralSettings.Instance.Manager.activeLoader** field once XR has been initialized.
 
 ## Add plugin loaders as needed
 * Navigate to **Project Settings**.
@@ -25,7 +25,7 @@ If you wish not to create this at installation time, the appropriate portion of 
 ### Automatic manager loading of XR
 By default XR Management will automatically initialize and start your XR environment on application load. At runtime this happens immediately before first scene load. In Play mode this happens immediately after first scene load but before Start is called on your game objects. In either case XR should be setup before Start is called so you should be able to query the state of XR in the Start method of your game objects.
 
-### If you wish to start XR SDK on a per scene basis (i.e. start in 2D and transition into VR)
+### If you wish to start XR on a per scene basis (i.e. start in 2D and transition into VR)
 * Make sure you disable the **Initialize on Startup** toggle for each platform you support.
 * At runtime use the **XRGeneralSettings.Instance.Manager** to add/create, remove and reorder the loaders you wish to use from the script.
 * To setup the XR environment to run manually call **InitializeLoader(Async)** on the **XRGeneralSettings.Instance.Manager**.
@@ -37,9 +37,9 @@ By default XR Management will automatically initialize and start your XR environ
 
 Any package that needs build or runtime settings should provide a settings datatype for use. This will be surfaced in the **Unified Settings** UI window underneath a top level **XR** node. By default a custom settings data instance will not be created. If you wish to modify build or runtime settings for the package you must go to the package authors entry in **Unified Settings** and select **Create**. This will create an instance of the settings that you can then modify inside of **Unified Settings**.
 
-# Installing *XR SDK Management*
+# Installing *XR Management*
 
-Most likey the XR SDK Provider package you want to use already includes XR Management so you shouldn't need to install it. If you do you can follow the directions provided in the top level documentation or follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
+Most likey the XR Provider package you want to use already includes XR Management so you shouldn't need to install it. If you do you can follow the directions provided in the top level documentation or follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
 
 # Installing *Legacy Input Helpers*
 

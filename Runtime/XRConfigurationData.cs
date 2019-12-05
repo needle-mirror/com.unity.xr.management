@@ -8,7 +8,7 @@ using UnityEngine;
 namespace UnityEngine.XR.Management
 {
     /// <summary>
-    /// This attribute is used to tag classes as providing build settings support for an XR SDK provider. The unified setting system
+    /// This attribute is used to tag classes as providing build settings support for an XR provider. The unified setting system
     /// will present the settings as an inspectable object in the Unified Settings window using the built-in inspector UI.
     ///
     /// The implementor of the settings is able to create their own custom UI and the Unified Settings system will use that UI in

@@ -64,7 +64,6 @@ namespace UnityEditor.XR.Management
         }
 
         List<XRLoaderInfo> m_AllLoaderInfos = new List<XRLoaderInfo>();
-        List<XRLoaderInfo> m_AllLoaderInfosForBuildTarget = new List<XRLoaderInfo>();
         List<XRLoaderInfo> m_AssignedLoaderInfos = new List<XRLoaderInfo>();
         List<XRLoaderInfo> m_UnassignedLoaderInfos = new List<XRLoaderInfo>();
 
@@ -126,7 +125,6 @@ namespace UnityEditor.XR.Management
                 return;
 
             PopulateAllLoaderInfos();
-            PopulateLoadersForBuildTarget();
             PopulateAssignedLoaderInfos();
             PopulateUnassignedLoaderInfos();
 
@@ -177,15 +175,10 @@ namespace UnityEditor.XR.Management
             return Path.GetFileNameWithoutExtension(assetPath);
         }
 
-        void PopulateLoadersForBuildTarget()
-        {
-            m_AllLoaderInfosForBuildTarget = FilteredLoaderInfos(m_AllLoaderInfos);
-        }
-
         void PopulateUnassignedLoaderInfos()
         {
             m_UnassignedLoaderInfos.Clear();
-            foreach (var info in m_AllLoaderInfosForBuildTarget)
+            foreach (var info in m_AllLoaderInfos)
             {
                 var assigned = from ai in m_AssignedLoaderInfos where ai.loaderType == info.loaderType select ai;
                 if (!assigned.Any()) m_UnassignedLoaderInfos.Add(info);
@@ -195,47 +188,6 @@ namespace UnityEditor.XR.Management
         void PopulateProperty(string propertyPath, ref SerializedProperty prop)
         {
             if (SerializedObjectData != null && prop == null) prop = SerializedObjectData.FindProperty(propertyPath);
-        }
-
-        private List<XRLoaderInfo> FilteredLoaderInfos(List<XRLoaderInfo> loaderInfos)
-        {
-            List<XRLoaderInfo> ret = new List<XRLoaderInfo>();
-
-            foreach (var info in loaderInfos)
-            {
-                if (info.loaderType == null)
-                    continue;
-
-                object[] attrs;
-
-                try
-                {
-                    attrs = info.loaderType.GetCustomAttributes(typeof(XRSupportedBuildTargetAttribute), true);
-                }
-                catch (Exception)
-                {
-                    attrs = default;
-                }
-
-                if (attrs.Length == 0)
-                {
-                    // If unmarked we assume it will be applied to all build targets.
-                    ret.Add(info);
-                }
-                else
-                {
-                    foreach (XRSupportedBuildTargetAttribute attr in attrs)
-                    {
-                        if (attr.buildTargetGroup == m_BuildTargetGroup)
-                        {
-                            ret.Add(info);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return ret;
         }
 
         void UpdateSerializedProperty()
