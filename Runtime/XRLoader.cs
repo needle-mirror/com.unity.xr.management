@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 #if !UNITY_2019_3_OR_NEWER
 using UnityEngine.Experimental.XR;
 using UnityEngine.Experimental;
@@ -52,6 +52,17 @@ namespace UnityEngine.XR.Management
         /// <typeparam name="T">Type of the subsystem to get</typeparam>
         ///
         /// <returns>The loaded subsystem or null if not found.</returns>
-        public abstract T GetLoadedSubsystem<T>()  where T : class, ISubsystem;
+        public abstract T GetLoadedSubsystem<T>() where T : class, ISubsystem;
+
+        /// <summary>
+        /// Gets the loader's supported graphics device types. If the list is empty, it is assumed that it supports all graphics device types.
+        /// </summary>
+        /// 
+        /// <param name="buildingPlayer">True if the player is being built. You may want to include or exclude graphics apis if the player is being built or not.</param>
+        /// <returns>Returns the loader's supported graphics device types.</returns>
+        public virtual List<GraphicsDeviceType> GetSupportedGraphicsDeviceTypes(bool buildingPlayer)
+        {
+            return new List<GraphicsDeviceType>();
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.XR;
 #if !UNITY_2019_3_OR_NEWER
 using UnityEngine.Experimental.XR;

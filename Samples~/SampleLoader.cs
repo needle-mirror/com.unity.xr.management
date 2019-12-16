@@ -23,6 +23,10 @@ namespace Samples
     /// NOTE: You have to rename this class to make it appear in the loader list for
     /// XRManager.
     /// </summary>
+#if UNITY_EDITOR
+    [XRSupportedBuildTarget(BuildTargetGroup.Standalone, new BuildTarget[]{ BuildTarget.StandaloneWindows, BuildTarget.StandaloneWindows64})]
+    [XRSupportedBuildTarget(BuildTargetGroup.Android)]
+#endif
     public class SampleLoader : XRLoaderHelper
     {
         static List<XRInputSubsystemDescriptor> s_InputSubsystemDescriptors =

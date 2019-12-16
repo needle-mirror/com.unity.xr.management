@@ -74,6 +74,7 @@ namespace UnityEditor.XR.Management
 
             instance.InternalPlayModeStateChanged(state);
         }
+
         static void PauseStateChange(PauseState state)
         {
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
@@ -87,6 +88,7 @@ namespace UnityEditor.XR.Management
 
             instance.InternalPauseStateChanged(state);
         }
+
 #endif
 
         /// <summary>Set specific settings for a given build target.</summary>

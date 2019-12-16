@@ -1,14 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Runtime.CompilerServices;
 using UnityEditor;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using UnityEngine.Serialization;
 using UnityEngine.XR.Management;
 
+[assembly: InternalsVisibleTo("Unity.XR.Management.Tests")]
 namespace UnityEngine.XR.Management
 {
     /// <summary>
@@ -159,7 +161,7 @@ namespace UnityEngine.XR.Management
             {
                 if (loader != null)
                 {
-                    if (loader.Initialize())
+                    if (CheckGraphicsAPICompatibility(loader) && loader.Initialize())
                     {
                         activeLoader = loader;
                         m_InitializationComplete = true;
@@ -200,7 +202,7 @@ namespace UnityEngine.XR.Management
             {
                 if (loader != null)
                 {
-                    if (loader.Initialize())
+                    if (CheckGraphicsAPICompatibility(loader) && loader.Initialize())
                     {
                         activeLoader = loader;
                         m_InitializationComplete = true;
@@ -212,6 +214,22 @@ namespace UnityEngine.XR.Management
             }
 
             activeLoader = null;
+        }
+
+        private bool CheckGraphicsAPICompatibility(XRLoader loader)
+        {
+            GraphicsDeviceType deviceType = SystemInfo.graphicsDeviceType;
+            List<GraphicsDeviceType> supportedDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(false);
+
+            // To help with backward compatibility, if the compatibility list is empty we assume that it does not implement the GetSupportedGraphicsDeviceTypes method
+            // Therefore we revert to the previous behavior of building or starting the loader regardless of gfx api settings.
+            if (supportedDeviceTypes.Count > 0 && !supportedDeviceTypes.Contains(deviceType))
+            {
+                Debug.LogWarning(String.Format("The {0} does not support the initialized graphics device, {1}. Please change the preffered Graphics API in PlayerSettings. Attempting to start the next XR loader.", loader.name, deviceType.ToString()));
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

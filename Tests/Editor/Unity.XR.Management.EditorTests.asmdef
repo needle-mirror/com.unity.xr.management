@@ -3,7 +3,8 @@
     "references": [
         "Unity.XR.Management.Editor",
         "Unity.XR.Management",
-        "Unity.XR.Management.Tests.Standalone"
+        "Unity.XR.Management.Tests.Standalone",
+        "Unity.XR.Management.Tests"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

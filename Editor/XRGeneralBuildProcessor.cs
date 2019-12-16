@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -12,8 +14,10 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.XR.Management;
 
+[assembly: InternalsVisibleTo("Unity.XR.Management.EditorTests")]
 namespace UnityEditor.XR.Management
 {
     class XRGeneralBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport, IPostGenerateGradleAndroidProject
@@ -71,6 +75,21 @@ namespace UnityEditor.XR.Management
                 }
             }
 
+            if (loaderManager != null)
+            {
+                // chances are that our devices won't fall back to graphics device types later in the list so it's better to assume the device will be created with the first gfx api in the list.
+                // furthermore, we have no way to influence falling back to other graphics API types unless we automatically change settings underneath the user which is no good!
+                GraphicsDeviceType[] deviceTypes = PlayerSettings.GetGraphicsAPIs(report.summary.platform);
+                if (deviceTypes.Length > 0)
+                {
+                    VerifyGraphicsAPICompatibility(loaderManager, deviceTypes[0]);
+                }
+                else
+                {
+                    Debug.LogWarning("No Graphics APIs have been configured in Player Settings.");
+                }
+            }
+
             UnityEngine.Object[] preloadedAssets = PlayerSettings.GetPreloadedAssets();
 
             if (!preloadedAssets.Contains(settings))
@@ -79,6 +98,45 @@ namespace UnityEditor.XR.Management
                 assets.Add(settings);
                 PlayerSettings.SetPreloadedAssets(assets.ToArray());
             }
+        }
+
+        public static void VerifyGraphicsAPICompatibility(XRManagerSettings loaderManager, GraphicsDeviceType selectedDeviceType)
+        {
+                HashSet<GraphicsDeviceType> allLoaderGraphicsDeviceTypes = new HashSet<GraphicsDeviceType>();
+                foreach (var loader in loaderManager.loaders)
+                {
+                    List<GraphicsDeviceType> supporteDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(true);
+                    // To help with backward compatibility, if we find that any of the compatibility lists are empty we assume that at least one of the loaders does not implement the GetSupportedGraphicsDeviceTypes method
+                    // Therefore we revert to the previous behavior of building the app regardless of gfx api settings.
+                    if (supporteDeviceTypes.Count == 0)
+                    {
+                        allLoaderGraphicsDeviceTypes.Clear();
+                        break;
+                    }
+                    foreach (var supportedGraphicsDeviceType in supporteDeviceTypes)
+                    {
+                        allLoaderGraphicsDeviceTypes.Add(supportedGraphicsDeviceType);
+                    }
+                }
+
+
+                if (allLoaderGraphicsDeviceTypes.Count > 0 && !allLoaderGraphicsDeviceTypes.Contains(selectedDeviceType))
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.AppendFormat(
+                            "The selected grpahics API, {0}, is not supported by any of the current loaders. Please change the preferred Graphics API setting in Player Settings.\n",
+                            selectedDeviceType);
+
+                    foreach (var loader in loaderManager.loaders)
+                    {
+                        stringBuilder.AppendLine(loader.name + " supports:");
+                        foreach (var supportedGraphicsDeviceType in loader.GetSupportedGraphicsDeviceTypes(true))
+                        {
+                            stringBuilder.AppendLine("\t -" + supportedGraphicsDeviceType);
+                        }
+                    }
+                    throw new BuildFailedException(stringBuilder.ToString());
+                }
         }
 
         public void OnPostprocessBuild(BuildReport report)

@@ -5,15 +5,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [3.0.6-preview.2] - 2019-12-20
+## [3.1.0-preview.2] - 2019-12-17
+* Fix FB 1206103: Serialized loader list is not saved correctly when a new loader asset is created as part of the add operation.
 * Fix package checking system to also look at installed packages and not just remotely registered packages. This allows us to see packages the user has locally installed on disk that may not be registered in the package registry.
 * Add check to make sure we pick up any class in the project that derives from XRLoader and not just those in packages. This allows a developer to create a loader in their assets folder and use that regardless of installed packages.
 
-
-## [3.0.6-preview.1] - 2019-12-12
+## [3.1.0-preview.1] - 2019-12-06
+* Fixes an issue where subsystems could not be initialized before awake in the editor
+* Fixes an issue where subsystems were not re-started after a pause in the editor
+* Re-add build target filtering into management.
 * Documentation copy review and edit.
-* Fix FB 1206103: Serialized loader list is not saved correctly when a new loader asset is created as part of the add operation.
-
+ 
+## [3.1.0-preview] - 2019-09-11
+* Adds generic gfx capabilities method to XRLoader class
+ 
 ## [3.0.5] - 2019-12-06
 * Fix package validation errors.
 * Release for verification.

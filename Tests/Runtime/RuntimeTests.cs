@@ -6,6 +6,8 @@ using UnityEngine.TestTools;
 using UnityEngine.XR.Management;
 
 using UnityEditor;
+using UnityEditor.TestTools;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
 namespace UnityEngine.XR.Management.Tests
@@ -74,6 +76,104 @@ namespace UnityEngine.XR.Management.Tests
             m_Manager.DeinitializeLoader();
 
             Assert.IsNull(m_Manager.activeLoader);
+
+            m_Manager.loaders.Clear();
+        }
+    }
+
+#if UNITY_EDITOR_WIN
+    [TestFixture(GraphicsDeviceType.Direct3D11, 0, new [] { GraphicsDeviceType.Direct3D11})]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Direct3D11})]
+    [TestFixture(GraphicsDeviceType.Direct3D11, -1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan})]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 0, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 1, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
+#endif
+#if UNITY_EDITOR_OSX
+    [TestFixture(GraphicsDeviceType.Metal, 0, new [] { GraphicsDeviceType.Metal})]
+    [TestFixture(GraphicsDeviceType.Metal, 1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal})]
+    [TestFixture(GraphicsDeviceType.Metal, -1, new [] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan})]
+    [TestFixture(GraphicsDeviceType.Metal, 0, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
+    [TestFixture(GraphicsDeviceType.Metal, 1, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
+#endif
+    class GraphicsAPICompatibilityTests
+    {
+        XRManagerSettings m_Manager;
+        List<XRLoader> m_Loaders = new List<XRLoader>();
+
+        private GraphicsDeviceType m_PlayerSettingsDeviceType;
+        private GraphicsDeviceType[]  m_LoadersSupporteDeviceTypes;
+        int m_LoaderIndexToWin;
+        public GraphicsAPICompatibilityTests(GraphicsDeviceType playerSettingsDeviceType,  int indexToWin, GraphicsDeviceType[] loaders)
+        {
+            m_LoaderIndexToWin = indexToWin;
+            m_PlayerSettingsDeviceType = playerSettingsDeviceType;
+            m_LoadersSupporteDeviceTypes = loaders;
+        }
+
+        [SetUp]
+        public void SetupPlayerSettings()
+        {
+#if UNITY_EDITOR_WIN
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { m_PlayerSettingsDeviceType });
+#elif UNITY_EDITOR_OSX
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneOSX, new[] { m_PlayerSettingsDeviceType });
+#endif
+            m_Manager = ScriptableObject.CreateInstance<XRManagerSettings>();
+            m_Manager.automaticLoading = false;
+
+            m_Loaders = new List<XRLoader>();
+
+            for (int i = 0; i < m_LoadersSupporteDeviceTypes.Length; i++)
+            {
+                DummyLoader dl = ScriptableObject.CreateInstance(typeof(DummyLoader)) as DummyLoader;
+                dl.id = i;
+                dl.supportedDeviceType = m_LoadersSupporteDeviceTypes[i];
+                m_Loaders.Add(dl);
+                m_Manager.loaders.Add(dl);
+            }
+        }
+
+        [TearDown]
+        public void TeadDown()
+        {
+            Object.Destroy(m_Manager);
+            m_Manager = null;
+        }
+
+        [Test]
+        public void CheckGraphicsAPICompatibilitySync()
+        {
+            m_Manager.InitializeLoaderSync();
+
+            if (m_LoaderIndexToWin < 0 || m_LoaderIndexToWin >= m_Loaders.Count)
+            {
+                Assert.IsNull(m_Manager.activeLoader);
+            }
+            else
+            {
+                Assert.IsNotNull(m_Manager.activeLoader);
+                Assert.AreEqual(m_Loaders[m_LoaderIndexToWin], m_Manager.activeLoader);
+                m_Manager.DeinitializeLoader();
+            }
+
+            m_Manager.loaders.Clear();
+        }
+
+        [UnityTest]
+        public IEnumerator CheckGraphicsAPICompatibility()
+        {
+            yield return m_Manager.InitializeLoader();
+
+            if (m_LoaderIndexToWin < 0 || m_LoaderIndexToWin >= m_Loaders.Count)
+            {
+                Assert.IsNull(m_Manager.activeLoader);
+            }
+            else
+            {
+                Assert.IsNotNull(m_Manager.activeLoader);
+                Assert.AreEqual(m_Loaders[m_LoaderIndexToWin], m_Manager.activeLoader);
+                m_Manager.DeinitializeLoader();
+            }
 
             m_Manager.loaders.Clear();
         }
