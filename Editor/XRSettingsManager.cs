@@ -20,7 +20,7 @@ namespace UnityEditor.XR.Management
         struct Content
         {
             internal static GUIContent s_LoaderInitOnStartLabel = new GUIContent("Initialize on Startup");
-            internal static GUIContent s_ProvidersToInstall = new GUIContent("Installable XR Plugin Providers");
+            internal static GUIContent s_ProvidersToInstall = new GUIContent("Known XR Plugin Providers");
             internal static GUIContent s_LookingForProviders = new GUIContent("Looking for installable provider packages... ");
             internal static GUIContent s_NoInstallablePackages = new GUIContent("No installable provider packages found.");
             internal static string k_NeedToInstallAProvider = "Before you can use the XR system you need to install at least one provider from the list.";
@@ -28,6 +28,7 @@ namespace UnityEditor.XR.Management
             internal static GUIContent s_InstallPackage = new GUIContent("Install");
             internal static GUIContent s_InstallingPackage = new GUIContent("Installing");
             internal static GUIContent s_InstalledPackage = new GUIContent("Installed");
+            internal static GUIContent s_LocalPackage = new GUIContent("Local Only");
         }
 
         internal static GUIStyle GetStyle(string styleName)
@@ -50,6 +51,7 @@ namespace UnityEditor.XR.Management
         private Dictionary<BuildTargetGroup, XRManagerSettingsEditor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, XRManagerSettingsEditor>();
 
         private bool m_HasCompletedRequest = false;
+        private bool m_HasKNownLocalLoaders = false;
         private bool m_HasProviders = false;
         private bool m_HasInstalledProviders = false;
 
@@ -57,9 +59,12 @@ namespace UnityEditor.XR.Management
         {
             internal PackageManager.PackageInfo uninstalledPackageInfo;
             internal bool isInstalled;
+            internal bool isLocalOnly;
         }
+
         private Dictionary<string, XRPackageInformation> m_XRPackages = new Dictionary<string, XRPackageInformation>();
-        private PackageManager.Requests.SearchRequest m_PackageListRequest = null;
+        private PackageManager.Requests.SearchRequest m_PackageRepositoryListRequest = null;
+        private PackageManager.Requests.ListRequest m_LocalPackageListRequest = null;
         private PackageManager.Requests.AddRequest m_InstallingPackage = null;
         private string m_InstallingPackageName = "";
 
@@ -111,7 +116,8 @@ namespace UnityEditor.XR.Management
         {
             m_HasCompletedRequest = false;
             m_XRPackages.Clear();
-            m_PackageListRequest = Client.SearchAll();
+            m_PackageRepositoryListRequest = Client.SearchAll();
+            m_LocalPackageListRequest = Client.List();
 
             EditorApplication.update += UpdatePackageManagerQuery;
         }
@@ -166,10 +172,10 @@ namespace UnityEditor.XR.Management
             Repaint();
             EditorApplication.update -= UpdatePackageManagerQuery;
 
-            if (m_PackageListRequest == null)
+            if (m_PackageRepositoryListRequest == null)
                 return;
 
-            if (!m_PackageListRequest.IsCompleted)
+            if (!m_PackageRepositoryListRequest.IsCompleted || !m_LocalPackageListRequest.IsCompleted)
             {
                 EditorApplication.update += UpdatePackageManagerQuery;
                 return;
@@ -178,47 +184,62 @@ namespace UnityEditor.XR.Management
             m_HasCompletedRequest = true;
             m_HasInstalledProviders = false;
 
-            if (m_PackageListRequest.Status != StatusCode.Success)
+            if (m_PackageRepositoryListRequest.Status != StatusCode.Success)
             {
                 m_HasProviders = false;
-                m_PackageListRequest = null;
+                m_PackageRepositoryListRequest = null;
                 return;
             }
 
-            foreach (var pinfo in m_PackageListRequest.Result)
+            foreach (var pinfo in m_LocalPackageListRequest.Result)
             {
-                var xrp = from keyword in pinfo.keywords 
-                    where String.Compare("xreditorsubsystem", keyword, true) == 0 
+                var xrp = from keyword in pinfo.keywords
+                    where String.Compare("xreditorsubsystem", keyword, true) == 0
                     select keyword;
 
                 if (xrp.Any())
                 {
-                    string tempPath = $"Packages/{pinfo.name}/package.json";
-                    try
-                    {
-                        XRPackageInformation xrpinfo = new XRPackageInformation();
-                        xrpinfo.uninstalledPackageInfo = pinfo;
-                        xrpinfo.isInstalled = false;
-
-                        var packagePath = Path.GetFullPath(tempPath);
-
-                        if (File.Exists(packagePath))
-                        {
-                            xrpinfo.isInstalled = true;
-                            m_HasInstalledProviders = true;
-                        }
-
-                        m_XRPackages.Add(pinfo.name, xrpinfo);
-                    }
-                    catch (Exception)
-                    {
-                        // DO NOTHING...
-                    }
+                    XRPackageInformation xrpinfo = new XRPackageInformation();
+                    xrpinfo.uninstalledPackageInfo = pinfo;
+                    xrpinfo.isInstalled = true;
+                    xrpinfo.isLocalOnly = true;
+                    m_HasInstalledProviders = true;
+                    m_XRPackages.Add(pinfo.name, xrpinfo);
                 }
             }
 
+            foreach (var pinfo in m_PackageRepositoryListRequest.Result)
+            {
+                if (m_XRPackages.ContainsKey(pinfo.name))
+                {
+                    XRPackageInformation xrpinfo;
+                    if (m_XRPackages.TryGetValue(pinfo.name, out xrpinfo))
+                    {
+                        xrpinfo.isLocalOnly = false;
+                        m_XRPackages[pinfo.name] = xrpinfo;
+                    }
+                    continue;
+                }
+
+                var xrp = from keyword in pinfo.keywords
+                    where String.Compare("xreditorsubsystem", keyword, true) == 0
+                    select keyword;
+
+                if (xrp.Any())
+                {
+                    XRPackageInformation xrpinfo = new XRPackageInformation();
+                    xrpinfo.uninstalledPackageInfo = pinfo;
+                    xrpinfo.isInstalled = false;
+                    m_XRPackages.Add(pinfo.name, xrpinfo);
+               }
+            }
+
+            List<XRLoaderInfo> onDiskLoaderInfos = new List<XRLoaderInfo>();
+            XRLoaderInfo.GetAllKnownLoaderInfos(onDiskLoaderInfos);
+            m_HasKNownLocalLoaders = onDiskLoaderInfos.Any();
+
             m_HasProviders = m_XRPackages.Any();
-            m_PackageListRequest = null;
+            m_PackageRepositoryListRequest = null;
         }
 
         void UpdatePackageInstallationQuery()
@@ -317,11 +338,16 @@ namespace UnityEditor.XR.Management
                         EditorGUI.BeginDisabledGroup(isInstalling);
                         foreach (var kv in m_XRPackages)
                         {
+                            var isLocalOnly = kv.Value.isLocalOnly;
                             var isInstalled = kv.Value.isInstalled;
                             var pinfo = kv.Value.uninstalledPackageInfo;
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.LabelField(pinfo.displayName, GetStyle("label"));
-                            if (isInstalling && String.Compare(m_InstallingPackageName, pinfo.name) == 0)
+                            if (isLocalOnly)
+                            {
+                                EditorGUILayout.LabelField(Content.s_LocalPackage, GUILayout.Width(100));
+                            }
+                            else if (isInstalling && String.Compare(m_InstallingPackageName, pinfo.name) == 0)
                             {
                                 EditorGUILayout.LabelField(Content.s_InstallingPackage, GUILayout.Width(100));
                             }
@@ -360,18 +386,21 @@ namespace UnityEditor.XR.Management
             if (!m_HasCompletedRequest)
                 return;
 
-            if (!m_XRPackages.Any())
+            if (!m_HasKNownLocalLoaders)
             {
-                EditorGUILayout.HelpBox(Content.k_ProvidersUnavailable, MessageType.Error);
-                return;
+                if (!m_XRPackages.Any())
+                {
+                    EditorGUILayout.HelpBox(Content.k_ProvidersUnavailable, MessageType.Error);
+                    return;
+                }
+
+                if (!m_HasInstalledProviders)
+                {
+                    EditorGUILayout.HelpBox(Content.k_NeedToInstallAProvider, MessageType.Warning);
+                    return;
+                }
             }
 
-            if (!m_HasInstalledProviders)
-            {
-                EditorGUILayout.HelpBox(Content.k_NeedToInstallAProvider, MessageType.Warning);
-                return;
-            }
-            
             BuildTargetGroup buildTargetGroup = EditorGUILayout.BeginBuildTargetSelectionGrouping();
             bool buildTargetChanged = m_LastBuildTargetGroup != buildTargetGroup;
             if (buildTargetChanged)

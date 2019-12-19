@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [3.0.6-preview.2] - 2019-12-20
+* Fix package checking system to also look at installed packages and not just remotely registered packages. This allows us to see packages the user has locally installed on disk that may not be registered in the package registry.
+* Add check to make sure we pick up any class in the project that derives from XRLoader and not just those in packages. This allows a developer to create a loader in their assets folder and use that regardless of installed packages.
+
+
+## [3.0.6-preview.1] - 2019-12-12
+* Documentation copy review and edit.
+* Fix FB 1206103: Serialized loader list is not saved correctly when a new loader asset is created as part of the add operation.
+
 ## [3.0.5] - 2019-12-06
 * Fix package validation errors.
 * Release for verification.

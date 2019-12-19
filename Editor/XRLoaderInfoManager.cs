@@ -205,6 +205,8 @@ namespace UnityEditor.XR.Management
                     index++;
                 }
             }
+
+            SerializedObjectData.ApplyModifiedProperties();
         }
 
         #region IXRLoaderOrderManager
