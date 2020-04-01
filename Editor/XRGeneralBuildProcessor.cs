@@ -1,14 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Xml;
-using System.Xml.Linq;
 
-using UnityEditor;
 using UnityEditor.Android;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -163,13 +159,8 @@ namespace UnityEditor.XR.Management
                                 string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget,
                                     preInitInfo.buildTargetGroup);
                                 preInitInfo = null;
- #if UNITY_2019_3_OR_NEWER
                                 UnityEditor.XR.BootOptions.SetXRSDKPreInitLibrary(file.path,
                                     preInitLibraryName);
- #else
-                                UnityEditor.Experimental.XR.BootOptions.SetXRSDKPreInitLibrary(file.path,
-                                    preInitLibraryName);
- #endif
                             }
                         }
                         catch (Exception e)
@@ -199,11 +190,7 @@ namespace UnityEditor.XR.Management
                     string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget,
                         preInitInfo.buildTargetGroup);
                     preInitInfo = null;
- #if UNITY_2019_3_OR_NEWER
                     UnityEditor.XR.BootOptions.SetXRSDKPreInitLibrary(fullPath, preInitLibraryName);
- #else
-                    UnityEditor.Experimental.XR.BootOptions.SetXRSDKPreInitLibrary(fullPath, preInitLibraryName);
- #endif
                 }
             }
             catch (Exception e)

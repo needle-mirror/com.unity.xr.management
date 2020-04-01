@@ -110,12 +110,72 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 
 If you need more extensive support and/or complete control, you can make a copy of the `SampleBuildProcessor` in the `Samples/Editor` folder and work from there.
 
+## Package metadata
+
+Your plug-in must provide metadata information for it to be usable by the **XR Plug-in Management** system. Your plug-in must implement the following interfaces:
+
+* IXRPackage
+* IXRPackageMetadata
+* IXRLoaderMetadata
+
+The system will use .Net reflection to find all types implementing the **IXRPackage** interface. It will then attempt to instantiate each one and populate the metadata store with the information provided by each instance.
+
+## Example: Simple, minimal package information setup:
+
+```
+    class MyPackage : IXRPackage
+    {
+        private class MyLoaderMetadata : IXRLoaderMetadata
+        {
+            public string loaderName { get; set; }
+            public string loaderType { get; set; }
+            public List<BuildTargetGroup> supportedBuildTargets { get; set; }
+        }
+
+        private class MyPackageMetadata : IXRPackageMetadata
+        {
+            public string packageName { get; set; }
+            public string packageId { get; set; }
+            public string settingsType { get; set; }
+            public List<IXRLoaderMetadata> loaderMetadata { get; set; } 
+        }
+        
+        private static IXRPackageMetadata s_Metadata = new MyPackageMetadata(){
+                packageName = "My XR Plug-in",
+                packageId = "my.xr.package",
+                settingsType = "My.Package.MyPackageSettings",
+                loaderMetadata = new List<IXRLoaderMetadata>() {
+                new MyLoaderMetadata() {
+                        loaderName = "My Loader",
+                        loaderType = "My.Package.MyLoader",
+                        supportedBuildTargets = new List<BuildTargetGroup>() {
+                            BuildTargetGroup.Standalone,
+                            BuildTargetGroup.Android,
+                            BuildTargetGroup.iOS
+                        }
+                    },
+                }
+            };
+
+        public IXRPackageMetadata metadata => s_Metadata;
+
+        public bool PopulateNewSettingsInstance(ScriptableObject obj)
+        {
+            MyPackageSettings packageSettings = obj as MyPackageSettings;
+            if (packageSettings != null)
+            {
+                // Do something here if you need to...
+            }
+            return false;
+
+        }
+    }    
+```
+
 ## Package initialization
 
-Because ScriptableObject instances must support Loaders and settings, you must create these instances at some point. The quickest way to do this is to create them when you install the XR Plugin Management package. Otherwise, both **XRManagerSettings** and **Unified Settings** support creating them on-demand.
+Implementing the Package Metadata allows the **XR Plug-in Management** system to auto create and initialize your loaders and settings instances. The system will pass any new instances of your settings to the `PopulateNewSettingsInstance` function to allow your plug-in to do post creation initialization of the new instance data if needed.
 
-If you derive a class from `XRPackageInitializationBase` and fill out the interface properties and methods, the system uses these to create default instances of your Loader and settings during installation, and places these instances in their respective default locations (`Assets/XR/Loaders` for Loaders, `Assets/XR/Settings` for settings). You can relocate these anywhere within your Project, as long as Unity can locate at least one instance of each type for each package.
+## Installing the XR Plug-in Management package
 
-## Installing the XR Plugin Management package
-
-Most XR SDK Provider packages typically include XR Plugin Management, so you shouldn't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
+Most XR SDK Provider packages typically include XR Plug-in Management, so you shouldn't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).

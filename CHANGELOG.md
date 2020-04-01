@@ -4,7 +4,67 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.4] - 2020-04-02
+* Add documentation related to re-ordering loaders.
 
+## [3.2.3] - 2020-03-27
+* Pick up updated Legacy Input Handlers.
+
+## [3.2.2] - 2020-03-26
+* Re-enable Mac automation testing
+* Add force removal of legacy LIH package to deal with package management resolution issue.
+  
+## [3.2.1] - 2020-03-23
+* CI issues causing an update to LIH, which mean we need to spin an update for that as well.
+
+## [3.2.0] - 2020-03-13
+* Release of new management workflow.
+  
+## [3.2.0-preview.9] - 2020-03-11
+* Disable legacy vr if we install XR Management. This doesn't lock the UI out but it at least keeps it from being activated at the same time as XR.
+* Stop nagging users to uninstall if not a plugin is unassigned. Instead just add text to the above the fold copy to point out users need to use Pack Man UI instead.
+
+
+## [3.2.0-preview.8] - 2020-03-09
+* Cleanup of the uninstaller code. Will eventually do the same thing for the package metadata code as well.
+
+## [3.2.0-preview.7] - 2020-03-06
+* Add utility for requesting uninstall of the currently installed built in VR pacakges.
+* Add callbacks to XRLoaderHelper to allow clients to handle assignment/unassigment of their loader to a build target in the Editor.
+
+## [3.2.0-preview.6] - 2020-03-04
+* Make documentation link color differentiate between Personal and Professional editor themes.
+* More UI tweaks
+  
+## [3.2.0-preview.5] - 2020-03-01
+* Fix state management for queue processing.
+* Add ability for users to remove plug-ins that are no longer actively referenced.
+* Add documentation link to management pane in Player Settings.
+
+## [3.2.0-preview.4] - 2020-02-26
+* Further Documentation review changes.
+* Fix bug allowing user to enable/disable loaders at play time.
+* Fix bug with compilation errors causing proggress bar to hang around.
+
+## [3.2.0-preview.3] - 2020-02-25
+* Modify metadata store to hold packages and not just metadatas. This allows us to call the settings instance initializer function even after initialization.
+* Fixed some minor known package naming issues.
+  
+## [3.2.0-preview.2] - 2020-02-24
+* Add in Mock HMD pacakge to known packages.
+* Fix up some asynchronous issues with checking for installable packages.
+* Change UI a little to try to differentiate installable from installed packages.
+* Correct documentation after review.
+* Modify sorted list to make MOck HMD last item always.
+* Modify assignment to make sure that the order of the items is always the same order as in the UI.
+
+## [3.2.0-preview.1] - 2020-02-20
+* Entire re-write of the UI and backing data store to provide a better user experience more inline with the previous Built In XR Settings UI.
+* Removed the Legacy Input Helpers sub pane and replaced with a more integrated set of menu uptions in the Assets menu (provided by the Legacy Input Helpers package).
+  
+## [3.1.0] - 2020-02-07
+* Preparation for verification release.
+  
 ## [3.1.0-preview.2] - 2019-12-17
 * Fix FB 1206103: Serialized loader list is not saved correctly when a new loader asset is created as part of the add operation.
 * Fix package checking system to also look at installed packages and not just remotely registered packages. This allows us to see packages the user has locally installed on disk that may not be registered in the package registry.
@@ -36,7 +96,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * New attribute was incorrectly placed into Runtime instead of Editor. Moved to Editor where it belongs.
 
 ## [3.0.5-preview.1] - 2019-11-13
-* UI rework to provide for simpler installation and management of XR Plugin Providers.
+* UI rework to provide for simpler installation and management of XR Plug-in Providers.
 * Reworked the underlying data handling and maintenance to be more streamlines and less coupled.
 
 ## [3.0.4] - 2019-11-04
@@ -93,83 +153,83 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Update package to support 2019.3+ only.
 * Rev version to almost 3. This is to make space for 2019.2 preview versions and in acknowledgement of the breaking changes that will happen soon.
 
-## [2.0.0-preview.24] - 2019-6-14
+## [2.0.0-preview.24] - 2019-06-14
 * Tie version to 2019.2 exclusively for preview.
 * Strip document revision history.
 * Remove third party notice as unneeded.
 
-## [2.0.0-preview.23] - 2019-6-10
+## [2.0.0-preview.23] - 2019-06-10
 * Add promotion pipeline yaml file to get promotion to production working again.
 
-## [2.0.0-preview.22] - 2019-6-11
+## [2.0.0-preview.22] - 2019-06-11
 * Revert Legacy Input Helpers dependency to newly pushed 1.3.2 production version.
 
-## [2.0.0-preview.21] - 2019-6-10
+## [2.0.0-preview.21] - 2019-06-10
 * Downgrade Legacy Input Helpers dependency to correct production version.
 
-## [2.0.0-preview.20] - 2019-6-10
+## [2.0.0-preview.20] - 2019-06-10
 * Downgrade Legacy Input Helpers dependency to help get package to production.
 
-## [2.0.0-preview.19] - 2019-6-4
+## [2.0.0-preview.19] - 2019-06-04
 * Fix package name and description.
 
-## [2.0.0-preview.18] - 2019-6-3
+## [2.0.0-preview.18] - 2019-06-03
 * Minor corrections in samples header file.
 * Remove Windows from log message.
 * Remove tutorial UI and unsupported data.
 
-## [2.0.0-preview.17] - 2019-5-28
+## [2.0.0-preview.17] - 2019-05-28
 * Fix issue where no settings object would cause an error to be logged at build time incorrectly.
 * Add helper method to get XRGeneralSettings instance for a specific build target.
 
-## [2.0.0-preview.16] - 2019-5-28
+## [2.0.0-preview.16] - 2019-05-28
 * Move PR template to correct location.
 
-## [2.0.0-preview.15] - 2019-5-23
+## [2.0.0-preview.15] - 2019-05-23
 * Fix the readme help page to only appear once on initial add of package.
 * Fix up test namespaces to use correct namespace naming
 
-## [2.0.0-preview.14] - 2019-5-23
+## [2.0.0-preview.14] - 2019-05-23
 * updating number for yamato, adds depednency to com.unity.xr.legacyinputhelpers
 
-## [2.0.0-preview.13] - 2019-5-09
+## [2.0.0-preview.13] - 2019-05-09
 * Fix more output logging for Yamato.
 
-## [2.0.0-preview.12] - 2019-5-09
+## [2.0.0-preview.12] - 2019-05-09
 * Add support for Yamato
 * Fix unit tests broken with streamlined workflow changes.
 
-## [2.0.0-preview.10] - 2019-4-19
+## [2.0.0-preview.10] - 2019-04-19
 * Add ability for users to disable auto initialize at start. This should allow for hybrid applications that want to start in non-XR mode and manually switch.
 * Fix play mode initialization so that we can guarantee that XR has been initialized (or at least attempted initialization) by the time the Start method is called on MonoBehaviours.
 * Documentation updated to cover the above.
 * Fixed a bug in the new Readme script code that caused a crash in headless mode. Seems the code was launching an Editor window and causing UIElements to crash on an attempt to repaint. We have a workaround to make sure we don't load the window if in headless mode and a bug is filed with the responsible team to correct the crash.
 
-## [2.0.0-preview.9] - 2019-4-10
+## [2.0.0-preview.9] - 2019-04-10
 * Fix package validation console errors.
 
-## [2.0.0-preview.8] - 2019-4-10
+## [2.0.0-preview.8] - 2019-04-10
 * Fix package validation compilation errors.
 * Remove .github folder from npm packaging.
 
-## [2.0.0-preview.7] - 2019-4-10
+## [2.0.0-preview.7] - 2019-04-10
 * Streamlining of the management system. Move XR Manager to a singleton instance on XRGeneralSettings that is populated by an XRManagerSettings instance that the user can switch in and out. __NOTE: This removes the ability to use XRManagement for per scene situations. For hybrid or manual scenes the user will be responsible for instantiating/loading the XRManagerSettings instance they want and dealing with lifecycle themselves.__
 
-## [2.0.0-preview.6] - 2019-3-29
+## [2.0.0-preview.6] - 2019-03-29
 * Fix up package repo information for rel mgmt.
 
-## [2.0.0-preview.5] - 2019-2-5
+## [2.0.0-preview.5] - 2019-02-05
 * Split documentation into separate audience files for End Users and Providers.
 * Update package target Unity version to Unity 2019.1.
 
-## [2.0.0-preview.4] - 2019-2-5
+## [2.0.0-preview.4] - 2019-02-05
 * Fix an issue with with an NRE in the build processor.
 
-## [2.0.0-preview.3] - 2019-1-22
+## [2.0.0-preview.3] - 2019-01-22
 * Add missing repo url to package json file
 * Fix NRE issue in build processor
 
-## [2.0.0-preview.3] - 2019-1-22
+## [2.0.0-preview.3] - 2019-01-22
 * Fix error in general build processor due to a potential null deref.
 * Fix missing check for unity version when referencing UIElements.
 
@@ -183,20 +243,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Add ability for general settings to be set per platform and not just globally.
 * Tagged with release preview build. This should be the base on which we move to release for 2019.1
 
-## [0.2.0-preview.9] 2018-11-27
+## [0.2.0-preview.9] - 2018-11-27
 * Fixed some issues with boot time and general setting.
 
-## [0.2.0-preview.8] 2018-10-29
+## [0.2.0-preview.8] - 2018-10-29
 * Fix an API breaking change to UnifiedSettings api
 * Fix a NRE in XRGeneralSettings if the user has set an XRManager Component on a scene game object and didn't setup general settings.
 
-## [0.2.0-preview.7] 2018-10-29
+## [0.2.0-preview.7] - 2018-10-29
 * Hopefully all CI issues are resolved now.
   
-## [0.2.0-preview.4] 2018-10-24
+## [0.2.0-preview.4] - 2018-10-24
 * Merged in gneral settings support. Initial implentation allows for ability to assign an XR Manager instance for loading XR SDK at boot launch time.
 
-## [0.2.0-preview.3] 2018-10-24
+## [0.2.0-preview.3] - 2018-10-24
 * Merged in Unified Settings dependent changes.
 
 ## [0.1.0-preview.9] - 2018-07-30

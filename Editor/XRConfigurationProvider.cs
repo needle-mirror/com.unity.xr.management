@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-using UnityEditor;
+using UnityEditor.XR.Management.Metadata;
 
 namespace UnityEditor.XR.Management
 {
@@ -89,6 +89,9 @@ namespace UnityEditor.XR.Management
             ScriptableObject settings = ScriptableObject.CreateInstance(m_BuildDataType) as ScriptableObject;
             if (settings != null)
             {
+                var package = XRPackageMetadataStore.GetPackageForSettingsTypeNamed(m_BuildDataType.FullName);
+                package?.PopulateNewSettingsInstance(settings);
+
                 string newAssetName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(m_BuildDataType));
                 string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath);
                 if (!string.IsNullOrEmpty(assetPath))

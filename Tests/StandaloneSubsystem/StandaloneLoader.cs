@@ -1,14 +1,4 @@
-using System;
 using System.Collections.Generic;
-
-using UnityEngine;
-using UnityEngine.XR;
-using UnityEngine.XR.Management;
-
-#if !UNITY_2019_3_OR_NEWER
-using UnityEngine.Experimental;
-using UnityEngine.Experimental.XR;
-#endif
 
 namespace UnityEngine.XR.Management.Tests.Standalone
 {

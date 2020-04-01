@@ -1,5 +1,3 @@
-using UnityEngine;
-using UnityEngine.XR.Management;
 using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

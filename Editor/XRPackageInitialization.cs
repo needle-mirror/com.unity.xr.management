@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime;
 
 using UnityEngine;
-using UnityEditor;
+
+using UnityEditor.XR.Management.Metadata;
 
 namespace UnityEditor.XR.Management
 {
@@ -38,76 +35,11 @@ namespace UnityEditor.XR.Management
         bool PopulateSettingsOnInitialization(ScriptableObject obj);
     }
 
-    class PackageInitializationSettings : ScriptableObject
-    {
-        private static PackageInitializationSettings s_PackageSettings = null;
-        private static object s_Lock = new object();
-
-        [SerializeField]
-        private List<string> m_Settings = new List<string>();
-
-        private PackageInitializationSettings(){ }
-
-        internal static PackageInitializationSettings Instance
-        {
-            get
-            {
-                if (s_PackageSettings == null)
-                {
-                    lock(s_Lock)
-                    {
-                        if (s_PackageSettings == null)
-                        {
-                            s_PackageSettings = ScriptableObject.CreateInstance<PackageInitializationSettings>();
-                        }
-                    }
-                }
-                return s_PackageSettings;
-            }
-        }
-
-        internal void LoadSettings()
-        {
-            string packageInitPath = Path.Combine("ProjectSettings", "XRPackageSettings.asset");
-
-            if (File.Exists(packageInitPath))
-            {
-                using (StreamReader sr = new StreamReader(packageInitPath))
-                {
-                    string settings = sr.ReadToEnd();
-                    JsonUtility.FromJsonOverwrite(settings, this);
-                }
-            }
-        }
-
-
-        internal void SaveSettings()
-        {
-            string packageInitPath = Path.Combine("ProjectSettings", "XRPackageSettings.asset");
-            using (StreamWriter sw = new StreamWriter(packageInitPath))
-            {
-                string settings = JsonUtility.ToJson(this, true);
-                sw.Write(settings);
-            }
-        }
-
-        internal bool HasSettings(string key)
-        {
-            return m_Settings.Contains(key);
-        }
-
-        internal void AddSettings(string key)
-        {
-            if (!HasSettings(key))
-                m_Settings.Add(key);
-        }
-    }
-
 
     [InitializeOnLoad]
-    class PackageInitializationBootstrap
+    class XRPackageInitializationBootstrap
     {
-        static PackageInitializationBootstrap()
+        static XRPackageInitializationBootstrap()
         {
             if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
@@ -115,54 +47,139 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        static void BeginPackageInitialization()
+        internal static void BeginPackageInitialization()
         {
             EditorApplication.update -= BeginPackageInitialization;
 
+            foreach (var t in TypeLoaderExtensions.GetAllTypesWithInterface<IXRPackage>())
+            {
+                if (t.IsInterface || t.FullName.Contains("Unity.XR.Management.TestPackage") || t.FullName.Contains("UnityEditor.XR.Management.Metadata.KnownPackages"))
+                    continue;
+
+                IXRPackage package = Activator.CreateInstance(t) as IXRPackage;
+                if (package == null)
+                {
+                    Debug.LogError($"Unable to find an implementation for expected package type {t.FullName}.");
+                    continue;
+                }
+                InitPackage(package);
+            }
+
             foreach (var t in TypeLoaderExtensions.GetAllTypesWithInterface<XRPackageInitializationBase>())
             {
+                if (t.IsInterface)
+                    continue;
+
                 XRPackageInitializationBase packageInit = Activator.CreateInstance(t) as XRPackageInitializationBase;
+                if (packageInit == null)
+                {
+                    Debug.LogError($"Unable to find an implementation for expected package type {t.FullName}.");
+                    continue;
+                }
                 InitPackage(packageInit);
             }
+
+            XRPackageMetadataStore.RebuildInstalledCache();
+            XRPackageMetadataStore.AssignAnyRequestedLoaders();
+        }
+
+        internal static void InitPackage(IXRPackage package)
+        {
+            var packageMetadata = package.metadata;
+            if (packageMetadata == null)
+            {
+                Debug.LogError($"Package {package.GetType().Name} has a package definition but has no metadata. Skipping initialization.");
+                return;
+            }
+
+            XRPackageMetadataStore.AddPackage(package);
+
+            if (!InitializePackageFromMetadata(package, packageMetadata))
+            {
+                Debug.LogWarning(
+                    String.Format("{0} package Initialization not completed. You will need to create any instances of the loaders and settings manually before you can use the intended XR Plug-in Package.", packageMetadata.packageName));
+            }
+
+        }
+
+        static bool InitializePackageFromMetadata(IXRPackage package, IXRPackageMetadata packageMetadata)
+        {
+            bool ret = true;
+            ret |= InitializeLoaderFromMetadata(packageMetadata.packageName, packageMetadata.loaderMetadata);
+            ret |= InitializeSettingsFromMetadata(package, packageMetadata.packageName, packageMetadata.settingsType);
+            return ret;
+        }
+        
+        static bool InitializeLoaderFromMetadata(string packageName, List<IXRLoaderMetadata> loaderMetadatas)
+        {
+            if (String.IsNullOrEmpty(packageName))
+                return false;
+
+            if (loaderMetadatas == null || loaderMetadatas.Count == 0)
+            {
+                Debug.LogWarning($"Package {packageName} has no loader metadata. Skipping loader initialization.");
+                return true;
+            }
+
+            bool ret = true;
+            foreach (var loader in loaderMetadatas)
+            {
+                bool hasInstance = EditorUtilities.AssetDatabaseHasInstanceOfType(loader.loaderType);
+
+                if (!hasInstance)
+                {
+                    var obj = EditorUtilities.CreateScriptableObjectInstance(loader.loaderType,
+                        EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultLoaderPath));
+                    hasInstance = (obj != null);
+                    if (!hasInstance)
+                    {
+                        Debug.LogError($"Error creating instance of loader {loader.loaderName} for package {packageName}");
+                    }
+                }
+
+                ret |= hasInstance;
+            }
+
+            return ret;
+
+        }
+
+        static bool InitializeSettingsFromMetadata(IXRPackage package, string packageName, string settingsType)
+        {
+            if (String.IsNullOrEmpty(packageName))
+                return false;
+
+            if (settingsType == null)
+            {
+                Debug.LogWarning($"Package {packageName} has no settings metadata. Skipping settings initialization.");
+                return true;
+            }
+
+            bool ret = EditorUtilities.AssetDatabaseHasInstanceOfType(settingsType);
+
+            if (!ret)
+            {
+                var obj = EditorUtilities.CreateScriptableObjectInstance( settingsType,
+                    EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath));
+                ret = package.PopulateNewSettingsInstance(obj);
+            }
+
+            return ret;
         }
 
         static void InitPackage(XRPackageInitializationBase packageInit)
         {
-            PackageInitializationSettings.Instance.LoadSettings();
-
-            if (PackageInitializationSettings.Instance.HasSettings(packageInit.PackageInitKey))
-                return;
-
             if (!InitializeLoaderInstance(packageInit))
             {
                 Debug.LogWarning(
-                    String.Format("{0} Loader Initialization not completed. You will need to create an instance of the loader using an instance of XRManager before you can use the intended XR Package.", packageInit.PackageName));
+                    String.Format("{0} Loader Initialization not completed. You will need to create an instance of the loader manually before you can use the intended XR Plug-in Package.", packageInit.PackageName));
             }
 
             if (!InitializeSettingsInstance(packageInit))
             {
                 Debug.LogWarning(
-                    String.Format("{0} Settings Initialization not completed. You will need to create an instance of settings to customize options specific to this pacakge.", packageInit.PackageName));
+                    String.Format("{0} Settings Initialization not completed. You will need to create an instance of settings to customize options specific to this package.", packageInit.PackageName));
             }
-
-            PackageInitializationSettings.Instance.AddSettings(packageInit.PackageInitKey);
-            PackageInitializationSettings.Instance.SaveSettings();
-        }
-
-        static ScriptableObject CreateScriptableObjectInstance(string packageName, string typeName, string instanceType, string path)
-        {
-            ScriptableObject obj = ScriptableObject.CreateInstance(typeName) as ScriptableObject;
-            if (obj != null)
-            {
-                if (!string.IsNullOrEmpty(path))
-                {
-                    string fileName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(typeName));
-                    string targetPath = Path.Combine(path, fileName);
-                    AssetDatabase.CreateAsset(obj, targetPath);
-                    return obj;
-                }
-            }
-            return null;
         }
 
         static bool InitializeLoaderInstance(XRPackageInitializationBase packageInit)
@@ -171,9 +188,7 @@ namespace UnityEditor.XR.Management
 
             if (!ret)
             {
-                var obj = CreateScriptableObjectInstance(packageInit.PackageName,
-                    packageInit.LoaderFullTypeName,
-                    "Loader",
+                var obj = EditorUtilities.CreateScriptableObjectInstance(packageInit.LoaderFullTypeName,
                     EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultLoaderPath));
                 ret = (obj != null);
             }
@@ -187,9 +202,7 @@ namespace UnityEditor.XR.Management
 
             if (!ret)
             {
-                var obj = CreateScriptableObjectInstance(packageInit.PackageName,
-                    packageInit.SettingsFullTypeName,
-                    "Settings",
+                var obj = EditorUtilities.CreateScriptableObjectInstance(packageInit.SettingsFullTypeName,
                     EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath));
                 ret = packageInit.PopulateSettingsOnInitialization(obj);
             }

@@ -22,6 +22,7 @@ namespace UnityEngine.XR.Management
         internal XRManagerSettings m_LoaderManagerInstance = null;
 
         [SerializeField]
+        [Tooltip("Toggling this on/off will enable/disable the automatic startup of XR at run time.")]
         internal bool m_InitManagerOnStart = true;
 
         /// <summary>The current active manager used to manage XR lifetime.</summary>

@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
-
-using UnityEditor;
+using System.Linq;
 
 using UnityEngine;
 using UnityEngine.XR.Management;
 
+using UnityEditor.XR.Management.Metadata;
 
 namespace UnityEditor.XR.Management
 {
- #if UNITY_EDITOR
+#if UNITY_EDITOR
     [InitializeOnLoad]
 #endif
    /// <summary>Container class that holds general settings for each build target group installed in Unity.</summary>
@@ -58,6 +58,15 @@ namespace UnityEditor.XR.Management
 
         void OnEnable()
         {
+            foreach (var setting in Settings.Values)
+            {
+                var assignedSettings = setting.AssignedSettings;
+                if (assignedSettings == null)
+                    continue;
+
+                var filteredLoaders = from ldr in assignedSettings.loaders where ldr != null select ldr;
+                assignedSettings.loaders = filteredLoaders.ToList<XRLoader>();
+            }
             XRGeneralSettings.Instance = XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
         }
 
@@ -89,6 +98,22 @@ namespace UnityEditor.XR.Management
             instance.InternalPauseStateChanged(state);
         }
 
+        internal static bool ContainsLoaderForAnyBuildTarget(string loaderTypeName)
+        {
+
+            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            if (buildTargetSettings == null)
+                return false;
+
+            foreach (var settings in buildTargetSettings.Settings.Values)
+            {
+                if (XRPackageMetadataStore.IsLoaderAssigned(settings.Manager, loaderTypeName))
+                    return true;
+            }
+
+            return false;
+        }
 #endif
 
         /// <summary>Set specific settings for a given build target.</summary>

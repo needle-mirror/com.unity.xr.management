@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+
 using UnityEditor;
 
 using UnityEngine;
@@ -98,6 +100,9 @@ namespace UnityEngine.XR.Management
         public List<XRLoader> loaders
         {
             get { return m_Loaders; }
+#if UNITY_EDITOR
+            set { m_Loaders = value; }
+#endif
         }
 
 

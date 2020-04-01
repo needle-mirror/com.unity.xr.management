@@ -1,9 +1,6 @@
-using System;
 using System.Collections;
 
 using NUnit.Framework;
-
-using UnityEditor;
 
 using UnityEngine;
 using UnityEngine.TestTools;

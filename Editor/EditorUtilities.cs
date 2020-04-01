@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 using UnityEngine;
 
@@ -20,6 +21,29 @@ namespace UnityEditor.XR.Management
             return assets.Any();
         }
 
+        internal static T GetInstanceOfTypeFromAssetDatabase<T>() where T : class
+        {
+            var assets = AssetDatabase.FindAssets(String.Format("t:{0}", typeof(T).Name));
+            if (assets.Any())
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
+                var asset = AssetDatabase.LoadAssetAtPath(assetPath, typeof(T));
+                return asset as T;
+            }
+            return null;
+        }
+
+        internal static ScriptableObject GetInstanceOfTypeWithNameFromAssetDatabase(string typeName)
+        {
+            var assets = AssetDatabase.FindAssets(String.Format("t:{0}", typeName));
+            if (assets.Any())
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
+                var asset = AssetDatabase.LoadAssetAtPath(assetPath, typeof(ScriptableObject));
+                return asset as ScriptableObject;
+            }
+            return null;
+        }
 
         internal static string GetAssetPathForComponents(string[] pathComponents, string root = "Assets")
         {
@@ -65,5 +89,22 @@ namespace UnityEditor.XR.Management
                 .ToArray();
             return string.Join(" ", words);
         }
+
+        internal static ScriptableObject CreateScriptableObjectInstance(string typeName, string path)
+        {
+            ScriptableObject obj = ScriptableObject.CreateInstance(typeName) as ScriptableObject;
+            if (obj != null)
+            {
+                if (!string.IsNullOrEmpty(path))
+                {
+                    string fileName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(typeName));
+                    string targetPath = Path.Combine(path, fileName);
+                    AssetDatabase.CreateAsset(obj, targetPath);
+                    return obj;
+                }
+            }
+            return null;
+        }
+
     }
 }

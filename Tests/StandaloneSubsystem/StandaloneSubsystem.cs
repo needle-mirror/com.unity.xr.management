@@ -1,13 +1,5 @@
 using System;
 
-using UnityEngine;
-using UnityEngine.XR;
-
-#if !UNITY_2019_3_OR_NEWER
-using UnityEngine.Experimental;
-using UnityEngine.Experimental.XR;
-#endif
-
 namespace UnityEngine.XR.Management.Tests.Standalone
 {
     public class StandaloneSubsystem : Subsystem
@@ -40,11 +32,7 @@ namespace UnityEngine.XR.Management.Tests.Standalone
                 stopCalled.Invoke();
         }
 
-#if UNITY_2019_3_OR_NEWER
         protected override void OnDestroy()
-#else
-        public override void Destroy()
-#endif
         {
             isRunning = false;
             if (destroyCalled != null)

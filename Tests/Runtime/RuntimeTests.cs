@@ -1,14 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.XR.Management;
 
 using UnityEditor;
-using UnityEditor.TestTools;
 using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 
 namespace UnityEngine.XR.Management.Tests
 {
@@ -113,11 +109,30 @@ namespace UnityEngine.XR.Management.Tests
         [SetUp]
         public void SetupPlayerSettings()
         {
+            GraphicsDeviceType[] deviceTypes = PlayerSettings.GetGraphicsAPIs(BuildTarget.StandaloneOSX);
+            var oldGfxType = m_PlayerSettingsDeviceType;
+
+            // If the type we want to check isn't the supported graphics type, then substitute it out
+            // so we can still pass the tests. Semantics are the same regardless of actual devices.
+            if (SystemInfo.graphicsDeviceType != m_PlayerSettingsDeviceType)
+            {
+                m_PlayerSettingsDeviceType = SystemInfo.graphicsDeviceType;
+
+                for (int i = 0; i < m_LoadersSupporteDeviceTypes.Length; i++)
+                {
+                    if (oldGfxType == m_LoadersSupporteDeviceTypes[i])
+                    {
+                        m_LoadersSupporteDeviceTypes[i] = m_PlayerSettingsDeviceType;
+                    }
+                }
+            }
+
 #if UNITY_EDITOR_WIN
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { m_PlayerSettingsDeviceType });
 #elif UNITY_EDITOR_OSX
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneOSX, new[] { m_PlayerSettingsDeviceType });
 #endif
+
             m_Manager = ScriptableObject.CreateInstance<XRManagerSettings>();
             m_Manager.automaticLoading = false;
 
@@ -128,6 +143,7 @@ namespace UnityEngine.XR.Management.Tests
                 DummyLoader dl = ScriptableObject.CreateInstance(typeof(DummyLoader)) as DummyLoader;
                 dl.id = i;
                 dl.supportedDeviceType = m_LoadersSupporteDeviceTypes[i];
+                dl.shouldFail = (i != m_LoaderIndexToWin);
                 m_Loaders.Add(dl);
                 m_Manager.loaders.Add(dl);
             }
