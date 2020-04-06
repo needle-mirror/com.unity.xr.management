@@ -40,7 +40,7 @@ namespace UnityEditor.XR.Management
             public static readonly GUIContent k_ExplanatoryText = new GUIContent("Selecting an XR plug-in provider below enables that provider for the corresponding build target. The appropriate plug-in package will be installed if it is not already present. Disabling plug-ins will not automatically uninstall already installed packages. To uninstall a provider plug-in use the Package Manager.");
             public static readonly GUIContent k_XRTrackingText = new GUIContent("To set up tracking in your XR project, please follow the steps outlined using the link below.");
             public static readonly GUIContent k_XRTrackingDocsText = new GUIContent("View XR Tracking Migration Guide");
-            public static readonly Uri k_XRTrackingDocsUri = new Uri("https://docs.unity3d.com/Packages/com.unity.xr.legacyinputhelpers@1.4/manual/index.html");
+            public static readonly Uri k_XRTrackingDocsUri = new Uri("https://docs.unity3d.com/Packages/com.unity.xr.legacyinputhelpers@latest");
 
         }
 

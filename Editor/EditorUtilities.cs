@@ -103,6 +103,8 @@ namespace UnityEditor.XR.Management
                     return obj;
                 }
             }
+
+            Debug.LogError($"We were unable to create an instance of the requested type {typeName}. Please make sure that all packages are updated to support this version of XR Plug-In Management. See the Unity documentation for XR Plug-In Management for information on resolving this issue.");
             return null;
         }
 
