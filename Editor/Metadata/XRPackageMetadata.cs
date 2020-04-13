@@ -487,7 +487,7 @@ namespace UnityEditor.XR.Management.Metadata
                         QueueLoaderRequest(request);
                     }
                 }
-                else if (request.timeOut < Time.time)
+                else if (request.timeOut < Time.realtimeSinceStartup)
                 {
                     request.errorText = $"Error installing package {request.packageId}. Package installation timed out. Check Package Manager UI to see if the package is installed and/or retry your operation.";
                     request.installationState = InstallationState.Error;
@@ -560,7 +560,7 @@ namespace UnityEditor.XR.Management.Metadata
                 case InstallationState.StartInstallation:
                     req.needsAddRequest = true;
                     req.packageAddRequest = null;
-                    req.timeOut = Time.time + k_TimeOutDelta;
+                    req.timeOut = Time.realtimeSinceStartup + k_TimeOutDelta;
                     AddRequestToQueue(req, k_InstallingPackage);
                     EditorApplication.update += MonitorPackageInstallation;
                     break;
