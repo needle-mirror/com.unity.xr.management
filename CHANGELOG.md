@@ -4,6 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.9] - 2020-04-18
+* Fix linux tests in CI.
+
+## [3.2.8] - 2020-04-17
+* Fix double click to untoggle Magic Leap bug.
+* Fix name of Magic Leap Zero Iteration entry for standalone.
+
 ## [3.2.7] - 2020-04-14
 * Fix issue where the wrong time value was being used to test for a timeout.
 

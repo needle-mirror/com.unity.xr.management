@@ -77,14 +77,15 @@ namespace UnityEngine.XR.Management.Tests
         }
     }
 
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
+
 #if UNITY_EDITOR_WIN
     [TestFixture(GraphicsDeviceType.Direct3D11, 0, new [] { GraphicsDeviceType.Direct3D11})]
     [TestFixture(GraphicsDeviceType.Direct3D11, 1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Direct3D11})]
     [TestFixture(GraphicsDeviceType.Direct3D11, -1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan})]
     [TestFixture(GraphicsDeviceType.Direct3D11, 0, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
     [TestFixture(GraphicsDeviceType.Direct3D11, 1, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
-#endif
-#if UNITY_EDITOR_OSX
+#elif UNITY_EDITOR_OSX
     [TestFixture(GraphicsDeviceType.Metal, 0, new [] { GraphicsDeviceType.Metal})]
     [TestFixture(GraphicsDeviceType.Metal, 1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal})]
     [TestFixture(GraphicsDeviceType.Metal, -1, new [] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan})]
@@ -194,4 +195,6 @@ namespace UnityEngine.XR.Management.Tests
             m_Manager.loaders.Clear();
         }
     }
+#endif // UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
+
 }

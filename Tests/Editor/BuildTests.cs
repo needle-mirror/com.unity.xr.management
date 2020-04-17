@@ -7,6 +7,8 @@ using UnityEngine.XR.Management;
 using UnityEngine.XR.Management.Tests;
 using Object = UnityEngine.Object;
 
+#if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
+
 namespace UnityEditor.XR.Management.Tests.BuildTests
 {
 #if UNITY_EDITOR_WIN
@@ -15,8 +17,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(GraphicsDeviceType.Direct3D11, true, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan})]
     [TestFixture(GraphicsDeviceType.Direct3D11, false, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
     [TestFixture(GraphicsDeviceType.Direct3D11, false, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
-#endif
-#if UNITY_EDITOR_OSX
+#elif UNITY_EDITOR_OSX
     [TestFixture(GraphicsDeviceType.Metal, false, new [] { GraphicsDeviceType.Metal})]
     [TestFixture(GraphicsDeviceType.Metal, false, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal})]
     [TestFixture(GraphicsDeviceType.Metal, true, new [] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan})]
@@ -87,3 +88,4 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         }
     }
 }
+#endif //UNITY_EDITOR_WIN || UNITY_EDITOR_OSX

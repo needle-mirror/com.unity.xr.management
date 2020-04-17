@@ -82,10 +82,16 @@ namespace UnityEditor.XR.Management.Metadata
                     settingsType = "UnityEngine.XR.MagicLeap.MagicLeapSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
-                            loaderName = "Magic Leap",
+                            loaderName = "Magic Leap Zero Iteration",
                             loaderType = "UnityEngine.XR.MagicLeap.MagicLeapLoader",
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Standalone,
+                            }
+                        },
+                    new KnownLoaderMetadata() {
+                            loaderName = "Magic Leap",
+                            loaderType = "UnityEngine.XR.MagicLeap.MagicLeapLoader",
+                            supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Lumin
                             }
                         },
@@ -140,7 +146,8 @@ namespace UnityEditor.XR.Management.Metadata
                             loaderName = "Unity Mock HMD",
                             loaderType = k_KnownPackageMockHMDLoader,
                             supportedBuildTargets = new List<BuildTargetGroup>() {
-                                BuildTargetGroup.Standalone
+                                BuildTargetGroup.Standalone,
+                                BuildTargetGroup.Android,
                             }
                         },
                     }
