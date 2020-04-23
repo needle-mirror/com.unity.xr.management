@@ -56,7 +56,7 @@ namespace UnityEditor.XR.Management.Legacy
             public ListRequest packageListRequest;
         }
 
-        private static readonly string k_PackageToRemoveQueue = "Remove Pacakge Queue";
+        private static readonly string k_PackageToRemoveQueue = "Remove Package Queue";
         private static EditorWorkQueue<PackageRemovalOperation> s_PackageRemovelQueue => EditorWorkQueue<PackageRemovalOperation>.Instance;
         private static bool hasPackageBeingRemoved => s_PackageRemovelQueue.HasWorkItems;
 

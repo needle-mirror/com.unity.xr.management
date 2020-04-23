@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.10] - 2020-04-24
+* Release 3.2.10
+
+## [3.2.10-preview.1] - 2020-04-20
+* Fix Unity Frame Debugger by not stopping loaders on Pause / Stop.
+* Don't stop loaders when XRGeneralSettings is disabled.
+* Fix UI issue where third party providers would sometimes disappear from the provider selection UI.
+ 
+
 ## [3.2.9] - 2020-04-18
 * Fix linux tests in CI.
 

@@ -147,7 +147,7 @@ namespace UnityEditor.XR.Management.Metadata
                             loaderType = k_KnownPackageMockHMDLoader,
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Standalone,
-                                BuildTargetGroup.Android,
+                                BuildTargetGroup.Android
                             }
                         },
                     }

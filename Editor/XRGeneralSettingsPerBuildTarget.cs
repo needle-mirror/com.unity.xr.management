@@ -53,7 +53,6 @@ namespace UnityEditor.XR.Management
         static XRGeneralSettingsPerBuildTarget()
         {
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
-            EditorApplication.pauseStateChanged += PauseStateChange;
         }
 
         void OnEnable()
@@ -82,20 +81,6 @@ namespace UnityEditor.XR.Management
                 return;
 
             instance.InternalPlayModeStateChanged(state);
-        }
-
-        static void PauseStateChange(PauseState state)
-        {
-            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
-            if (buildTargetSettings == null)
-                return;
-
-            XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
-            if (instance == null || !instance.InitManagerOnStart)
-                return;
-
-            instance.InternalPauseStateChanged(state);
         }
 
         internal static bool ContainsLoaderForAnyBuildTarget(string loaderTypeName)

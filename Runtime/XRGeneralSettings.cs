@@ -96,34 +96,11 @@ namespace UnityEngine.XR.Management
 #endif
 
 #if UNITY_EDITOR
-
-        void Pause()
-        {
-            if (m_ProviderIntialized && m_ProviderStarted)
-            {
-                StopXRSDK();
-            }
-        }
-
-        void Unpause()
-        {
-            if (m_ProviderIntialized && !m_ProviderStarted)
-            {
-                StartXRSDK();
-            }
-        }
-
+        /// <summary>For internal use only.</summary>
+        [System.Obsolete("Deprecating internal only API.")]
         public void InternalPauseStateChanged(PauseState state)
         {
-            switch (state)
-            {
-                case PauseState.Paused:
-                    Pause();
-                    break;
-                case PauseState.Unpaused:
-                    Unpause();
-                    break;
-            }
+            throw new NotImplementedException();
         }
 
         /// <summary>For internal use only.</summary>
@@ -141,24 +118,19 @@ namespace UnityEngine.XR.Management
             }
         }
 #endif
+
         static void Quit()
         {
             XRGeneralSettings instance = XRGeneralSettings.Instance;
             if (instance == null)
                 return;
 
-            instance.OnDisable();
-            instance.OnDestroy();
+            instance.DeInitXRSDK();
         }
 
         void Start()
         {
             StartXRSDK();
-        }
-
-        void OnDisable()
-        {
-            StopXRSDK();
         }
 
         void OnDestroy()

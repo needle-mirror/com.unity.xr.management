@@ -123,14 +123,7 @@ namespace UnityEditor.XR.Management
                         {
                             if (li.toggled)
                             {
-                                if (XRPackageMetadataStore.IsPackageInstalled(li.packageId))
-                                {
-                                    XRPackageMetadataStore.AssignLoader(settings.AssignedSettings, li.loaderType, buildTargetGroup);
-                                }
-                                else
-                                {
-                                    XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget(li.packageId, li.loaderType, buildTargetGroup);
-                                }
+                                XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget(li.packageId, li.loaderType, buildTargetGroup);
                             }
                             else
                             {

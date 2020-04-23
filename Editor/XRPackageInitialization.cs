@@ -45,7 +45,25 @@ namespace UnityEditor.XR.Management
             {
                 EditorApplication.update += BeginPackageInitialization;
             }
+
+            EditorApplication.playModeStateChanged += PlayModeStateChanged;
+
         }
+
+        private static void PlayModeStateChanged(PlayModeStateChange state)
+        {
+            switch (state)
+            {
+                case PlayModeStateChange.EnteredPlayMode:
+                    BeginPackageInitialization();
+                    break;
+
+                case PlayModeStateChange.EnteredEditMode:
+                    BeginPackageInitialization();
+                    break;
+            }
+        }
+
 
         internal static void BeginPackageInitialization()
         {
@@ -79,8 +97,7 @@ namespace UnityEditor.XR.Management
                 InitPackage(packageInit);
             }
 
-            XRPackageMetadataStore.RebuildInstalledCache();
-            XRPackageMetadataStore.AssignAnyRequestedLoaders();
+            if (XRSettingsManager.Instance != null) XRSettingsManager.Instance.ResetUi = true;
         }
 
         internal static void InitPackage(IXRPackage package)
