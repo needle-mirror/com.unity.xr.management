@@ -317,8 +317,6 @@ namespace UnityEditor.XR.Management
         /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
         public override void OnGUI(string searchContext)
         {
-            XRPackageMetadataStore.ReportProgressOnActiveWork();
-
             EditorGUILayout.Space();
 
             DisplayDocumentationLink();

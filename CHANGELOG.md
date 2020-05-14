@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.11-preview.1] - 2020-05-15
+* Fix FB 1242581 : Fix a number of issue around cache rebuilding and persistent UI display of cache rebuilding even though nothing was happening.
+* Fix FB 1245181 : Fix nullderef access of settings manager instance.
+
 ## [3.2.10] - 2020-04-24
 * Release 3.2.10
 
