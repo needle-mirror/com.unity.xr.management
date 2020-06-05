@@ -177,6 +177,7 @@ namespace UnityEditor.XR.Management.Legacy
                             packSettings.SaveSettings();
                         }
 
+#if !UNITY_2020_2_OR_NEWER
                         bool virtualRealityEnabled = false;
                         foreach (var buildTargetGroup in (BuildTargetGroup[])Enum.GetValues(typeof(BuildTargetGroup)))
                         {
@@ -201,7 +202,8 @@ namespace UnityEditor.XR.Management.Legacy
                                 }
                             }
                         }
-                    }
+#endif //!UNITY_2020_2_OR_NEWER
+}
                 }
             };
 

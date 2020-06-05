@@ -35,12 +35,9 @@ namespace UnityEditor.XR.Management
         struct Content
         {
             public static readonly GUIContent k_InitializeOnStart = new GUIContent("Initialize XR on Startup");
-            public static readonly GUIContent k_DocText = new GUIContent("View documentation");
-            public static readonly Uri k_DocUri = new Uri("https://docs.unity3d.com/Manual/XRPluginArchitecture.html");
-            public static readonly GUIContent k_ExplanatoryText = new GUIContent("Selecting an XR plug-in provider below enables that provider for the corresponding build target. The appropriate plug-in package will be installed if it is not already present. Disabling plug-ins will not automatically uninstall already installed packages. To uninstall a provider plug-in use the Package Manager.");
-            public static readonly GUIContent k_XRTrackingText = new GUIContent("To set up tracking in your XR project, please follow the steps outlined using the link below.");
-            public static readonly GUIContent k_XRTrackingDocsText = new GUIContent("View XR Tracking Migration Guide");
-            public static readonly Uri k_XRTrackingDocsUri = new Uri("https://docs.unity3d.com/Packages/com.unity.xr.legacyinputhelpers@latest");
+            public static readonly GUIContent k_XRConfigurationText = new GUIContent("Information about configuration, tracking and migration can be found below.");
+            public static readonly GUIContent k_XRConfigurationDocUriText = new GUIContent("View Documentation");
+            public static readonly Uri k_XRConfigurationUri = new Uri(" https://docs.unity3d.com/Manual/configuring-project-for-xr.html");
 
         }
 
@@ -272,18 +269,12 @@ namespace UnityEditor.XR.Management
             EditorGUI.DrawRect(new Rect(uriRect.x, uriRect.y + uriRect.height - 1, uriRect.width, 1), labelStyle.normal.textColor);
         }
 
-        private void DisplayDocumentationLink()
-        {
-            DisplayLink(Content.k_DocText, Content.k_DocUri, 5, 120);
-            EditorGUILayout.Space();
-        } 
-
         private void DisplayXRTrackingDocumentationLink()
         {
             GUILayout.BeginVertical(EditorStyles.helpBox);
             {
-                EditorGUILayout.LabelField(Content.k_XRTrackingText, Styles.k_LabelWordWrap);
-                DisplayLink(Content.k_XRTrackingDocsText, Content.k_XRTrackingDocsUri, 2, 200);
+                EditorGUILayout.LabelField(Content.k_XRConfigurationText, Styles.k_LabelWordWrap);
+                DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2, 200);
             }
             GUILayout.EndVertical();
             EditorGUILayout.Space();
@@ -291,11 +282,6 @@ namespace UnityEditor.XR.Management
 
         private void DisplayLoadOrderUi()
         {
-            GUILayout.BeginVertical(EditorStyles.helpBox);
-            {
-                EditorGUILayout.LabelField(Content.k_ExplanatoryText, Styles.k_LabelWordWrap);
-            }
-            GUILayout.EndVertical();
             EditorGUILayout.Space();
 
             EditorGUI.BeginDisabledGroup(XRPackageMetadataStore.isDoingQueueProcessing || EditorApplication.isPlaying || EditorApplication.isPaused);
@@ -319,7 +305,6 @@ namespace UnityEditor.XR.Management
         {
             EditorGUILayout.Space();
 
-            DisplayDocumentationLink();
             DisplayLoadOrderUi();
             DisplayXRTrackingDocumentationLink();
 

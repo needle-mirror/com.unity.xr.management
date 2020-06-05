@@ -4,6 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.12] - 2020-06-05
+* Fix testing definitions to allows us to remove tests as separate packages.
+  
+## [3.2.11] - 2020-06-04
+* Documentation updates for clarity and correctness.
+* Block use of deprecated APIs on 2020.2 and later.
+  
 ## [3.2.11-preview.1] - 2020-05-15
 * Fix FB 1242581 : Fix a number of issue around cache rebuilding and persistent UI display of cache rebuilding even though nothing was happening.
 * Fix FB 1245181 : Fix nullderef access of settings manager instance.

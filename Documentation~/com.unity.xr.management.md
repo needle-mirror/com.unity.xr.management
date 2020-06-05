@@ -43,7 +43,7 @@ There are two target audiences for XR Plug-in Management: the end user and the p
 
 This version of XR Plug-in Management is compatible with the following versions of the Unity Editor:
 
-* 2019.1 and later (recommended)
+* 2019.3 and later (recommended)
 
 ### Known limitations
 

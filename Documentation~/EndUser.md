@@ -24,6 +24,46 @@ If you want to start XR on a per-Scene basis (for example, to start in 2D and tr
 
 To handle pause state changes in the Editor, subscribe to the [`EditorApplication.pauseStateChanged`](https://docs.unity3d.com/ScriptReference/EditorApplication-pauseStateChanged.html) API, then stop and start the subsystems according to the new pause state that the `pauseStateChange` delegate method returns.
 
+The following code shows an example of how to manually control XR using XR Plug-in Management:
+
+```
+using System.Collections;
+using UnityEngine;
+
+using UnityEngine.XR.Management;
+
+public class ManualXRControl
+{
+    public IEnumerator StartXR()
+    {
+        Debug.Log("Initializing XR...");
+        yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+
+        if (XRGeneralSettings.Instance.Manager.activeLoader == null)
+        {
+            Debug.LogError("Initializing XR Failed. Check Editor or Player log for details.");
+        }
+        else 
+        {
+            Debug.Log("Starting XR...");
+            XRGeneralSettings.Instance.Manager.activeLoader.Start();
+        }
+    }
+
+    void StopXR()
+    {
+        Debug.Log("Stopping XR...");
+
+        if (XRGeneralSettings.Instance.Manager.activeLoader != null)
+        {
+            XRGeneralSettings.Instance.Manager.activeLoader.Stop();
+            XRGeneralSettings.Instance.Manager.activeLoader.Deinitialize();
+            Debug.Log("XR stopped completely.");
+        }
+    }
+}
+```
+
 ## Customizing build and runtime settings
 
 Any package that needs build or runtime settings should provide a settings data type for use. This data type appears in the **Project Settings** window, underneath a top level **XR** node.
@@ -107,8 +147,4 @@ You would most likely place this script in a custom build script, but that isn't
 
 ## Installing the XR Plug-in Management package
 
-Most XR Plug-in provider packages typically include XR Plug-in Management, so you shouldn't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
-
-## Installing the Legacy Input Helpers package
-
-Unity requires the Legacy Input Helpers package to operate XR devices correctly. To check if the Legacy Input Helpers package is installed, open the **Project Settings** window and navigate to **XR Plug-in Management** &gt; **Input Helpers**. If Unity can't locate the package, click the **Install Legacy Helpers Package** button to install it.
+Please see related Unity documentation for [Configuring XR](https://docs.unity3d.com/Manual/configuring-project-for-xr.html ).
