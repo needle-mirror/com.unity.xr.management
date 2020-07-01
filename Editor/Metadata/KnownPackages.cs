@@ -6,23 +6,23 @@ using UnityEngine;
 
 namespace UnityEditor.XR.Management.Metadata
 {
-    internal class KnownPackages 
+    internal class KnownPackages
     {
         internal static string k_KnownPackageMockHMDLoader = "Unity.XR.MockHMD.MockHMDLoader";
 
-        class KnownLoaderMetadata : IXRLoaderMetadata 
+        class KnownLoaderMetadata : IXRLoaderMetadata
         {
             public string loaderName { get; set; }
             public string loaderType { get; set; }
             public List<BuildTargetGroup> supportedBuildTargets { get; set; }
         }
 
-        class KnownPackageMetadata : IXRPackageMetadata 
+        class KnownPackageMetadata : IXRPackageMetadata
         {
             public string packageName { get; set; }
             public string packageId { get; set; }
             public string settingsType { get; set; }
-            public List<IXRLoaderMetadata> loaderMetadata { get; set; } 
+            public List<IXRLoaderMetadata> loaderMetadata { get; set; }
         }
 
         class KnownPackage : IXRPackage
@@ -34,7 +34,7 @@ namespace UnityEditor.XR.Management.Metadata
         private static Lazy<List<IXRPackage>> s_KnownPackages = new Lazy<List<IXRPackage>>(InitKnownPackages);
 
         internal static List<IXRPackage> Packages => s_KnownPackages.Value;
-        
+
         static List<IXRPackage> InitKnownPackages()
         {
             List<IXRPackage> packages = new List<IXRPackage>();
@@ -98,13 +98,13 @@ namespace UnityEditor.XR.Management.Metadata
                     }
                 }
             });
-            
+
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
                     packageName = "ARCore XR Plugin",
                     packageId = "com.unity.xr.arcore",
-                    settingsType = "",
+                    settingsType = "UnityEditor.XR.ARCore.ARCoreSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
                             loaderName = "ARCore",
@@ -116,13 +116,13 @@ namespace UnityEditor.XR.Management.Metadata
                     }
                 }
             });
-            
+
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
                     packageName = "ARKit XR Plugin",
                     packageId = "com.unity.xr.arkit",
-                    settingsType = "",
+                    settingsType = "UnityEditor.XR.ARKit.ARKitSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
                             loaderName = "ARKit",

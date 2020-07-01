@@ -57,7 +57,20 @@ namespace UnityEditor.XR.Management
 
         internal static XRSettingsManager Instance => s_SettingsManager;
 
-        internal bool ResetUi { get; set; }
+        private bool resetUi = false;
+        internal bool ResetUi
+        {
+            get
+            {
+                return resetUi;
+            }
+            set
+            {
+                resetUi = value;
+                if (resetUi)
+                    Repaint();
+            }
+        }
 
         SerializedObject m_SettingsWrapper;
 
@@ -274,7 +287,7 @@ namespace UnityEditor.XR.Management
             GUILayout.BeginVertical(EditorStyles.helpBox);
             {
                 EditorGUILayout.LabelField(Content.k_XRConfigurationText, Styles.k_LabelWordWrap);
-                DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2, 200);
+                DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2, 130);
             }
             GUILayout.EndVertical();
             EditorGUILayout.Space();
@@ -313,4 +326,3 @@ namespace UnityEditor.XR.Management
 
     }
 }
-

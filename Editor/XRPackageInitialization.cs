@@ -109,7 +109,7 @@ namespace UnityEditor.XR.Management
                 return;
             }
 
-            XRPackageMetadataStore.AddPackage(package);
+            XRPackageMetadataStore.AddPluginPackage(package);
 
             if (!InitializePackageFromMetadata(package, packageMetadata))
             {

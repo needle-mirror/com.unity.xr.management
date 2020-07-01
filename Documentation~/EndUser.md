@@ -46,7 +46,7 @@ public class ManualXRControl
         else 
         {
             Debug.Log("Starting XR...");
-            XRGeneralSettings.Instance.Manager.activeLoader.Start();
+            XRGeneralSettings.Instance.Manager.StartSubsystems();
         }
     }
 
@@ -54,12 +54,9 @@ public class ManualXRControl
     {
         Debug.Log("Stopping XR...");
 
-        if (XRGeneralSettings.Instance.Manager.activeLoader != null)
-        {
-            XRGeneralSettings.Instance.Manager.activeLoader.Stop();
-            XRGeneralSettings.Instance.Manager.activeLoader.Deinitialize();
-            Debug.Log("XR stopped completely.");
-        }
+        XRGeneralSettings.Instance.Manager.StopSubsystems();
+        XRGeneralSettings.Instance.Manager.DeinitializeLoader();
+        Debug.Log("XR stopped completely.");
     }
 }
 ```

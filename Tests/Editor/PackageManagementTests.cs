@@ -60,7 +60,7 @@ namespace UnityEditor.XR.Management.Tests
             XRPackageInitializationBootstrap.BeginPackageInitialization();
 
             TestPackage pkg = new TestPackage();
-            XRPackageMetadataStore.AddPackage(pkg);
+            XRPackageMetadataStore.AddPluginPackage(pkg);
             XRPackageInitializationBootstrap.InitPackage(pkg);
 
             TestLoaderBase.WasAssigned = false;

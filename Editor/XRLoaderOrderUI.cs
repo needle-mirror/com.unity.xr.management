@@ -103,6 +103,11 @@ namespace UnityEditor.XR.Management
                 m_OrderedList = new ReorderableList(m_LoaderMetadata, typeof(LoaderInformation), false, true, false, false);
                 m_OrderedList.drawHeaderCallback = (rect) => GUI.Label(rect, EditorGUIUtility.TrTextContent("Plug-in Providers"), EditorStyles.label);
                 m_OrderedList.drawElementCallback = (rect, index, isActive, isFocused) => DrawElementCallback(rect, index, isActive, isFocused);
+                m_OrderedList.drawFooterCallback = (rect) =>
+                {
+                    var status = XRPackageMetadataStore.GetCurrentStatusDisplayText();
+                    GUI.Label(rect, EditorGUIUtility.TrTextContent(status), EditorStyles.label);
+                };
                 m_OrderedList.elementHeightCallback = (index) => GetElementHeight(index);
             }
             

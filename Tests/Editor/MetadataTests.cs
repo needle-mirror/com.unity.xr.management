@@ -21,7 +21,7 @@ namespace UnityEditor.XR.Management.Tests
             XRPackageInitializationBootstrap.BeginPackageInitialization();
 
             TestPackage pkg = new TestPackage();
-            XRPackageMetadataStore.AddPackage(pkg);
+            XRPackageMetadataStore.AddPluginPackage(pkg);
             XRPackageInitializationBootstrap.InitPackage(pkg);
         }
 
@@ -78,7 +78,7 @@ namespace UnityEditor.XR.Management.Tests
             string[] assets = new string[0] { };
 
             TestPackage pkg = new TestPackage();
-            XRPackageMetadataStore.AddPackage(pkg);
+            XRPackageMetadataStore.AddPluginPackage(pkg);
             XRPackageInitializationBootstrap.InitPackage(pkg);
 
             while (frameCount < 60)

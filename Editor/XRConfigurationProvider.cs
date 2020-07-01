@@ -21,6 +21,10 @@ namespace UnityEditor.XR.Management
         {
             m_BuildDataType = buildDataType;
             m_BuildSettingsKey = buildSettingsKey;
+            if (currentSettings == null)
+            {
+                Create();
+            }
         }
 
         ScriptableObject currentSettings
@@ -68,12 +72,8 @@ namespace UnityEditor.XR.Management
         {
             if (m_SettingsWrapper == null || m_SettingsWrapper.targetObject == null)
             {
-                EditorGUILayout.HelpBox(s_WarningToCreateSettings);
-                if (GUILayout.Button(EditorGUIUtility.TrTextContent("Create")))
-                {
-                    ScriptableObject settings = Create();
-                    InitEditorData(settings);
-                }
+                ScriptableObject settings = Create();
+                InitEditorData(settings);
             }
 
             if (m_SettingsWrapper != null  && m_SettingsWrapper.targetObject != null && m_CachedEditor != null)

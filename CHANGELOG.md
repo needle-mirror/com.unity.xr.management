@@ -4,6 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.13] - 2020-07-01
+
+* Package installation is only for verified packages now.
+* Removed progress dialogs and reduced the number of blocking API calls required over lifetime.
+* Fix stacking calls to Client.List that was causing incorrect error reporting about API timeout.
+* Auto create settings for plug in packages if missing.
+
 ## [3.2.12] - 2020-06-05
 * Fix testing definitions to allows us to remove tests as separate packages.
   

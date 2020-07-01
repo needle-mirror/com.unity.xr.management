@@ -1,41 +1,36 @@
 using System.Collections.Generic;
 
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.XR.Management.Metadata;
 
 namespace Samples
 {
-    class SampleLoaderMetadata : IXRLoaderMetadata 
+    class SamplePackage : IXRPackage
     {
-        public string loaderName { get; set; }
-        public string loaderType { get; set; }
-        public List<BuildTargetGroup> supportedBuildTargets { get; set; }
-    }
-
-    class SamplePackageMetadata : IXRPackageMetadata
-    {
-        public string packageName { get; set; }
-        public string packageId { get; set; }
-        public string settingsType { get; set; }
-        public List<IXRLoaderMetadata> loaderMetadata { get; set; } 
-    }
-
-    static class SampleMetadata
-    {
-        static SamplePackageMetadata s_Metadata = null;
-
-        internal static SamplePackageMetadata CreateAndGetMetadata()
+        class SampleLoaderMetadata : IXRLoaderMetadata 
         {
-            if (s_Metadata == null)
-            {
-                s_Metadata = new SamplePackageMetadata();
-                s_Metadata.packageName = "Sample Package";
-                s_Metadata.packageId = "com.unity.xr.samplespackage";
-                s_Metadata.settingsType = typeof(SampleSettings).FullName;
+            public string loaderName { get; set; }
+            public string loaderType { get; set; }
+            public List<BuildTargetGroup> supportedBuildTargets { get; set; }
+        }
 
-                s_Metadata.loaderMetadata = new List<IXRLoaderMetadata>() {
+        class SamplePackageMetadata : IXRPackageMetadata
+        {
+            public string packageName { get; set; }
+            public string packageId { get; set; }
+            public string settingsType { get; set; }
+            public List<IXRLoaderMetadata> loaderMetadata { get; set; } 
+        }
+
+        private static IXRPackageMetadata s_Metadata = new SamplePackageMetadata() {
+                packageName = "Sample Package <SAMPLE ONLY YOU MUST REIMPLEMENT>",
+                packageId = "com.unity.xr.samplespackage",
+                settingsType = typeof(SampleSettings).FullName,
+
+                loaderMetadata = new List<IXRLoaderMetadata>() {
                     new SampleLoaderMetadata() {
-                        loaderName = "Sample Loader One",
+                        loaderName = "Sample Loader One  <SAMPLE ONLY YOU MUST REIMPLEMENT>",
                         loaderType = typeof(SampleLoader).FullName,
                         supportedBuildTargets = new List<BuildTargetGroup>() {
                             BuildTargetGroup.Standalone,
@@ -43,7 +38,7 @@ namespace Samples
                         }
                     },
                     new SampleLoaderMetadata() {
-                        loaderName = "Sample Loader Two",
+                        loaderName = "Sample Loader Two <SAMPLE ONLY YOU MUST REIMPLEMENT>",
                         loaderType = typeof(SampleLoader).FullName,
                         supportedBuildTargets = new List<BuildTargetGroup>() {
                             BuildTargetGroup.Android,
@@ -51,10 +46,15 @@ namespace Samples
                             BuildTargetGroup.Lumin
                         }
                     }
-                };
-            }
+                }
+        };
 
-            return s_Metadata;
+        public IXRPackageMetadata metadata => s_Metadata;
+
+        public bool PopulateNewSettingsInstance(ScriptableObject obj)
+        {
+            return true;
         }
+
     }
 }
