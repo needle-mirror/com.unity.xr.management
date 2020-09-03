@@ -61,5 +61,23 @@ namespace UnityEngine.XR.Management.Tests
             Assert.IsTrue(loader.stopped);
             Assert.IsTrue(loader.deInitialized);
         }
+
+
+        [Test]
+        public void DeinitClearSubsystems()
+        {
+            Assert.IsNull(loader.standaloneSubsystem);
+
+            InitializeAndStart();
+
+            Assert.IsNotNull(loader.GetLoadedSubsystem<StandaloneSubsystem>());
+
+            loader.Stop();
+            loader.Deinitialize();
+
+            Assert.IsNull(loader.GetLoadedSubsystem<StandaloneSubsystem>());
+
+        }
+
     }
 }

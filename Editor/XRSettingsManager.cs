@@ -268,12 +268,13 @@ namespace UnityEditor.XR.Management
             EditorGUILayout.EndBuildTargetSelectionGrouping();
         }
 
-        private void DisplayLink(GUIContent text, Uri link, int leftMargin, int width)
+        private void DisplayLink(GUIContent text, Uri link, int leftMargin)
         {
             var labelStyle = EditorGUIUtility.isProSkin ? Styles.k_UrlLabelProfessional : Styles.k_UrlLabelPersonal;
+            var size = labelStyle.CalcSize(Content.k_XRConfigurationDocUriText);
             var uriRect = GUILayoutUtility.GetRect(text, labelStyle);
             uriRect.x += leftMargin;
-            uriRect.width = width;
+            uriRect.width = size.x;
             if (GUI.Button(uriRect, text, labelStyle))
             {
                 System.Diagnostics.Process.Start(link.AbsoluteUri);
@@ -287,7 +288,7 @@ namespace UnityEditor.XR.Management
             GUILayout.BeginVertical(EditorStyles.helpBox);
             {
                 EditorGUILayout.LabelField(Content.k_XRConfigurationText, Styles.k_LabelWordWrap);
-                DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2, 130);
+                DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2);
             }
             GUILayout.EndVertical();
             EditorGUILayout.Space();

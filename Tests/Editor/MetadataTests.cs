@@ -37,7 +37,7 @@ namespace UnityEditor.XR.Management.Tests
             int frameCount = 0;
             string[] assets = new string[0]{};
 
-            
+
             while (frameCount < 60)
             {
                 yield return null;
@@ -56,7 +56,7 @@ namespace UnityEditor.XR.Management.Tests
 
         [Test, Sequential]
         public void FilteringMetadataByBuildTargetGroup(
-            [Values(BuildTargetGroup.Standalone, BuildTargetGroup.Android, BuildTargetGroup.Unknown, BuildTargetGroup.WebGL)]BuildTargetGroup buildTargetGroup, 
+            [Values(BuildTargetGroup.Standalone, BuildTargetGroup.Android, BuildTargetGroup.Unknown, BuildTargetGroup.WebGL)]BuildTargetGroup buildTargetGroup,
             [Values("Test Loader One", "Test Loader Two", "Test Loader Three", "")]string expectedType)
         {
             var loaders = XRPackageMetadataStore.GetLoadersForBuildTarget(buildTargetGroup);

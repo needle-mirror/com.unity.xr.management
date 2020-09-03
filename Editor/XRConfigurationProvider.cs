@@ -72,7 +72,7 @@ namespace UnityEditor.XR.Management
         {
             if (m_SettingsWrapper == null || m_SettingsWrapper.targetObject == null)
             {
-                ScriptableObject settings = Create();
+                ScriptableObject settings = (currentSettings != null) ? currentSettings : Create();
                 InitEditorData(settings);
             }
 

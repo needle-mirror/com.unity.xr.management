@@ -18,7 +18,7 @@ namespace UnityEditor.XR.Management.Metadata
     public interface IXRLoaderMetadata
     {
         /// <summary>
-        /// The user facing name for this loader. Will be used to populate the 
+        /// The user facing name for this loader. Will be used to populate the
         /// list in the XR Plug-in Management UI.
         /// </summary>
         string loaderName { get; }
@@ -62,7 +62,7 @@ namespace UnityEditor.XR.Management.Metadata
         string packageId { get; }
 
         /// <summary>
-        /// This is the full type name for the settings type for your package. 
+        /// This is the full type name for the settings type for your package.
         ///
         /// When your package is first installed, the XR Plug-in Management system will
         /// use this information to create an instance of your settings in Assets/XR/Settings.
@@ -73,7 +73,7 @@ namespace UnityEditor.XR.Management.Metadata
         /// List of <see cref="IXRLoaderMetadata"/> instances describing the data about the loaders
         /// your package supports.
         /// </summary>
-        List<IXRLoaderMetadata> loaderMetadata { get; } 
+        List<IXRLoaderMetadata> loaderMetadata { get; }
     }
 
 
@@ -442,7 +442,7 @@ namespace UnityEditor.XR.Management.Metadata
         }
 
         internal static void InitKnownPluginPackages()
-        {            
+        {
             foreach (var knownPackage in KnownPackages.Packages)
             {
                 InternalAddPluginPackage(knownPackage);
@@ -771,33 +771,50 @@ namespace UnityEditor.XR.Management.Metadata
                             request.installationState = InstallationState.Assigning;
                             QueueLoaderRequest(request);
                         }
-                    }
-                    else
-                    {
-                        if (String.IsNullOrEmpty(request.packageId))
+                        else
                         {
-                            request.logMessage = $"Error installing package {request.packageId}. Error Code: {request.packageAddRequest.Status} Error Message: {request.packageAddRequest.Error.message}";
+                            request.logMessage = $"Missing loader type. Unable to assign loader.";
                             request.logLevel = LogLevel.Error;
                             request.installationState = InstallationState.Log;
                             QueueLoaderRequest(request);
                         }
                     }
                 }
+                else if (request.packageAddRequest.IsCompleted && request.packageAddRequest.Status != StatusCode.Success)
+                {
+                    if (String.IsNullOrEmpty(request.packageId))
+                    {
+                        request.logMessage = $"Error installing package with no package id.";
+                    }
+                    else
+                    {
+                        request.logMessage = $"Error Message: {request.packageAddRequest?.Error?.message ?? "UNKNOWN" }.\nError installing package {request.packageId ?? "UNKNOWN PACKAGE ID" }.";
+                    }
+
+                    request.logLevel = LogLevel.Error;
+                    request.installationState = InstallationState.Log;
+                    QueueLoaderRequest(request);
+                }
                 else if (request.timeOut < Time.realtimeSinceStartup)
                 {
                     if (String.IsNullOrEmpty(request.packageId))
                     {
-                        request.logMessage = $"Error installing package {request.packageId}. Package installation timed out. Check Package Manager UI to see if the package is installed and/or retry your operation.";
-                        request.logLevel = LogLevel.Error;
-
-                        if (request.packageAddRequest.IsCompleted)
-                        {
-                            request.logMessage += $" Error message: {request.packageAddRequest.Error.message}";
-                        }
-                        
-                        request.installationState = InstallationState.Log;
-                        QueueLoaderRequest(request);
+                        request.logMessage = $"Time out while installing pacakge with no package id.";
                     }
+                    else
+                    {
+                        request.logMessage = $"Error installing package {request.packageId}. Package installation timed out. Check Package Manager UI to see if the package is installed and/or retry your operation.";
+                    }
+
+                    request.logLevel = LogLevel.Error;
+
+                    if (request.packageAddRequest.IsCompleted)
+                    {
+                        request.logMessage += $" Error message: {request.packageAddRequest.Error.message}";
+                    }
+
+                    request.installationState = InstallationState.Log;
+                    QueueLoaderRequest(request);
                 }
                 else
                 {

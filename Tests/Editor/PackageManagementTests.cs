@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -93,7 +94,7 @@ namespace UnityEditor.XR.Management.Tests
             if (String.IsNullOrEmpty(loaderTypeName))
                 return false;
 
-            return XRPackageMetadataStore.AssignLoader(m_Settings, loaderTypeName, buildTargetGroup);            
+            return XRPackageMetadataStore.AssignLoader(m_Settings, loaderTypeName, buildTargetGroup);
         }
 
         private bool SettingsHasLoaderOfType(XRManagerSettings settings, string loaderTypeName)
@@ -170,6 +171,41 @@ namespace UnityEditor.XR.Management.Tests
             Assert.IsFalse(SettingsHasLoaderOfType(m_Settings, loaderTypeName));
 
             Assert.IsTrue(TestLoaderBase.WasUnassigned);
+        }
+
+        [UnityTest]
+        public IEnumerator TestInvalidPackageErrorsOut()
+        {
+#if !UNITY_2020_2_OR_NEWER
+            XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget("com.unity.invalid.package.id", String.Empty, BuildTargetGroup.Standalone);
+
+            LogAssert.Expect(LogType.Error, new Regex(@"cannot be found"));
+
+            while (XRPackageMetadataStore.isDoingQueueProcessing)
+            {
+                yield return null;
+            }
+#else
+            yield return null;
+#endif //UNITY_2020_2_OR_NEWER
+
+        }
+
+        [UnityTest]
+        public IEnumerator TestNoPackageIdErrorsOut()
+        {
+#if !UNITY_2020_2_OR_NEWER
+            XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget("", String.Empty, BuildTargetGroup.Standalone);
+
+            LogAssert.Expect(LogType.Error, new Regex(@"no package id"));
+
+            while (XRPackageMetadataStore.isDoingQueueProcessing)
+            {
+                yield return null;
+            }
+#else
+            yield return null;
+#endif //UNITY_2020_2_OR_NEWER
         }
     }
 }

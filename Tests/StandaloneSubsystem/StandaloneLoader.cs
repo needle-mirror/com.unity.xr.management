@@ -72,7 +72,7 @@ namespace UnityEngine.XR.Management.Tests.Standalone
                 standaloneSubsystem.stopCalled -= OnStopCalled;
                 standaloneSubsystem.destroyCalled -= OnDestroyCalled;
             }
-            return true;
+            return base.Deinitialize();
         }
 
     }

@@ -4,6 +4,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.15] - 2020-09-03
+* Fix issue with file being included in built package that shouldn't be there.
+
+## [3.2.14] - 2020-08-31
+
+* Document link underlining is correct.
+* Fix an issue where, after Play In Editor completed, settings were reset to default.
+* Clear subsystem instance map on deinitialize so that stale instances aren't being retrieved on restarts.
+* Fix and issue where invalid package IDs were not being handled when attempting package installs.
+
 ## [3.2.13] - 2020-07-01
 
 * Package installation is only for verified packages now.

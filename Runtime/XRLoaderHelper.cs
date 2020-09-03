@@ -153,6 +153,20 @@ namespace UnityEngine.XR.Management
             CreateSubsystem<TDescriptor, TSubsystem>(descriptors, id);
         }
 
+        /// <summary>
+        /// Override of <see cref="DeInitialize"/> to provide for clearing the instance map.true
+        ///
+        /// If you override <see cref="DeInitialize"/> in your subclass, you must call the base
+        /// implementation to allow the instance map tp be cleaned up correctly.
+        /// </summary>
+        ///
+        /// <returns>True if de-initialization was successful.</returns>
+        public override bool Deinitialize()
+        {
+            m_SubsystemInstanceMap.Clear();
+            return base.Deinitialize();
+        }
+
 #if UNITY_EDITOR
         virtual public void WasAssignedToBuildTarget(BuildTargetGroup buildTargetGroup)
         {

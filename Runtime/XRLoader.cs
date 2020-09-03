@@ -17,28 +17,28 @@ namespace UnityEngine.XR.Management
         /// </summary>
         ///
         /// <returns>Whether or not initialization succeeded.</returns>
-        public virtual bool Initialize() { return false; }
+        public virtual bool Initialize() { return true; }
 
         /// <summary>
         /// Ask loader to start all initialized subsystems.
         /// </summary>
         ///
         /// <returns>Whether or not all subsystems were successfully started.</returns>
-        public virtual bool Start() { return false; }
+        public virtual bool Start() { return true; }
 
         /// <summary>
         /// Ask loader to stop all initialized subsystems.
         /// </summary>
         ///
         /// <returns>Whether or not all subsystems were successfully stopped.</returns>
-        public virtual bool Stop() { return false; }
+        public virtual bool Stop() { return true; }
 
         /// <summary>
         /// Ask loader to deinitialize all initialized subsystems.
         /// </summary>
         ///
         /// <returns>Whether or not deinitialization succeeded.</returns>
-        public virtual bool Deinitialize() { return false; }
+        public virtual bool Deinitialize() { return true; }
 
         /// <summary>
         /// Gets the loaded subsystem of the specified type. Implementation dependent as only implemetnations
@@ -53,7 +53,7 @@ namespace UnityEngine.XR.Management
         /// <summary>
         /// Gets the loader's supported graphics device types. If the list is empty, it is assumed that it supports all graphics device types.
         /// </summary>
-        /// 
+        ///
         /// <param name="buildingPlayer">True if the player is being built. You may want to include or exclude graphics apis if the player is being built or not.</param>
         /// <returns>Returns the loader's supported graphics device types.</returns>
         public virtual List<GraphicsDeviceType> GetSupportedGraphicsDeviceTypes(bool buildingPlayer)

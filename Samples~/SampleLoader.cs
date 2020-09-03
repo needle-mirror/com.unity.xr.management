@@ -81,7 +81,7 @@ namespace Samples
         public override bool Deinitialize()
         {
             DestroySubsystem<XRInputSubsystem>();
-            return true;
+            return base.Deinitialize();
         }
 
 #endregion

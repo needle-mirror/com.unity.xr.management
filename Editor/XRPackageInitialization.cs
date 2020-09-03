@@ -122,8 +122,8 @@ namespace UnityEditor.XR.Management
         static bool InitializePackageFromMetadata(IXRPackage package, IXRPackageMetadata packageMetadata)
         {
             bool ret = true;
-            ret |= InitializeLoaderFromMetadata(packageMetadata.packageName, packageMetadata.loaderMetadata);
-            ret |= InitializeSettingsFromMetadata(package, packageMetadata.packageName, packageMetadata.settingsType);
+            ret = ret && InitializeLoaderFromMetadata(packageMetadata.packageName, packageMetadata.loaderMetadata);
+            ret = ret && InitializeSettingsFromMetadata(package, packageMetadata.packageName, packageMetadata.settingsType);
             return ret;
         }
         
