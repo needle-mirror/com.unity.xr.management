@@ -9,7 +9,17 @@ using UnityEngine;
 
 namespace UnityEditor.XR.Management
 {
-    internal class EditorWorkQueue<T>
+    internal class EditorWorkQueueBase
+    {
+        const string k_DefaultSessionStateString = "0BADF00D";
+        internal static bool SessionStateHasStoredData(string queueName)
+        {
+            return SessionState.GetString(queueName, k_DefaultSessionStateString) != EditorWorkQueueBase.k_DefaultSessionStateString;
+        }
+
+    }
+
+    internal class EditorWorkQueue<T> : EditorWorkQueueBase
     {
         [Serializable]
         struct Queue
@@ -18,13 +28,12 @@ namespace UnityEditor.XR.Management
             public List<T> workItems;
         }
 
-
         public string QueueName { get; set; }
 
         private static Lazy<EditorWorkQueue<T>> s_Instance = new Lazy<EditorWorkQueue<T>>();
         public static EditorWorkQueue<T> Instance => s_Instance.Value;
 
-        public bool HasWorkItems => EditorPrefs.HasKey(QueueName);
+        public bool HasWorkItems => EditorWorkQueueBase.SessionStateHasStoredData(QueueName);
 
         public Action<T> ProcessItemCallback { get; set; }
 
@@ -38,9 +47,9 @@ namespace UnityEditor.XR.Management
             Queue queue = new Queue();
             queue.workItems = new List<T>();
 
-            if (EditorPrefs.HasKey(QueueName))
+            if (EditorWorkQueueBase.SessionStateHasStoredData(QueueName))
             {
-                string fromJson = EditorPrefs.GetString(QueueName);
+                string fromJson = SessionState.GetString(QueueName, "{}");
                 JsonUtility.FromJsonOverwrite(fromJson, queue);
             }
 
@@ -51,7 +60,7 @@ namespace UnityEditor.XR.Management
 
             queue.workItems.Add(workItem);
             string json = JsonUtility.ToJson(queue);
-            EditorPrefs.SetString(QueueName, json);
+            SessionState.SetString(QueueName, json);
             StartQueue();
         }
 
@@ -80,8 +89,8 @@ namespace UnityEditor.XR.Management
                 return ret;
             }
 
-            string fromJson = EditorPrefs.GetString(Instance.QueueName);
-            EditorPrefs.DeleteKey(Instance.QueueName);
+            string fromJson = SessionState.GetString(Instance.QueueName, "{}");
+            SessionState.EraseString(Instance.QueueName);
 
             Queue queue = JsonUtility.FromJson<Queue>(fromJson);
             if (queue.workItems.Count <= 0)
@@ -95,7 +104,7 @@ namespace UnityEditor.XR.Management
             if (queue.workItems.Count > 0)
             {
                 string json = JsonUtility.ToJson(queue);
-                EditorPrefs.SetString(Instance.QueueName, json);
+                SessionState.SetString(Instance.QueueName, json);
             }
 
             return ret;

@@ -156,7 +156,7 @@ namespace UnityEditor.XR.Management
                     ret.Add(resProv);
                 }
             }
-         
+
             return ret.ToArray();
         }
 
@@ -292,7 +292,7 @@ namespace UnityEditor.XR.Management
             }
             GUILayout.EndVertical();
             EditorGUILayout.Space();
-        } 
+        }
 
         private void DisplayLoadOrderUi()
         {

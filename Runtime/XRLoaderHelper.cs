@@ -83,6 +83,11 @@ namespace UnityEngine.XR.Management
 
         /// <summary>
         /// Creates a subsystem given a list of descriptors and a specific subsystem id.
+        ///
+        /// You should make sure to destroy any subsystem that you created so that resources
+        /// acquired by your subsystems are correctly cleaned up and released. This is especially important
+        /// if you create them during initialization, but initialization fails. If that happens,
+        /// you should clean up any subsystems created up to that point.
         /// </summary>
         ///
         /// <typeparam name="TDescriptor">The descriptor type being passed in.</typeparam>

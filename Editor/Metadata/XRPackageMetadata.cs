@@ -4,10 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using UnityEditor;
+
 using UnityEngine;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine.XR.Management;
+
 
 namespace UnityEditor.XR.Management.Metadata
 {
@@ -192,14 +195,25 @@ namespace UnityEditor.XR.Management.Metadata
         static Dictionary<string, IXRPackage> s_Packages = new Dictionary<string, IXRPackage>();
         static SearchRequest s_SearchRequest = null;
 
-        internal static bool isCheckingInstallationRequirements => EditorPrefs.HasKey(k_WaitingPackmanQuery);
-        internal static bool isRebuildingCache => EditorPrefs.HasKey(k_RebuildCache);
-        internal static bool isInstallingPackages => EditorPrefs.HasKey(k_InstallingPackage);
-        internal static bool isUninstallingPackages => EditorPrefs.HasKey(k_UninstallingPackage);
-        internal static bool isAssigningLoaders => EditorPrefs.HasKey(k_AssigningPackage);
+        const string k_DefaultSessionStateString = "DEADBEEF";
+        static bool SessionStateHasStoredData(string queueName)
+        {
+            return SessionState.GetString(queueName, k_DefaultSessionStateString) != XRPackageMetadataStore.k_DefaultSessionStateString;
+        }
 
-        internal static bool isDoingQueueProcessing =>
-            isCheckingInstallationRequirements || isRebuildingCache || isInstallingPackages || isUninstallingPackages || isAssigningLoaders;
+        internal static bool isCheckingInstallationRequirements => XRPackageMetadataStore.SessionStateHasStoredData(k_WaitingPackmanQuery);
+        internal static bool isRebuildingCache => XRPackageMetadataStore.SessionStateHasStoredData(k_RebuildCache);
+        internal static bool isInstallingPackages => XRPackageMetadataStore.SessionStateHasStoredData(k_InstallingPackage);
+        internal static bool isUninstallingPackages => XRPackageMetadataStore.SessionStateHasStoredData(k_UninstallingPackage);
+        internal static bool isAssigningLoaders => XRPackageMetadataStore.SessionStateHasStoredData(k_AssigningPackage);
+
+        internal static bool isDoingQueueProcessing
+        {
+            get
+            {
+                return isCheckingInstallationRequirements || isRebuildingCache || isInstallingPackages || isUninstallingPackages || isAssigningLoaders;
+            }
+        }
 
         internal struct LoaderBuildTargetQueryResult
         {
@@ -573,9 +587,9 @@ namespace UnityEditor.XR.Management.Metadata
         {
             LoaderAssignmentRequests reqs;
 
-            if (EditorPrefs.HasKey(queueName))
+            if (XRPackageMetadataStore.SessionStateHasStoredData(queueName))
             {
-                string fromJson = EditorPrefs.GetString(queueName);
+                string fromJson = SessionState.GetString(queueName, k_DefaultSessionStateString);
                 reqs = JsonUtility.FromJson<LoaderAssignmentRequests>(fromJson);
             }
             else
@@ -586,14 +600,14 @@ namespace UnityEditor.XR.Management.Metadata
 
             reqs.activeRequests.Add(request);
             string json = JsonUtility.ToJson(reqs);
-            EditorPrefs.SetString(queueName, json);
+            SessionState.SetString(queueName, json);
 
         }
 
         static void SetRequestsInQueue(LoaderAssignmentRequests reqs, string queueName)
         {
             string json = JsonUtility.ToJson(reqs);
-            EditorPrefs.SetString(queueName, json);
+            SessionState.SetString(queueName, json);
         }
 
         static LoaderAssignmentRequests GetAllRequestsInQueue(string queueName)
@@ -601,11 +615,11 @@ namespace UnityEditor.XR.Management.Metadata
             var reqs = new LoaderAssignmentRequests();
             reqs.activeRequests = new List<LoaderAssignmentRequest>();
 
-            if (EditorPrefs.HasKey(queueName))
+            if (XRPackageMetadataStore.SessionStateHasStoredData(queueName))
             {
-                string fromJson = EditorPrefs.GetString(queueName);
+                string fromJson = SessionState.GetString(queueName, k_DefaultSessionStateString);
                 reqs = JsonUtility.FromJson<LoaderAssignmentRequests>(fromJson);
-                EditorPrefs.DeleteKey(queueName);
+                SessionState.EraseString(queueName);
             }
 
             return reqs;
@@ -628,12 +642,16 @@ namespace UnityEditor.XR.Management.Metadata
             EditorApplication.update -= RebuildCache;
 
             if (IsEditorInPlayMode())
+            {
                 return; // Use the cached data that should have been passed in the play state change.
+            }
 
             LoaderAssignmentRequests reqs = GetAllRequestsInQueue(k_RebuildCache);
 
             if (reqs.activeRequests == null || reqs.activeRequests.Count == 0)
+            {
                 return;
+            }
 
             var req = reqs.activeRequests[0];
             reqs.activeRequests.Remove(req);

@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.16] - 2020-09-25
+* Release
+
+## [3.2.16-preview.1] - 2020-09-17
+
+* Fix issue that was causing the UI to gray out with the "Querying Package Manager for currently installed packages..." message.
+* Add documentation to clarify the differences and requirements around plug-in packages and Unity packages.
+* Clarify some issues around loader and initialization.
+
 ## [3.2.15] - 2020-09-03
 * Fix issue with file being included in built package that shouldn't be there.
 

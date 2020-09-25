@@ -1,6 +1,12 @@
 
 # Package author documentation
 
+## XR Plug-in Management packages and Unity packages
+
+All **XR Plug-in Management** packages must also be full Unity packages. The package does not have to be registered or exist in any external repository or package server. It can live within the `Assets` folder. The only requirement is that you define the package with a `package.json` file and a unique package id. 
+
+For more information, see documentation on [Unity Packages](https://docs.unity3d.com/Manual/PackagesList.html).
+
 ## Lifecycle management
 
 This package enables you to manage the lifecycle of XR SDK subsystems without the need for boilerplate code. The `XRManagerSettings`class provides a scriptable object that your app can use to start, stop, initialize, and deinitialize a set of subsystems defined in an `XRLoader` instance.
@@ -119,6 +125,8 @@ Your plug-in must provide metadata information for it to be usable by the **XR P
 * IXRLoaderMetadata
 
 The system will use .Net reflection to find all types implementing the **IXRPackage** interface. It will then attempt to instantiate each one and populate the metadata store with the information provided by each instance.
+
+You can only have one instance of **IXRPackage** within a given Unity package. The **IXRMetadata.packageId** field must return the same id as set in the package's `package.json` file.
 
 ## Example: Simple, minimal package information setup:
 

@@ -24,7 +24,7 @@ namespace UnityEditor.XR.Management.Legacy
             "com.unity.xr.oculus.android",
             "com.unity.xr.oculus.standalone",
             "com.unity.xr.openvr.standalone",
-            "com.unity.xr.windowsmr.metro", 
+            "com.unity.xr.windowsmr.metro",
         };
 
 
@@ -56,6 +56,7 @@ namespace UnityEditor.XR.Management.Legacy
             public ListRequest packageListRequest;
         }
 
+
         private static readonly string k_PackageToRemoveQueue = "Remove Package Queue";
         private static EditorWorkQueue<PackageRemovalOperation> s_PackageRemovelQueue => EditorWorkQueue<PackageRemovalOperation>.Instance;
         private static bool hasPackageBeingRemoved => s_PackageRemovelQueue.HasWorkItems;
@@ -66,7 +67,7 @@ namespace UnityEditor.XR.Management.Legacy
 
         private static readonly string k_LocalPackageListingQueryQueue = "Local Package List";
         private static EditorWorkQueue<LegacyPackageListRequest> s_PackageListQueue => EditorWorkQueue<LegacyPackageListRequest>.Instance;
-        private static bool hasActivePackageListQuery => EditorPrefs.HasKey(k_LocalPackageListingQueryQueue);
+        private static bool hasActivePackageListQuery => EditorWorkQueueBase.SessionStateHasStoredData(k_LocalPackageListingQueryQueue);
 
 
         internal static bool IsPackageInstalled(string package)
@@ -162,7 +163,7 @@ namespace UnityEditor.XR.Management.Legacy
                         if (packageIdsToRemove.Count > 0)
                         {
                             if (EditorUtility.DisplayDialog("Built in VR Detected", removeRequestText, "Ok", "Cancel"))
-                            {                                
+                            {
                                 foreach (string packageId in packageIdsToRemove)
                                 {
                                     PackageRemovalRequest remreq = new PackageRemovalRequest();
