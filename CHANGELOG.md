@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.2.17] - 2020-11-03
+* Change how startup settings are written on build.
+* Fix issue with domain reload during play that caused a crash on next play.  
+* Immediately persist created assets when initializing packages.
+* CI changes to expand testing.
+  
 ## [3.2.16] - 2020-09-25
 * Release
 
@@ -20,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Document link underlining is correct.
 * Fix an issue where, after Play In Editor completed, settings were reset to default.
-* Clear subsystem instance map on deinitialize so that stale instances aren't being retrieved on restarts.
+* Clear subsystem instance map on de-initialize so that stale instances aren't being retrieved on restarts.
 * Fix and issue where invalid package IDs were not being handled when attempting package installs.
 
 ## [3.2.13] - 2020-07-01
@@ -39,7 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   
 ## [3.2.11-preview.1] - 2020-05-15
 * Fix FB 1242581 : Fix a number of issue around cache rebuilding and persistent UI display of cache rebuilding even though nothing was happening.
-* Fix FB 1245181 : Fix nullderef access of settings manager instance.
+* Fix FB 1245181 : Fix null deref access of settings manager instance.
 
 ## [3.2.10] - 2020-04-24
 * Release 3.2.10
@@ -51,10 +57,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  
 
 ## [3.2.9] - 2020-04-18
-* Fix linux tests in CI.
+* Fix Linux tests in CI.
 
 ## [3.2.8] - 2020-04-17
-* Fix double click to untoggle Magic Leap bug.
+* Fix double click to un-toggle Magic Leap bug.
 * Fix name of Magic Leap Zero Iteration entry for standalone.
 
 ## [3.2.7] - 2020-04-14
@@ -92,7 +98,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Cleanup of the uninstaller code. Will eventually do the same thing for the package metadata code as well.
 
 ## [3.2.0-preview.7] - 2020-03-06
-* Add utility for requesting uninstall of the currently installed built in VR pacakges.
+* Add utility for requesting uninstall of the currently installed built in VR packages.
 * Add callbacks to XRLoaderHelper to allow clients to handle assignment/unassigment of their loader to a build target in the Editor.
 
 ## [3.2.0-preview.6] - 2020-03-04
@@ -107,23 +113,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [3.2.0-preview.4] - 2020-02-26
 * Further Documentation review changes.
 * Fix bug allowing user to enable/disable loaders at play time.
-* Fix bug with compilation errors causing proggress bar to hang around.
+* Fix bug with compilation errors causing progress bar to hang around.
 
 ## [3.2.0-preview.3] - 2020-02-25
 * Modify metadata store to hold packages and not just metadatas. This allows us to call the settings instance initializer function even after initialization.
 * Fixed some minor known package naming issues.
   
 ## [3.2.0-preview.2] - 2020-02-24
-* Add in Mock HMD pacakge to known packages.
+* Add in Mock HMD package to known packages.
 * Fix up some asynchronous issues with checking for installable packages.
 * Change UI a little to try to differentiate installable from installed packages.
 * Correct documentation after review.
-* Modify sorted list to make MOck HMD last item always.
+* Modify sorted list to make Mock HMD last item always.
 * Modify assignment to make sure that the order of the items is always the same order as in the UI.
 
 ## [3.2.0-preview.1] - 2020-02-20
 * Entire re-write of the UI and backing data store to provide a better user experience more inline with the previous Built In XR Settings UI.
-* Removed the Legacy Input Helpers sub pane and replaced with a more integrated set of menu uptions in the Assets menu (provided by the Legacy Input Helpers package).
+* Removed the Legacy Input Helpers sub pane and replaced with a more integrated set of menu options in the Assets menu (provided by the Legacy Input Helpers package).
   
 ## [3.1.0] - 2020-02-07
 * Preparation for verification release.
@@ -179,7 +185,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix editor application perf issue due to not unhooking update callback.
 
 ## [3.0.3] - 2019-08-29
-* Fix package dependency version for subsystem registrion pacakge.
+* Fix package dependency version for subsystem registration package.
 
 ## [3.0.2] - 2019-08-29
 * Release package for verification.
@@ -195,7 +201,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [3.0.2-preview.1] - 2019-08-06
 * Remove asset menu creation entry for XR Settings as it is unsupported now.
-* Fix an issue with downloading packages that could allow PackMan toget corrupted, forcing the user to reload Unity.
+* Fix an issue with downloading packages that could allow PackMan to get corrupted, forcing the user to reload Unity.
 
 ## [3.0.1] - 2019-07-11
 * Update base Unity release version after namespace changes.
@@ -253,7 +259,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix up test namespaces to use correct namespace naming
 
 ## [2.0.0-preview.14] - 2019-05-23
-* updating number for yamato, adds depednency to com.unity.xr.legacyinputhelpers
+* updating number for Yamato, adds dependency to com.unity.xr.legacyinputhelpers
 
 ## [2.0.0-preview.13] - 2019-05-09
 * Fix more output logging for Yamato.
@@ -301,7 +307,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix bug due to preinit code that would cause a null ref exception.
 
 ## [2.0.0-preview.1] - 2018-12-19
-* Upated to support loading integrated and standalone subsystems.
+* Updated to support loading integrated and standalone subsystems.
 * Add support for pre-init framework to allow for setting handling things like LUID setup pre-gfx setup.
 * Add ability for general settings to be set per platform and not just globally.
 * Tagged with release preview build. This should be the base on which we move to release for 2019.1
@@ -317,7 +323,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Hopefully all CI issues are resolved now.
   
 ## [0.2.0-preview.4] - 2018-10-24
-* Merged in gneral settings support. Initial implentation allows for ability to assign an XR Manager instance for loading XR SDK at boot launch time.
+* Merged in general settings support. Initial implementation allows for ability to assign an XR Manager instance for loading XR SDK at boot launch time.
 
 ## [0.2.0-preview.3] - 2018-10-24
 * Merged in Unified Settings dependent changes.
@@ -334,7 +340,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Fix issue #3: Add ASMDEFs for sample code to get it to compile. No longer need to keep copy in project.
 * Fix Issue #4: Update documentation to reflect API changes and to expand information and API documentation.
-* Fix Issue #5: Move boilerplate loader code to a common helper base class that can be used if an implementor wants to.
+* Fix Issue #5: Move boilerplate loader code to a common helper base class that can be used if an implementer wants to.
 
 ## [0.1.0-preview.6] - 2018-07-17
 
@@ -350,7 +356,7 @@ Since we are 2018.3 and later only we can take advantage of the new PlayerSettin
 
 ## [0.1.0-preview.4] - 2018-07-17
 
-### Added samples and abiity to load settings
+### Added samples and ability to load settings
 
 This change adds a full fledged sample base that shows how to work with XR Management from start to finish, across run and build. This includes serializing and de-serializing the settings.
 
@@ -361,7 +367,7 @@ This change adds a full fledged sample base that shows how to work with XR Manag
 
 ### Update build settings management
 
-Changed XRBuildData froma class to an attribute. This allows providers to use simpler SO classes for build data and not forece them to subclass anything.
+Changed XRBuildData from a class to an attribute. This allows providers to use simpler SO classes for build data and not foreach them to subclass anything.
 Added a SettingsProvider subclass that wraps each of these attribute tagged classes. We use the display name from the attribute to populate the path in Unified Settings. The key in the attribute is used to store a single instance of the build settings SO in EditorBuildSettings as a single point to manage the instance.
 Added code to auto create the first SO settings instance using a file panel since the Editor build settings container requires stored instances be backed in the Asset DB. There is no UI for creating the settings (unless added by the Provider) so this should allow us to maintain the singleton settings. Even if a user duplicates the settings instance, since it won't be in the Editor build settings container we won't honor it.
 

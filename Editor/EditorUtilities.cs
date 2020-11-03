@@ -100,6 +100,7 @@ namespace UnityEditor.XR.Management
                     string fileName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(typeName));
                     string targetPath = Path.Combine(path, fileName);
                     AssetDatabase.CreateAsset(obj, targetPath);
+                    AssetDatabase.SaveAssets();
                     return obj;
                 }
             }

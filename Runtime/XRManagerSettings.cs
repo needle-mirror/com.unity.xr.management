@@ -116,15 +116,11 @@ namespace UnityEngine.XR.Management
             get { return m_InitializationComplete; }
         }
 
-        [HideInInspector]
-        static XRLoader s_ActiveLoader = null;
-
         ///<summary>
         /// Return the current singleton active loader instance.
-        ///
         ///</summary>
         [HideInInspector]
-        public XRLoader activeLoader { get { return s_ActiveLoader; } private set { s_ActiveLoader = value; } }
+        public XRLoader activeLoader { get; private set; }
 
         /// <summary>
         /// Return the current active loader, cast to the requested type. Useful shortcut when you need

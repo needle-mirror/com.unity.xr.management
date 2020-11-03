@@ -49,14 +49,14 @@ namespace UnityEditor.XR.Management
             }
         }
 
-
-        static XRGeneralSettingsPerBuildTarget()
+        private void OnDisable()
         {
-            EditorApplication.playModeStateChanged += PlayModeStateChanged;
+            EditorApplication.playModeStateChanged -= PlayModeStateChanged;
         }
 
         void OnEnable()
         {
+            EditorApplication.playModeStateChanged += PlayModeStateChanged;
             foreach (var setting in Settings.Values)
             {
                 var assignedSettings = setting.AssignedSettings;

@@ -16,8 +16,82 @@ using UnityEngine.XR.Management;
 [assembly: InternalsVisibleTo("Unity.XR.Management.EditorTests")]
 namespace UnityEditor.XR.Management
 {
-    class XRGeneralBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport, IPostGenerateGradleAndroidProject
+    /// <summary>
+    /// Small utility class for reading, updating and writing boot config.
+    /// </summary>
+    internal class BootConfig
     {
+        static readonly string kXrBootSettingsKey = "xr-boot-settings";
+        Dictionary<string, string> bootConfigSettings;
+
+        BuildReport buildReport;
+        string bootConfigPath;
+
+        internal BootConfig(BuildReport report)
+        {
+            buildReport = report;
+        }
+
+        internal void ReadBootConfig()
+        {
+            bootConfigSettings = new Dictionary<string, string>();
+
+            string buildTargetName = BuildPipeline.GetBuildTargetName(buildReport.summary.platform);
+            string xrBootSettings = UnityEditor.EditorUserBuildSettings.GetPlatformSettings(buildTargetName, kXrBootSettingsKey);
+            if (!String.IsNullOrEmpty(xrBootSettings))
+            {
+                // boot settings string format
+                // <boot setting>:<value>[;<boot setting>:<value>]*
+                var bootSettings = xrBootSettings.Split(';');
+                foreach (var bootSetting in bootSettings)
+                {
+                    var setting = bootSetting.Split(':');
+                    if (setting.Length == 2 && !String.IsNullOrEmpty(setting[0]) && !String.IsNullOrEmpty(setting[1]))
+                    {
+                        bootConfigSettings.Add(setting[0], setting[1]);
+                    }
+                }
+            }
+
+        }
+
+        internal void SetValueForKey(string key, string value, bool replace = false)
+        {
+            if (bootConfigSettings.ContainsKey(key))
+            {
+                bootConfigSettings[key] = value;
+            }
+            else
+            {
+                bootConfigSettings.Add(key, value);
+            }
+        }
+
+        internal void WriteBootConfig()
+        {
+            // boot settings string format
+            // <boot setting>:<value>[;<boot setting>:<value>]*
+            bool firstEntry = true;
+            var sb = new System.Text.StringBuilder();
+            foreach (var kvp in bootConfigSettings)
+            {
+                if (!firstEntry)
+                {
+                    sb.Append(";");
+                }
+                sb.Append($"{kvp.Key}:{kvp.Value}");
+                firstEntry = false;
+            }
+
+            string buildTargetName = BuildPipeline.GetBuildTargetName(buildReport.summary.platform);
+            EditorUserBuildSettings.SetPlatformSettings(buildTargetName, kXrBootSettingsKey, sb.ToString());
+        }
+    }
+
+    class XRGeneralBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+    {
+        static readonly string kPreInitLibraryKey = "xrsdk-pre-init-library";
+
         class PreInitInfo
         {
             public PreInitInfo(IXRLoaderPreInit loader, BuildTarget buildTarget, BuildTargetGroup buildTargetGroup)
@@ -32,7 +106,6 @@ namespace UnityEditor.XR.Management
             public BuildTargetGroup buildTargetGroup;
         }
 
-        static private PreInitInfo preInitInfo = null;
 
         public int callbackOrder
         {
@@ -59,17 +132,7 @@ namespace UnityEditor.XR.Management
             if (settings == null)
                 return;
 
-            // store off some info about the first loader in the list for PreInit boot.config purposes
-            preInitInfo = null;
             XRManagerSettings loaderManager = settings.AssignedSettings;
-            if (loaderManager != null)
-            {
-                List<XRLoader> loaders = loaderManager.loaders;
-                if (loaders.Count >= 1)
-                {
-                    preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);
-                }
-            }
 
             if (loaderManager != null)
             {
@@ -83,6 +146,23 @@ namespace UnityEditor.XR.Management
                 else
                 {
                     Debug.LogWarning("No Graphics APIs have been configured in Player Settings.");
+                }
+
+                PreInitInfo preInitInfo = null;
+                List<XRLoader> loaders = loaderManager.loaders;
+                if (loaders.Count >= 1)
+                {
+                    preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);
+                }
+
+                var loader = preInitInfo?.loader ?? null;
+                if (loader != null)
+                {
+                    BootConfig bootConfig = new BootConfig(report);
+                    bootConfig.ReadBootConfig();
+                    string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget, preInitInfo.buildTargetGroup);
+                    bootConfig.SetValueForKey(kPreInitLibraryKey, preInitLibraryName);
+                    bootConfig.WriteBootConfig();
                 }
             }
 
@@ -140,64 +220,8 @@ namespace UnityEditor.XR.Management
             // Always remember to cleanup preloaded assets after build to make sure we don't
             // dirty later builds with assets that may not be needed or are out of date.
             CleanOldSettings();
-
-            if (preInitInfo == null)
-                return;
-
-            // Android build post-processing is handled in OnPostGenerateGradleAndroidProject
-            if (report.summary.platform != BuildTarget.Android)
-            {
-                foreach (BuildFile file in report.files)
-                {
-                    if (file.role == CommonRoles.bootConfig)
-                    {
-                        try
-                        {
-                            var loader = preInitInfo.loader;
-                            if (loader != null)
-                            {
-                                string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget,
-                                    preInitInfo.buildTargetGroup);
-                                preInitInfo = null;
-                                UnityEditor.XR.BootOptions.SetXRSDKPreInitLibrary(file.path,
-                                    preInitLibraryName);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            throw new UnityEditor.Build.BuildFailedException(e);
-                        }
-                        break;
-                    }
-                }
-            }
         }
 
-        public void OnPostGenerateGradleAndroidProject(string path)
-        {
-            if (preInitInfo == null)
-                return;
-
-            // android builds move the files to a different location than is in the BuildReport, so we have to manually find the boot.config
-            string[] paths = { "src", "main", "assets", "bin", "Data", "boot.config" };
-            string fullPath = System.IO.Path.Combine(path, String.Join(Path.DirectorySeparatorChar.ToString(), paths));
-
-            try
-            {
-                var loader = preInitInfo.loader;
-                if (loader != null)
-                {
-                    string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget,
-                        preInitInfo.buildTargetGroup);
-                    preInitInfo = null;
-                    UnityEditor.XR.BootOptions.SetXRSDKPreInitLibrary(fullPath, preInitLibraryName);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new UnityEditor.Build.BuildFailedException(e);
-            }
-        }
     }
 }
 
