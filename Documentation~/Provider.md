@@ -1,4 +1,6 @@
-
+---
+uid: xr-plug-in-management-provider
+---
 # Package author documentation
 
 ## XR Plug-in Management packages and Unity packages
@@ -184,6 +186,13 @@ You can only have one instance of **IXRPackage** within a given Unity package. T
 
 Implementing the Package Metadata allows the **XR Plug-in Management** system to auto create and initialize your loaders and settings instances. The system will pass any new instances of your settings to the `PopulateNewSettingsInstance` function to allow your plug-in to do post creation initialization of the new instance data if needed.
 
+## Providing a custom loader UI for the loader selection screen
+
+A package author can provide a custom UI for their loader within one or more build targets. See `XRCustomLoaderUI` for more information about the API. The image below was rendered by the sample provided in this package.
+
+![Sample Loader UI](images/CustomLoaderUI.png)
+
+**Note:** If you're using the samples, make sure to add them to a Unity package. Otherwise, the XR Plug-in Management UI won't work correctly. See Unity documentation on [custom packages](https://docs.unity3d.com/Manual/CustomPackages.html) to learn more about custom package requirements.
 ## Installing the XR Plug-in Management package
 
 Most XR SDK Provider packages typically include XR Plug-in Management, so you shouldn't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).

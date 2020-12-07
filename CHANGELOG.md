@@ -4,21 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-exp.2] - 2020-12-07
+* OpenXR specific UI prototype work
+
 ## [3.2.17] - 2020-11-03
 * Change how startup settings are written on build.
 * Fix issue with domain reload during play that caused a crash on next play.  
 * Immediately persist created assets when initializing packages.
 * CI changes to expand testing.
   
-## [3.2.16] - 2020-09-25
-* Release
-
-## [3.2.16-preview.1] - 2020-09-17
-
+## [3.2.16] - 2020-09-23
 * Fix issue that was causing the UI to gray out with the "Querying Package Manager for currently installed packages..." message.
 * Add documentation to clarify the differences and requirements around plug-in packages and Unity packages.
 * Clarify some issues around loader and initialization.
-
+  
 ## [3.2.15] - 2020-09-03
 * Fix issue with file being included in built package that shouldn't be there.
 

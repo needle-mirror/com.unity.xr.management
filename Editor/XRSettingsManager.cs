@@ -38,7 +38,6 @@ namespace UnityEditor.XR.Management
             public static readonly GUIContent k_XRConfigurationText = new GUIContent("Information about configuration, tracking and migration can be found below.");
             public static readonly GUIContent k_XRConfigurationDocUriText = new GUIContent("View Documentation");
             public static readonly Uri k_XRConfigurationUri = new Uri(" https://docs.unity3d.com/Manual/configuring-project-for-xr.html");
-
         }
 
         internal static GUIStyle GetStyle(string styleName)
@@ -271,7 +270,7 @@ namespace UnityEditor.XR.Management
         private void DisplayLink(GUIContent text, Uri link, int leftMargin)
         {
             var labelStyle = EditorGUIUtility.isProSkin ? Styles.k_UrlLabelProfessional : Styles.k_UrlLabelPersonal;
-            var size = labelStyle.CalcSize(Content.k_XRConfigurationDocUriText);
+            var size = labelStyle.CalcSize(text);
             var uriRect = GUILayoutUtility.GetRect(text, labelStyle);
             uriRect.x += leftMargin;
             uriRect.width = size.x;

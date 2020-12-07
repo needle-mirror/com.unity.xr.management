@@ -1,3 +1,6 @@
+---
+uid: xr-plug-in-management-manual
+---
 # About the XR Plug-in Management package
 
 Use the **XR Plug-in Management** package to help streamline **XR plug-in** lifecycle management and potentially provide users with build time UI through the Unity **Unified Settings** system.

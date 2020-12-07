@@ -1,3 +1,6 @@
+---
+uid: xr-plug-in-management-end-user
+---
 # End-user documentation
 
 ## Installing and using XR Plug-in Management
