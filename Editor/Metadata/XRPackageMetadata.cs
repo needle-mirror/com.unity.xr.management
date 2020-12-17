@@ -39,7 +39,7 @@ namespace UnityEditor.XR.Management.Metadata
         /// The full list of supported buildtargets for this loader. This allows the UI to only show the
         /// loaders appropriate for a specific build target.
         ///
-        /// Returning an empty list or a list containing just <see cref="https://docs.unity3d.com/ScriptReference/BuildTargetGroup.Unknown.html">BuildTargetGroup.Unknown</see>. will make this
+        /// Returning an empty list or a list containing just <a href="https://docs.unity3d.com/ScriptReference/BuildTargetGroup.Unknown.html">BuildTargetGroup.Unknown</a>. will make this
         /// loader invisible in the ui.
         /// </summary>
         List<BuildTargetGroup> supportedBuildTargets { get; }

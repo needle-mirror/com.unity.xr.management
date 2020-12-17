@@ -159,9 +159,9 @@ namespace UnityEngine.XR.Management
         }
 
         /// <summary>
-        /// Override of <see cref="DeInitialize"/> to provide for clearing the instance map.true
+        /// Override of <see cref="XRLoader.Deinitialize"/> to provide for clearing the instance map.true
         ///
-        /// If you override <see cref="DeInitialize"/> in your subclass, you must call the base
+        /// If you override this method in your subclass, you must call the base
         /// implementation to allow the instance map tp be cleaned up correctly.
         /// </summary>
         ///

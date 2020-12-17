@@ -7,6 +7,10 @@ using UnityEngine;
 
 namespace Samples
 {
+    /// <summary>
+    /// Sample loader UI demonstrating how to provide your own loader selection UI for the
+    /// loader selection list.
+    /// </summary>
     [XRCustomLoaderUI("Samples.SampleLoader", BuildTargetGroup.Standalone)]
     public class SampleStandaloneLoaderUI : IXRCustomLoaderUI
     {
@@ -25,12 +29,16 @@ namespace Samples
 
         private float renderLineHeight =0;
 
+        /// <inheritdoc />
         public bool IsLoaderEnabled { get; set; }
 
+        /// <inheritdoc />
         public string[] IncompatibleLoaders => new string[] { "UnityEngine.XR.WindowsMR.WindowsMRLoader" };
 
+        /// <inheritdoc />
         public float RequiredRenderHeight { get; private set; }
 
+        /// <inheritdoc />
         public void SetRenderedLineHeight(float height)
         {
             renderLineHeight = height;
@@ -42,8 +50,10 @@ namespace Samples
             }
         }
 
+        /// <inheritdoc />
         public BuildTargetGroup ActiveBuildTargetGroup { get; set; }
 
+        /// <inheritdoc />
         public void OnGUI(Rect rect)
         {
             var size = EditorStyles.toggle.CalcSize(Content.k_LoaderName);

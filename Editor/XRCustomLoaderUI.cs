@@ -6,9 +6,9 @@ using UnityEngine;
 namespace UnityEditor.XR.Management
 {
     /// <summary>
-    /// Custom attribute that indicates a class supports the <see cref"IXRCustomLoaderIU"/> for a
+    /// Custom attribute that indicates a class supports the <see cref="IXRCustomLoaderUI"/> for a
     /// specific loader and build target group. And class marked with this attribute will
-    /// have <see cref"IXRCustomLoaderIU"/> methods called on it while the XR Plug-in Management UI is displaying
+    /// have <see cref="IXRCustomLoaderUI"/> methods called on it while the XR Plug-in Management UI is displaying
     /// the supported loader for the supported build target.
     ///
     /// Note that there can only be one custom loader for each (Loader Type, BuildTargetGroup) combination. If more than one loader exists,

@@ -17,21 +17,21 @@ namespace UnityEngine.XR.Management
 {
     /// <summary>
     /// Class to handle active loader and subsystem management for XR. This class is to be added as a
-    /// ScriptableObject asset in your project and should only be referenced by the an <see cref="XRGeneralSettings"/>
+    /// ScriptableObject asset in your project and should only be referenced by the <see cref="XRGeneralSettings"/>
     /// instance for its use.
     ///
     /// Given a list of loaders, it will attempt to load each loader in the given order. The first
     /// loader that is successful wins and all remaining loaders are ignored. The loader
     /// that succeeds is accessible through the <see cref="activeLoader"/> property on the manager.
     ///
-    /// Depending on configuration the <see cref="XRGeneralSettings"/> instance will automatically manage the active loader
+    /// Depending on configuration the <see cref="XRManagerSettings"/> instance will automatically manage the active loader
     /// at correct points in the application lifecycle. The user can override certain points in the active loader lifecycle
-    /// and manually manage them by toggling the <see cref="XRGeneralSettings.automaticLoading"/> and <see cref="XRGeneralSettings.automaticRunning"/>
-    /// properties. Disabling <see cref="XRGeneralSettings.automaticLoading"/> implies the the user is responsible for the full lifecycle
-    /// of the XR session normally handled by the <see cref="XRGeneralSettings"/> instance. Toggling this to false also toggles
-    /// <see cref="XRGeneralSettings.automaticRunning"/> false.
+    /// and manually manage them by toggling the <see cref="automaticLoading"/> and <see cref="automaticRunning"/>
+    /// properties. Disabling <see cref="automaticLoading"/> implies the the user is responsible for the full lifecycle
+    /// of the XR session normally handled by the <see cref="XRManagerSettings"/> instance. Toggling this to false also toggles
+    /// <see cref="automaticRunning"/> false.
     ///
-    /// Disabling <see cref="XRGeneralSettings.automaticRunning"/> only implies that the user is responsible for starting and stopping
+    /// Disabling <see cref="automaticRunning"/> only implies that the user is responsible for starting and stopping
     /// the <see cref="activeLoader"/> through the <see cref="StartSubsystems"/> and <see cref="StopSubsystems"/> APIs.
     ///
     /// Automatic lifecycle management is executed as follows
@@ -62,7 +62,7 @@ namespace UnityEngine.XR.Management
 
         /// <summary>
         /// Get and set Automatic Loading state for this manager. When this is true, the manager will automatically call
-        /// <see cref="InitializeLoader"/> and <see cref="DeiitializeLoader"/> for you. When false <see cref="automaticRunning"/>
+        /// <see cref="InitializeLoader"/> and <see cref="DeinitializeLoader"/> for you. When false <see cref="automaticRunning"/>
         /// is also set to false and remains that way. This means that disabling automatic loading disables all automatic behavior
         /// for the manager.
         /// </summary>

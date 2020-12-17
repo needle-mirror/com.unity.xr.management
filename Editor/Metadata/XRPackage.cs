@@ -21,10 +21,10 @@ namespace UnityEditor.XR.Management.Metadata
         /// <summary>
         /// Allows the package to configure new settings and/or port old settings to the instance passed
         /// in.
-        /// 
+        ///
         /// </summary>
         /// <param name="obj">ScriptableObject instance representing an instance of the settings
-        /// type provided by <see cref="IXRPackageMetadata.Settings"/>.</param>
+        /// type provided by <see cref="IXRPackageMetadata.settingsType"/>.</param>
         /// <returns>True if the operation succeeded, false if not. If implementation is empty, just return true.</returns>
         bool PopulateNewSettingsInstance(ScriptableObject obj);
     }
