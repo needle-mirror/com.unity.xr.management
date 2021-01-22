@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-
-using UnityEditor.Android;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
@@ -106,7 +103,6 @@ namespace UnityEditor.XR.Management
             public BuildTargetGroup buildTargetGroup;
         }
 
-
         public int callbackOrder
         {
             get { return 0;  }
@@ -136,6 +132,10 @@ namespace UnityEditor.XR.Management
 
             if (loaderManager != null)
             {
+                // If there are no loaders present in the current manager instance, then the settings will not be included in the current build.
+                if (loaderManager.activeLoaders.Count == 0)
+                    return;
+
                 // chances are that our devices won't fall back to graphics device types later in the list so it's better to assume the device will be created with the first gfx api in the list.
                 // furthermore, we have no way to influence falling back to other graphics API types unless we automatically change settings underneath the user which is no good!
                 GraphicsDeviceType[] deviceTypes = PlayerSettings.GetGraphicsAPIs(report.summary.platform);
@@ -149,7 +149,7 @@ namespace UnityEditor.XR.Management
                 }
 
                 PreInitInfo preInitInfo = null;
-                List<XRLoader> loaders = loaderManager.loaders;
+                var loaders = loaderManager.activeLoaders;
                 if (loaders.Count >= 1)
                 {
                     preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);
@@ -167,19 +167,25 @@ namespace UnityEditor.XR.Management
             }
 
             UnityEngine.Object[] preloadedAssets = PlayerSettings.GetPreloadedAssets();
+            var settingsIncludedInPreloadedAssets = preloadedAssets.Contains(settings);
 
-            if (!preloadedAssets.Contains(settings))
+            // If there are no loaders present in the current manager instance, then the settings will not be included in the current build.
+            if (!settingsIncludedInPreloadedAssets && loaderManager.activeLoaders.Count > 0)
             {
                 var assets = preloadedAssets.ToList();
                 assets.Add(settings);
                 PlayerSettings.SetPreloadedAssets(assets.ToArray());
+            }
+            else
+            {
+                CleanOldSettings();
             }
         }
 
         public static void VerifyGraphicsAPICompatibility(XRManagerSettings loaderManager, GraphicsDeviceType selectedDeviceType)
         {
                 HashSet<GraphicsDeviceType> allLoaderGraphicsDeviceTypes = new HashSet<GraphicsDeviceType>();
-                foreach (var loader in loaderManager.loaders)
+                foreach (var loader in loaderManager.activeLoaders)
                 {
                     List<GraphicsDeviceType> supporteDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(true);
                     // To help with backward compatibility, if we find that any of the compatibility lists are empty we assume that at least one of the loaders does not implement the GetSupportedGraphicsDeviceTypes method
@@ -203,7 +209,7 @@ namespace UnityEditor.XR.Management
                             "The selected grpahics API, {0}, is not supported by any of the current loaders. Please change the preferred Graphics API setting in Player Settings.\n",
                             selectedDeviceType);
 
-                    foreach (var loader in loaderManager.loaders)
+                    foreach (var loader in loaderManager.activeLoaders)
                     {
                         stringBuilder.AppendLine(loader.name + " supports:");
                         foreach (var supportedGraphicsDeviceType in loader.GetSupportedGraphicsDeviceTypes(true))

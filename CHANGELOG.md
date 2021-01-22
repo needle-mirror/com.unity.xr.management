@@ -4,6 +4,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2021-01-22
+* Changed `activeLoaders` to instead of returning a shallow copy, it will now just return a read only list to prevent additional garbage collection.
+* Changed the behavior of `TryRemoveLoader` to return `true` if the loader is no longer present in the list even if it wasn't present to begin with.
+
+## [4.0.0] - 2021-01-21
+* Added API for surfacing package information notification icons in the XR Plug-in Management editor window.
+* Fix issue that enabled users to ask for loaders to be assigned/removed during Play mode.
+* Update dependency on `com.unity.xr.legacyinputhelpers` to version `2.1.7`.
+* Fix issue where the internal list of loaders could modified at runtime in an invalid way. Now, the list of loaders returns a shallow copy of the list at runtime and any modifications using the new `TryAddLoader`, `TryRemoveLoader`, and `TrySetLoaders` methods will be validated to ensure the incoming modifications are legal modifications for the internal loader list before applying them.
+* Fix issue where `XRGeneralSettings` would be included in a build when it held no loaders.
+* Fix issue involving attempts to modify the loader list while in play mode. That should no longer be actionable and should report an error on attempt.
+
 ## [4.0.0-pre.3] - 2020-12-17
 * Fix documentation validation issues.
 
@@ -18,15 +30,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [3.2.17] - 2020-11-03
 * Change how startup settings are written on build.
-* Fix issue with domain reload during play that caused a crash on next play.  
+* Fix issue with domain reload during play that caused a crash on next play.
 * Immediately persist created assets when initializing packages.
 * CI changes to expand testing.
-  
+
 ## [3.2.16] - 2020-09-23
 * Fix issue that was causing the UI to gray out with the "Querying Package Manager for currently installed packages..." message.
 * Add documentation to clarify the differences and requirements around plug-in packages and Unity packages.
 * Clarify some issues around loader and initialization.
-  
+
 ## [3.2.15] - 2020-09-03
 * Fix issue with file being included in built package that shouldn't be there.
 
@@ -46,11 +58,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [3.2.12] - 2020-06-05
 * Fix testing definitions to allows us to remove tests as separate packages.
-  
+
 ## [3.2.11] - 2020-06-04
 * Documentation updates for clarity and correctness.
 * Block use of deprecated APIs on 2020.2 and later.
-  
+
 ## [3.2.11-preview.1] - 2020-05-15
 * Fix FB 1242581 : Fix a number of issue around cache rebuilding and persistent UI display of cache rebuilding even though nothing was happening.
 * Fix FB 1245181 : Fix null deref access of settings manager instance.
@@ -62,7 +74,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix Unity Frame Debugger by not stopping loaders on Pause / Stop.
 * Don't stop loaders when XRGeneralSettings is disabled.
 * Fix UI issue where third party providers would sometimes disappear from the provider selection UI.
- 
+
 
 ## [3.2.9] - 2020-04-18
 * Fix Linux tests in CI.
@@ -90,13 +102,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [3.2.2] - 2020-03-26
 * Re-enable Mac automation testing
 * Add force removal of legacy LIH package to deal with package management resolution issue.
-  
+
 ## [3.2.1] - 2020-03-23
 * CI issues causing an update to LIH, which mean we need to spin an update for that as well.
 
 ## [3.2.0] - 2020-03-13
 * Release of new management workflow.
-  
+
 ## [3.2.0-preview.9] - 2020-03-11
 * Disable legacy vr if we install XR Management. This doesn't lock the UI out but it at least keeps it from being activated at the same time as XR.
 * Stop nagging users to uninstall if not a plugin is unassigned. Instead just add text to the above the fold copy to point out users need to use Pack Man UI instead.
@@ -112,7 +124,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [3.2.0-preview.6] - 2020-03-04
 * Make documentation link color differentiate between Personal and Professional editor themes.
 * More UI tweaks
-  
+
 ## [3.2.0-preview.5] - 2020-03-01
 * Fix state management for queue processing.
 * Add ability for users to remove plug-ins that are no longer actively referenced.
@@ -126,7 +138,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [3.2.0-preview.3] - 2020-02-25
 * Modify metadata store to hold packages and not just metadatas. This allows us to call the settings instance initializer function even after initialization.
 * Fixed some minor known package naming issues.
-  
+
 ## [3.2.0-preview.2] - 2020-02-24
 * Add in Mock HMD package to known packages.
 * Fix up some asynchronous issues with checking for installable packages.
@@ -138,10 +150,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [3.2.0-preview.1] - 2020-02-20
 * Entire re-write of the UI and backing data store to provide a better user experience more inline with the previous Built In XR Settings UI.
 * Removed the Legacy Input Helpers sub pane and replaced with a more integrated set of menu options in the Assets menu (provided by the Legacy Input Helpers package).
-  
+
 ## [3.1.0] - 2020-02-07
 * Preparation for verification release.
-  
+
 ## [3.1.0-preview.2] - 2019-12-17
 * Fix FB 1206103: Serialized loader list is not saved correctly when a new loader asset is created as part of the add operation.
 * Fix package checking system to also look at installed packages and not just remotely registered packages. This allows us to see packages the user has locally installed on disk that may not be registered in the package registry.
@@ -152,10 +164,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fixes an issue where subsystems were not re-started after a pause in the editor
 * Re-add build target filtering into management.
 * Documentation copy review and edit.
- 
+
 ## [3.1.0-preview] - 2019-09-11
 * Adds generic gfx capabilities method to XRLoader class
- 
+
 ## [3.0.5] - 2019-12-06
 * Fix package validation errors.
 * Release for verification.
@@ -329,7 +341,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.0-preview.7] - 2018-10-29
 * Hopefully all CI issues are resolved now.
-  
+
 ## [0.2.0-preview.4] - 2018-10-24
 * Merged in general settings support. Initial implementation allows for ability to assign an XR Manager instance for loading XR SDK at boot launch time.
 

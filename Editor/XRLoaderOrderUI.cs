@@ -79,8 +79,11 @@ namespace UnityEditor.XR.Management
         {
             var li = m_LoaderMetadata[index];
 
+            if (PackageNotificationUtils.registeredPackagesWithNotifications.TryGetValue(li.packageId, out var notificationInfo))
+                PackageNotificationUtils.DrawNotificationIconUI(notificationInfo, rect);
+
             li.toggled = XRPackageMetadataStore.IsLoaderAssigned(li.loaderType, CurrentBuildTargetGroup);
-            bool preToggledState = li.toggled;
+            var preToggledState = li.toggled;
             EditorGUI.BeginDisabledGroup(li.disabled);
 
             if (li.customLoaderUI != null)

@@ -63,8 +63,8 @@ namespace UnityEditor.XR.Management
                 if (assignedSettings == null)
                     continue;
 
-                var filteredLoaders = from ldr in assignedSettings.loaders where ldr != null select ldr;
-                assignedSettings.loaders = filteredLoaders.ToList<XRLoader>();
+                var filteredLoaders = from ldr in assignedSettings.activeLoaders where ldr != null select ldr;
+                assignedSettings.TrySetLoaders(filteredLoaders.ToList<XRLoader>());
             }
             XRGeneralSettings.Instance = XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
         }

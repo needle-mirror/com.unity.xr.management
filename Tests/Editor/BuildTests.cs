@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using UnityEditor.Build;
 using UnityEngine;
@@ -59,8 +61,8 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
                 dl.id = i;
                 dl.supportedDeviceType = m_LoadersSupporteDeviceTypes[i];
                 m_Loaders.Add(dl);
-                m_Manager.loaders.Add(dl);
             }
+            m_Manager.TrySetLoaders(m_Loaders);
         }
 
         [TearDown]
@@ -85,6 +87,90 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
             }
 
             Assert.False(m_BuildFails);
+        }
+    }
+
+    [TestFixture(BuildTargetGroup.Standalone)]
+    [TestFixture(BuildTargetGroup.Android)]
+    [TestFixture(BuildTargetGroup.iOS)]
+    [TestFixture(BuildTargetGroup.Lumin)]
+    [TestFixture(BuildTargetGroup.PS4)]
+    class XRGeneralSettingsBuildTests
+    {
+        const string k_TemporaryTestPath = "Assets/Hidden_XRManagement_Test_Assets";
+        const string k_AssetName = "TestGeneralAsset.asset";
+
+        BuildTargetGroup m_BuildTargetGroup;
+
+        XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
+
+        public XRGeneralSettingsBuildTests(BuildTargetGroup group)
+        {
+            m_BuildTargetGroup = group;
+        }
+
+        void CleanupOldSettings() => BuildHelpers.CleanOldSettings<XRGeneralSettings>();
+
+        [SetUp]
+        public void SetupPlayerSettings()
+        {
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out m_OldBuildTargetSettings);
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+
+            var emptyBuildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
+            var generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
+            generalSettings.AssignedSettings = ScriptableObject.CreateInstance<XRManagerSettings>();
+            emptyBuildTargetSettings.SetSettingsForBuildTarget(m_BuildTargetGroup, generalSettings);
+            emptyBuildTargetSettings.SettingsForBuildTarget(m_BuildTargetGroup).AssignedSettings.TrySetLoaders(new List<XRLoader>());
+
+            Directory.CreateDirectory(k_TemporaryTestPath);
+            AssetDatabase.CreateAsset(emptyBuildTargetSettings, Path.Combine(k_TemporaryTestPath, k_AssetName));
+
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, emptyBuildTargetSettings, true);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (m_OldBuildTargetSettings != null)
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
+
+            // AssetDatabase.DeleteAsset(k_TemporaryTestPath);
+            AssetDatabase.DeleteAsset(Path.Combine(k_TemporaryTestPath, k_AssetName));
+            if (Directory.Exists(Path.Combine("./", k_TemporaryTestPath)))
+            {
+                Directory.Delete(Path.Combine("./", k_TemporaryTestPath));
+                File.Delete($"./{k_TemporaryTestPath}.meta");
+                AssetDatabase.Refresh();
+            }
+        }
+
+        [Test]
+        public void CheckEmptyXRGeneralAssetWillNotGetIncludedInAssets()
+        {
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            Assert.False(buildTargetSettings == null);
+
+            var settings = buildTargetSettings.SettingsForBuildTarget(m_BuildTargetGroup);
+            Assert.False(settings == null);
+
+            var preloadedAssets = PlayerSettings.GetPreloadedAssets();
+            var settingsIncludedInPreloadedAssets = preloadedAssets.Contains(settings);
+
+            // Use the logic in XRGeneralBuildProcessor.OnPreprocessBuild() to determine if the XR General Settings will
+            // be include or not.
+            if (!settingsIncludedInPreloadedAssets && settings.AssignedSettings.activeLoaders.Count > 0)
+            {
+                var assets = preloadedAssets.ToList();
+                assets.Add(settings);
+                PlayerSettings.SetPreloadedAssets(assets.ToArray());
+            }
+            else
+            {
+                CleanupOldSettings();
+            }
+
+            Assert.False(PlayerSettings.GetPreloadedAssets().Contains(settings));
         }
     }
 }

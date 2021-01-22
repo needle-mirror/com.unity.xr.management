@@ -29,12 +29,12 @@ namespace UnityEditor.XR.Management.Tests
             var dl = ScriptableObject.CreateInstance(typeof(DummyLoader)) as DummyLoader;
             dl.id = 0;
             dl.shouldFail = true;
-            m_Manager.loaders.Add(dl);
+            m_Manager.TryAddLoader(dl);
 
             dl = ScriptableObject.CreateInstance(typeof(DummyLoader)) as DummyLoader;
             dl.id = 1;
             dl.shouldFail = false;
-            m_Manager.loaders.Add(dl);
+            m_Manager.TryAddLoader(dl);
         }
 
         [UnityTest]

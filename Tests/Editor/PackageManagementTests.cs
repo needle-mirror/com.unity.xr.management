@@ -100,7 +100,7 @@ namespace UnityEditor.XR.Management.Tests
         private bool SettingsHasLoaderOfType(XRManagerSettings settings, string loaderTypeName)
         {
             bool wasFound = false;
-            foreach (var l in m_Settings.loaders)
+            foreach (var l in m_Settings.activeLoaders)
             {
                 if (String.Compare(l.GetType().FullName, loaderTypeName) == 0)
                     wasFound = true;
@@ -118,7 +118,7 @@ namespace UnityEditor.XR.Management.Tests
             Assert.IsFalse(String.IsNullOrEmpty(loaderTypeName));
 
             bool wasFound = false;
-            foreach (var l in m_Settings.loaders)
+            foreach (var l in m_Settings.activeLoaders)
             {
                 if (String.Compare(l.GetType().FullName, loaderTypeName) == 0)
                     wasFound = true;
@@ -179,7 +179,7 @@ namespace UnityEditor.XR.Management.Tests
 #if !UNITY_2020_2_OR_NEWER
             XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget("com.unity.invalid.package.id", String.Empty, BuildTargetGroup.Standalone);
 
-            LogAssert.Expect(LogType.Error, new Regex(@"cannot be found"));
+            LogAssert.Expect(LogType.Error, new Regex(@"Management error"));
 
             while (XRPackageMetadataStore.isDoingQueueProcessing)
             {

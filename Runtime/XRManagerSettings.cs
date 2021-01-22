@@ -13,6 +13,7 @@ using UnityEngine.Serialization;
 using UnityEngine.XR.Management;
 
 [assembly: InternalsVisibleTo("Unity.XR.Management.Tests")]
+[assembly: InternalsVisibleTo("Unity.XR.Management.EditorTests")]
 namespace UnityEngine.XR.Management
 {
     /// <summary>
@@ -94,9 +95,21 @@ namespace UnityEngine.XR.Management
         [FormerlySerializedAs("Loaders")]
         List<XRLoader> m_Loaders = new List<XRLoader>();
 
+        // Maintains a list of registered loaders that is immutable at runtime.
+        [SerializeField]
+        [HideInInspector]
+        HashSet<XRLoader> m_RegisteredLoaders = new HashSet<XRLoader>();
+
         /// <summary>
         /// List of loaders currently managed by this XR Manager instance.
         /// </summary>
+        /// <remarks>
+        /// Modifying the list of loaders at runtime is undefined behavior and could result in a crash or memory leak.
+        /// Use <see cref="activeLoaders"/> to retrieve the currently ordered list of loaders. If you need to mutate
+        /// the list at runtime, use <see cref="TryAddLoader"/>, <see cref="TryRemoveLoader"/>, and
+        /// <see cref="TrySetLoaders"/>.
+        /// </remarks>
+        [Obsolete("'XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.")]
         public List<XRLoader> loaders
         {
             get { return m_Loaders; }
@@ -105,6 +118,15 @@ namespace UnityEngine.XR.Management
 #endif
         }
 
+        /// <summary>
+        /// A shallow copy of the list of loaders currently managed by this XR Manager instance.
+        /// </summary>
+        /// <remarks>
+        /// This property returns a read only list. Any changes made to the list itself will not affect the list
+        /// used by this XR Manager instance. To mutate the list of loaders currently managed by this instance,
+        /// use <see cref="TryAddLoader"/>, <see cref="TryRemoveLoader"/>, and/or <see cref="TrySetLoaders"/>.
+        /// </remarks>
+        public IReadOnlyList<XRLoader> activeLoaders => m_Loaders;
 
         /// <summary>
         /// Read only boolean letting us know if initialization is completed. Because initialization is
@@ -158,7 +180,7 @@ namespace UnityEngine.XR.Management
                 return;
             }
 
-            foreach (var loader in loaders)
+            foreach (var loader in currentLoaders)
             {
                 if (loader != null)
                 {
@@ -199,7 +221,7 @@ namespace UnityEngine.XR.Management
                 yield break;
             }
 
-            foreach (var loader in loaders)
+            foreach (var loader in currentLoaders)
             {
                 if (loader != null)
                 {
@@ -215,6 +237,133 @@ namespace UnityEngine.XR.Management
             }
 
             activeLoader = null;
+        }
+
+        private bool CheckLoaderRegistration(XRLoader loader)
+        {
+#if UNITY_EDITOR
+            // Need to check if the application is in play mode, if not then the set of registered loaders is mutable.
+            if (!Application.isPlaying)
+            {
+                return !m_RegisteredLoaders.Contains(loader);
+            }
+#endif
+
+            return m_RegisteredLoaders.Contains(loader) && !currentLoaders.Contains(loader);
+        }
+
+        /// <summary>
+        /// Attempts to append the given loader to the list of loaders at the given index.
+        /// </summary>
+        /// <param name="loader">
+        /// The <see cref="XRLoader"/> to be added to this manager's instance of loaders.
+        /// </param>
+        /// <param name="index">
+        /// The index at which the given <see cref="XRLoader"/> should be added. If you set a negative or otherwise
+        /// invalid index, the loader will be appended to the end of the list.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the loader is not a duplicate and was added to the list successfully, <c>false</c>
+        /// otherwise.
+        /// </returns>
+        /// <remarks>
+        /// This method behaves differently in the Editor and during runtime/Play mode. While your app runs in the Editor and not in
+        /// Play mode, attempting to add an <see cref="XRLoader"/> will always succeed and register that loader's type
+        /// internally. Attempting to add a loader during runtime/Play mode will trigger a check to see whether a loader of
+        /// that type was registered. If the check is successful, the loader is added. If not, the loader is not added and the method
+        /// returns <c>false</c>.
+        /// </remarks>
+        public bool TryAddLoader(XRLoader loader, int index = -1)
+        {
+            if (loader == null || !CheckLoaderRegistration(loader))
+                return false;
+
+#if UNITY_EDITOR
+            m_RegisteredLoaders.Add(loader);
+#endif
+
+            if (index < 0 || index >= currentLoaders.Count)
+                currentLoaders.Add(loader);
+            else
+                currentLoaders.Insert(index, loader);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to remove the first instance of a given loader from the list of loaders.
+        /// </summary>
+        /// <param name="loader">
+        /// The <see cref="XRLoader"/> to be removed from this manager's instance of loaders.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the loader was successfully removed from the list, <c>false</c> otherwise.
+        /// </returns>
+        /// <remarks>
+        /// This method behaves differently in the Editor and during runtime/Play mode. During runtime/Play mode, the loader
+        /// will be removed with no additional side effects if it is in the list managed by this instance. While in the
+        /// Editor and not in Play mode, the loader will be removed if it exists and
+        /// it will be unregistered from this instance and any attempts to add it during
+        /// runtime/Play mode will fail. You can re-add the loader in the Editor while not in Play mode.
+        /// </remarks>
+        public bool TryRemoveLoader(XRLoader loader)
+        {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                m_RegisteredLoaders.Remove(loader);
+#endif
+            if (currentLoaders.Contains(loader))
+                return currentLoaders.Remove(loader);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to set the given loader list as the list of loaders managed by this instance.
+        /// </summary>
+        /// <param name="reorderedLoaders">
+        /// The list of <see cref="XRLoader"/>s to be managed by this manager instance.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the loader list was set successfully, <c>false</c> otherwise.
+        /// </returns>
+        /// <remarks>
+        /// This method behaves differently in the Editor and during runtime/Play mode. While in the Editor and not in
+        /// Play mode, any attempts to set the list of loaders will succeed without any additional checks. During
+        /// runtime/Play mode, the new loader list will be validated against the registered <see cref="XRLoader"/> types.
+        /// If any loaders exist in the list that were not registered at startup, the attempt will fail.
+        /// </remarks>
+        public bool TrySetLoaders(List<XRLoader> reorderedLoaders)
+        {
+            var originalLoaders = new List<XRLoader>(activeLoaders);
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                registeredLoaders.Clear();
+                currentLoaders.Clear();
+                foreach (var loader in reorderedLoaders)
+                {
+                    if (!TryAddLoader(loader))
+                    {
+                        TrySetLoaders(originalLoaders);
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+#endif
+            currentLoaders.Clear();
+            foreach (var loader in reorderedLoaders)
+            {
+                if (!TryAddLoader(loader))
+                {
+                    currentLoaders = originalLoaders;
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private bool CheckGraphicsAPICompatibility(XRLoader loader)
@@ -329,6 +478,22 @@ namespace UnityEngine.XR.Management
             {
                 DeinitializeLoader();
             }
+        }
+
+        // To modify the list of loaders internally use `currentLoaders` as it will return a list reference rather
+        // than a shallow copy.
+        // TODO @davidmo 10/12/2020: remove this in next major version bump and make 'loaders' internal.
+        internal List<XRLoader> currentLoaders
+        {
+            get { return m_Loaders; }
+            set { m_Loaders = value; }
+        }
+
+        // To modify the set of registered loaders use `registeredLoaders` as it will return a reference to the
+        // hashset of loaders.
+        internal HashSet<XRLoader> registeredLoaders
+        {
+            get { return m_RegisteredLoaders; }
         }
     }
 }

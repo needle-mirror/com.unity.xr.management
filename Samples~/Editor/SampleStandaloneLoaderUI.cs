@@ -27,7 +27,7 @@ namespace Samples
             public static readonly GUIContent k_WarningIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
         }
 
-        private float renderLineHeight =0;
+        float renderLineHeight = 0;
 
         /// <inheritdoc />
         public bool IsLoaderEnabled { get; set; }
@@ -62,12 +62,13 @@ namespace Samples
             labelRect.height = renderLineHeight;
             IsLoaderEnabled = EditorGUI.ToggleLeft(labelRect, Content.k_LoaderName, IsLoaderEnabled);
 
+            // The following shows how to make draw an icon with a tooltip
             size = EditorStyles.label.CalcSize(Content.k_WarningIcon);
             var imageRect = new Rect(rect);
             imageRect.xMin = labelRect.xMax + 1;
             imageRect.width = size.y;
             imageRect.height = renderLineHeight;
-            var iconWithTooltip = new GUIContent("", Content.k_WarningIcon.image, "Warning: This is tooltip text!");
+            var iconWithTooltip = new GUIContent("", Content.k_WarningIcon.image, "Warning: This is a sample to show how to draw a custom icon with a tooltip!");
             EditorGUI.LabelField(imageRect, iconWithTooltip);
 
             if (IsLoaderEnabled)

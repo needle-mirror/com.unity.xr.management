@@ -12,8 +12,7 @@ namespace UnityEditor.XR.Management
 {
     class XRSettingsManager : SettingsProvider
     {
-
-        static class Styles
+        internal static class Styles
         {
             public static readonly GUIStyle k_UrlLabelPersonal = new GUIStyle(EditorStyles.label)
             {

@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-
-using UnityEditor;
 
 using UnityEngine;
 using UnityEditor.PackageManager;
@@ -289,7 +286,7 @@ namespace UnityEditor.XR.Management.Metadata
             if (settings == null)
                 return false;
 
-            foreach (var loader in settings.AssignedSettings.loaders)
+            foreach (var loader in settings.AssignedSettings.activeLoaders)
             {
                 if (loader != null && String.Compare(loader.GetType().FullName, loaderTypeName) == 0)
                     return true;
@@ -302,7 +299,7 @@ namespace UnityEditor.XR.Management.Metadata
             if (settings == null)
                 return false;
 
-            foreach (var l in settings.loaders)
+            foreach (var l in settings.activeLoaders)
             {
                 if (l != null && String.Compare(l.GetType().FullName, loaderTypeName) == 0)
                     return true;
@@ -331,6 +328,12 @@ namespace UnityEditor.XR.Management.Metadata
         /// <returns>True if assignment succeeds, false if not.</returns>
         public static bool AssignLoader(XRManagerSettings settings, string loaderTypeName, BuildTargetGroup buildTargetGroup)
         {
+            if (EditorApplication.isPlaying || EditorApplication.isPaused)
+            {
+                Debug.LogError($"Attempt to add {loaderTypeName} for {buildTargetGroup} while in Play mode. XR Plug-in Management can not make changes to the loader list when running.");
+                return false;
+            }
+
             var instance = EditorUtilities.GetInstanceOfTypeWithNameFromAssetDatabase(loaderTypeName);
             if (instance == null || !(instance is XRLoader))
             {
@@ -340,29 +343,28 @@ namespace UnityEditor.XR.Management.Metadata
                     return false;
             }
 
-            var assignedLoaders = settings.loaders;
             XRLoader newLoader = instance as XRLoader;
-
-            if (!assignedLoaders.Contains(newLoader))
+            if (settings.TryAddLoader(newLoader))
             {
-                assignedLoaders.Add(newLoader);
-                settings.loaders = new List<XRLoader>();
-
+                var assignedLoaders = settings.activeLoaders;
+                var orderedLoaders = new List<XRLoader>();
                 var allLoaders = GetAllLoadersForBuildTarget(buildTargetGroup);
-
                 foreach (var ldr in allLoaders)
                 {
                     var newInstance = EditorUtilities.GetInstanceOfTypeWithNameFromAssetDatabase(ldr.loaderType) as XRLoader;
 
                     if (newInstance != null && assignedLoaders.Contains(newInstance))
                     {
-                        settings.loaders.Add(newInstance);
+                        orderedLoaders.Add(newInstance);
 #if UNITY_EDITOR
                         var loaderHelper = newLoader as XRLoaderHelper;
                         loaderHelper?.WasAssignedToBuildTarget(buildTargetGroup);
 #endif
                     }
                 }
+
+                if (!settings.TrySetLoaders(orderedLoaders))
+                    return false;
 
                 EditorUtility.SetDirty(settings);
                 AssetDatabase.SaveAssets();
@@ -383,24 +385,30 @@ namespace UnityEditor.XR.Management.Metadata
         /// <returns>True if removal succeeds, false if not.</returns>
         public static bool RemoveLoader(XRManagerSettings settings, string loaderTypeName, BuildTargetGroup buildTargetGroup)
         {
+            if (EditorApplication.isPlaying || EditorApplication.isPaused)
+            {
+                Debug.LogError($"Attempt to remove {loaderTypeName} for {buildTargetGroup} while in Play mode. XR Plug-in Management can not make changes to the loader list when running.");
+                return false;
+            }
+
             var instance = EditorUtilities.GetInstanceOfTypeWithNameFromAssetDatabase(loaderTypeName);
             if (instance == null || !(instance is XRLoader))
                 return false;
 
             XRLoader loader = instance as XRLoader;
 
-            if (settings.loaders.Contains(loader))
+            if (settings.TryRemoveLoader(loader))
             {
-                settings.loaders.Remove(loader);
                 EditorUtility.SetDirty(settings);
                 AssetDatabase.SaveAssets();
 #if UNITY_EDITOR
                 var loaderHelper = loader as XRLoaderHelper;
                 loaderHelper?.WasUnassignedFromBuildTarget(buildTargetGroup);
 #endif
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         internal static IXRPackage GetPackageForSettingsTypeNamed(string settingsTypeName)
@@ -846,7 +854,10 @@ namespace UnityEditor.XR.Management.Metadata
             EditorApplication.update -= WaitingOnSearchQuery;
             if (s_SearchRequest != null)
             {
-                EditorApplication.update += WaitingOnSearchQuery;
+                if (s_SearchRequest.IsCompleted)
+                    EditorApplication.update += UpdateInstallablePackages;
+                else
+                    EditorApplication.update += WaitingOnSearchQuery;
                 return;
             }
 

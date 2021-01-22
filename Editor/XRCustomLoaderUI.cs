@@ -7,7 +7,7 @@ namespace UnityEditor.XR.Management
 {
     /// <summary>
     /// Custom attribute that indicates a class supports the <see cref="IXRCustomLoaderUI"/> for a
-    /// specific loader and build target group. And class marked with this attribute will
+    /// specific loader and build target group. Any class marked with this attribute will
     /// have <see cref="IXRCustomLoaderUI"/> methods called on it while the XR Plug-in Management UI is displaying
     /// the supported loader for the supported build target.
     ///
@@ -59,8 +59,8 @@ namespace UnityEditor.XR.Management
         bool IsLoaderEnabled { get; set; }
 
         /// <summary>
-        /// Array of type names that are incompatible with the loader when it's enabled. Non-compatible loaders will be grayed out.
-        /// of the UI,
+        /// Array of type names that are incompatible with the loader when it's enabled. Non-compatible loaders will be grayed out
+        /// in the UI.
         /// </summary>
         /// <value>Array of type names to disable.</value>
         string[] IncompatibleLoaders { get; }
@@ -87,9 +87,9 @@ namespace UnityEditor.XR.Management
         BuildTargetGroup ActiveBuildTargetGroup { get; set; }
 
         /// <summary>
-        /// Call to render the custom loader UI for this
+        /// Call to render the UI for this custom loader.
         /// </summary>
-        /// <param name="rect"></param>
+        /// <param name="rect">The rect within which the UI should render into.</param>
         void OnGUI(Rect rect);
     }
 }

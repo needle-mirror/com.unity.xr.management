@@ -5,7 +5,7 @@ uid: xr-plug-in-management-provider
 
 ## XR Plug-in Management packages and Unity packages
 
-All **XR Plug-in Management** packages must also be full Unity packages. The package does not have to be registered or exist in any external repository or package server. It can live within the `Assets` folder. The only requirement is that you define the package with a `package.json` file and a unique package id. 
+All **XR Plug-in Management** packages must also be full Unity packages. The package does not have to be registered or exist in any external repository or package server. It can live within the `Assets` folder. The only requirement is that you define the package with a `package.json` file and a unique package id.
 
 For more information, see documentation on [Unity Packages](https://docs.unity3d.com/Manual/PackagesList.html).
 
@@ -67,7 +67,7 @@ The provider needs to handle getting the settings from `EditorUserBuildSettings`
 The simplest build script for your package would look like this:
 
 ```csharp
-public class MyBuildProcessor : XRBuildHelper<MySettings> 
+public class MyBuildProcessor : XRBuildHelper<MySettings>
 {
     public override string BuildSettingsKey { get { return "MyPackageSettingsKey"; } }
 }
@@ -76,8 +76,8 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 You can override the build processing steps from `IPreprocessBuildWithReport` and `IPostprocessBuildWithReport`, but make sure you call to the base class implementation. If you don’t, your settings don't transfer to the built application.
 
 ```csharp
-public class MyBuildProcessor : XRBuildHelper<MySettings> 
-{ 
+public class MyBuildProcessor : XRBuildHelper<MySettings>
+{
     public override string BuildSettingsKey { get { return "MyPackageSettingsKey"; } }
 
     public override void OnPreprocessBuild(BuildReport report)
@@ -97,8 +97,8 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 If you want to support different settings per platform at build time, you can override `UnityEngine.Object SettingsForBuildTargetGroup(BuildTargetGroup buildTargetGroup)` and use the `buildTargetGroup` attribute to retrieve the appropriate platform settings. By default, this method uses the key associated with the settings instance to copy the entire settings object from `EditorUserBuildSettings` to `PlayerSettings`.
 
 ```csharp
-public class MyBuildProcessor : XRBuildHelper<MySettings> 
-{ 
+public class MyBuildProcessor : XRBuildHelper<MySettings>
+{
     public override string BuildSettingsKey { get { return "MyPackageSettingsKey"; } }
 
     public override UnityEngine.Object SettingsForBuildTargetGroup(BuildTargetGroup buildTargetGroup)
@@ -132,7 +132,7 @@ You can only have one instance of **IXRPackage** within a given Unity package. T
 
 ## Example: Simple, minimal package information setup:
 
-```
+```csharp
     class MyPackage : IXRPackage
     {
         private class MyLoaderMetadata : IXRLoaderMetadata
@@ -147,9 +147,9 @@ You can only have one instance of **IXRPackage** within a given Unity package. T
             public string packageName { get; set; }
             public string packageId { get; set; }
             public string settingsType { get; set; }
-            public List<IXRLoaderMetadata> loaderMetadata { get; set; } 
+            public List<IXRLoaderMetadata> loaderMetadata { get; set; }
         }
-        
+
         private static IXRPackageMetadata s_Metadata = new MyPackageMetadata(){
                 packageName = "My XR Plug-in",
                 packageId = "my.xr.package",
@@ -179,7 +179,7 @@ You can only have one instance of **IXRPackage** within a given Unity package. T
             return false;
 
         }
-    }    
+    }
 ```
 
 ## Package initialization
@@ -193,6 +193,86 @@ A package author can provide a custom UI for their loader within one or more bui
 ![Sample Loader UI](images/CustomLoaderUI.png)
 
 **Note:** If you're using the samples, make sure to add them to a Unity package. Otherwise, the XR Plug-in Management UI won't work correctly. See Unity documentation on [custom packages](https://docs.unity3d.com/Manual/CustomPackages.html) to learn more about custom package requirements.
+
+## Displaying plug-in notifications in the XR Plug-in Management window
+
+If your package loader needs to notify the user about upcoming changes to the package, XR Plug-in Management provides an API that allows packages to display a tooltip and icon inside the XR Plug-in Management window in the Unity Editor.
+
+![Example notification in the XR Plug-in Management windowI](images/XRPluginManagementNotificationIcons.png)
+
+To do this, use the `UnityEngine.XR.Management.PackageNotificationUtils` API.  The code example below shows The code example below shows how to register your package with an icon, tooltip, and optionally a URL. Clicking the icon will redirect the user to a resource with more information.
+
+```csharp
+// The following sample assumes some package "com.unity.xr.foobar" has all
+// relevant package information
+class FoobarLoaderMetadata : IXRLoaderMetadata
+{
+    public string loaderName { get; set; }
+    public string loaderType { get; set; }
+    public List<BuildTargetGroup> supportedBuildTargets { get; set; }
+}
+
+class FoobarPackageMetadata : IXRPackageMetadata
+{
+    public string packageName { get; set; }
+    public string packageId { get; set; }
+    public string settingsType { get; set; }
+    public List<IXRLoaderMetadata> loaderMetadata { get; set; }
+}
+
+static IXRPackageMetadata s_Metadata = new FoobarPackageMetadata() {
+        packageName = "Foobar Package",
+        packageId = "com.unity.xr.foobar",
+        settingsType = typeof(SampleSettings).FullName,
+
+        loaderMetadata = new List<IXRLoaderMetadata>() {
+            new FoobarLoaderMetadata() {
+                loaderName = "Foobar Loader",
+                loaderType = typeof(SampleLoader).FullName,
+                supportedBuildTargets = new List<BuildTargetGroup>() {
+                    BuildTargetGroup.Standalone,
+                    BuildTargetGroup.WSA
+                }
+            }
+        }
+};
+
+// This is the tooltip string that will be shown in the XR Plug-in Management window when the user
+// mouses over the icon
+const string k_PackageNotificationTooltip =
+@"This is a sample and will not work if copied verbatim.";
+
+// This is a string that links to the Unity Editor built-in icon for a warning symbol.
+const GUIContent k_PackageNotificationIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
+
+// This is the link that opens when the user clicks on the icon in the XR Plug-in Management window.
+const string k_PackageNotificationManagementDocsURL = @"https://docs.unity3d.com/Packages/com.unity.xr.management@latest/index.html";
+
+public IXRPackageMetadata metadata
+{
+    get
+    {
+        // Register package notification information any time the metadata is
+        // requested. This prevents domain reloads from losing your notification.
+        var packageNotificationInfo = new PackageNotificationInfo(
+            EditorGUIUtility.IconContent(k_PackageNotificationIcon),
+            k_PackageNotificationTooltip,
+            k_PackageNotificationManagementDocsURL);
+
+        PackageNotificationUtils.RegisterPackageNotificationInformation(
+            s_Metadata.packageId,
+            packageNotificationInfo);
+
+        return s_Metadata;
+    }
+}
+
+```
+
+The code above should display a notification in the XR Plug-in Management window.
+
+**Note:** The code samples in `SampleMetadata.cs` contain further examples of how to use this API.
+
 ## Installing the XR Plug-in Management package
 
 Most XR SDK Provider packages typically include XR Plug-in Management, so you shouldn't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
