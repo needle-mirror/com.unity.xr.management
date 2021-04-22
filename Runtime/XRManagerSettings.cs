@@ -176,7 +176,7 @@ namespace UnityEngine.XR.Management
             {
                 Debug.LogWarning(
                     "XR Management has already initialized an active loader in this scene." +
-                    "Please make sure to stop all subsystems and deinitialize the active loader before initializing a new one.");
+                    " Please make sure to stop all subsystems and deinitialize the active loader before initializing a new one.");
                 return;
             }
 
@@ -217,7 +217,7 @@ namespace UnityEngine.XR.Management
             {
                 Debug.LogWarning(
                     "XR Management has already initialized an active loader in this scene." +
-                    "Please make sure to stop all subsystems and deinitialize the active loader before initializing a new one.");
+                    " Please make sure to stop all subsystems and deinitialize the active loader before initializing a new one.");
                 yield break;
             }
 
@@ -237,19 +237,6 @@ namespace UnityEngine.XR.Management
             }
 
             activeLoader = null;
-        }
-
-        private bool CheckLoaderRegistration(XRLoader loader)
-        {
-#if UNITY_EDITOR
-            // Need to check if the application is in play mode, if not then the set of registered loaders is mutable.
-            if (!Application.isPlaying)
-            {
-                return !m_RegisteredLoaders.Contains(loader);
-            }
-#endif
-
-            return m_RegisteredLoaders.Contains(loader) && !currentLoaders.Contains(loader);
         }
 
         /// <summary>
@@ -275,12 +262,15 @@ namespace UnityEngine.XR.Management
         /// </remarks>
         public bool TryAddLoader(XRLoader loader, int index = -1)
         {
-            if (loader == null || !CheckLoaderRegistration(loader))
+            if (loader == null || currentLoaders.Contains(loader))
                 return false;
 
 #if UNITY_EDITOR
-            m_RegisteredLoaders.Add(loader);
+            if (!EditorApplication.isPlaying && !m_RegisteredLoaders.Contains(loader))
+                m_RegisteredLoaders.Add(loader);
 #endif
+            if (!m_RegisteredLoaders.Contains(loader))
+                return false;
 
             if (index < 0 || index >= currentLoaders.Count)
                 currentLoaders.Add(loader);
@@ -308,14 +298,16 @@ namespace UnityEngine.XR.Management
         /// </remarks>
         public bool TryRemoveLoader(XRLoader loader)
         {
+            var removedLoader = true;
+            if (currentLoaders.Contains(loader))
+                removedLoader = currentLoaders.Remove(loader);
+
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
+            if (!EditorApplication.isPlaying && !currentLoaders.Contains(loader))
                 m_RegisteredLoaders.Remove(loader);
 #endif
-            if (currentLoaders.Contains(loader))
-                return currentLoaders.Remove(loader);
 
-            return true;
+            return removedLoader;
         }
 
         /// <summary>
@@ -337,7 +329,7 @@ namespace UnityEngine.XR.Management
         {
             var originalLoaders = new List<XRLoader>(activeLoaders);
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
+            if (!EditorApplication.isPlaying)
             {
                 registeredLoaders.Clear();
                 currentLoaders.Clear();

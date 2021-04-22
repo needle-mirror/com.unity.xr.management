@@ -39,6 +39,27 @@ namespace UnityEditor.XR.Management.Metadata
         {
             List<IXRPackage> packages = new List<IXRPackage>();
 
+#if UNITY_2020_3_OR_NEWER
+            packages.Add(new KnownPackage() {
+                metadata = new KnownPackageMetadata(){
+                    packageName = "Open XR Plugin",
+                    packageId = "com.unity.xr.openxr",
+                    settingsType = "UnityEditor.XR.OpenXR.OpenXRPackageSettings",
+                    loaderMetadata = new List<IXRLoaderMetadata>() {
+                    new KnownLoaderMetadata() {
+                            loaderName = "Open XR",
+                            loaderType = "UnityEngine.XR.OpenXR.OpenXRLoader",
+                            supportedBuildTargets = new List<BuildTargetGroup>() {
+                                BuildTargetGroup.Standalone,
+                                BuildTargetGroup.WSA
+                            }
+                        },
+                    }
+                }
+            });
+#endif
+
+#if !UNITY_2021_2_OR_NEWER
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
                     packageName = "Windows XR Plugin",
@@ -56,6 +77,7 @@ namespace UnityEditor.XR.Management.Metadata
                     }
                 }
             });
+#endif
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){

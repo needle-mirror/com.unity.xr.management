@@ -43,12 +43,50 @@ namespace UnityEditor.XR.Management
 
         struct Content
         {
-            public static readonly string k_HelpUri = "https://docs.unity3d.com/Packages/com.unity.xr.management@3.0/manual/EndUser.html#:~:text=Select%20the%20XR%20Plugin%20Management,Loader%20for%20your%20plug%2Din.&text=Select%20the%20Install%20button%20from,install%20the%20provider%20you%20need.https://docs.unity3d.com/Packages/com.unity.xr.management@3.0/manual/EndUser.html#:~:text=Select%20the%20XR%20Plugin%20Management,Loader%20for%20your%20plug%2Din.&text=Select%20the%20Install%20button%20from,install%20the%20provider%20you%20need";
+            public static readonly string k_HelpUri = "https://docs.unity3d.com/Packages/com.unity.xr.management@4.0/manual/EndUser.html";
             public static readonly GUIContent k_LoaderUITitle = EditorGUIUtility.TrTextContent("Plug-in Providers");
 
             public static readonly GUIContent k_HelpContent = new GUIContent("",
                 EditorGUIUtility.IconContent("_Help@2x").image,
                 "Selecting an XR Plug-in Provider installs and loads the corresponding package in your project. You can view and manage these packages in the Package Manager.");
+        }
+
+        struct DeprecationInfo
+        {
+            public GUIContent icon;
+            public GUIContent renderContent;
+        }
+
+        static Dictionary<string, DeprecationInfo> s_DeprecationInfo = new Dictionary<string, DeprecationInfo>();
+        static bool s_DidPopulateDeprecationInfo = false;
+
+#if UNITY_2021_1_OR_NEWER
+        static string k_DeprecatedWMRLoaderName = "Windows Mixed Reality";
+#endif //UNITY_2021_1_OR_NEWER
+        static bool IsDeprecated(string loaderName)
+        {
+#if UNITY_2021_2_OR_NEWER
+            if (loaderName == k_DeprecatedWMRLoaderName)
+                return true;
+#endif //UNITY_2021_2_OR_NEWER
+            return false;
+        }
+
+        static void PopulateDeprecationInfo()
+        {
+            if (s_DidPopulateDeprecationInfo)
+                return;
+
+            s_DidPopulateDeprecationInfo = true;
+
+#if UNITY_2021_1_OR_NEWER
+            s_DeprecationInfo[k_DeprecatedWMRLoaderName] =  new DeprecationInfo{
+                icon = EditorGUIUtility.IconContent("console.warnicon.sml"),
+                renderContent = new GUIContent("",
+                    EditorGUIUtility.IconContent("console.warnicon.sml").image,
+                    @"Microsoft has transitioned support of Windows MR devices to OpenXR in Unity 2021, and recommends using Unity's OpenXR plugin. As such, this Windows XR plugin is marked as deprecated and will be removed in the 2021.2 release. It will continue to be supported in the 2020 LTS.")
+            };
+#endif //UNITY_2021_1_OR_NEWER
         }
 
         internal XRLoaderOrderUI()
@@ -93,7 +131,26 @@ namespace UnityEditor.XR.Management
             }
             else
             {
-                li.toggled = EditorGUI.ToggleLeft(rect, li.loaderName, preToggledState);
+                string name = li.loaderName;
+                if (s_DeprecationInfo.ContainsKey(name))
+                {
+                    var depInfo = s_DeprecationInfo[name];
+
+                    var labelRect = rect;
+                    var size = EditorStyles.label.CalcSize(depInfo.icon);
+                    labelRect.width -= size.y + 1;
+
+                    var imageRect = new Rect(rect);
+                    imageRect.xMin = labelRect.xMax + 1;
+                    imageRect.width = size.y;
+
+                    li.toggled = EditorGUI.ToggleLeft(labelRect, li.loaderName, preToggledState);
+                    EditorGUI.LabelField(imageRect, depInfo.renderContent);
+                }
+                else
+                {
+                    li.toggled = EditorGUI.ToggleLeft(rect, li.loaderName, preToggledState);
+                }
             }
 
             li.stateChanged = (li.toggled != preToggledState);
@@ -114,6 +171,8 @@ namespace UnityEditor.XR.Management
 
         internal bool OnGUI(BuildTargetGroup buildTargetGroup)
         {
+            PopulateDeprecationInfo();
+
             var settings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(buildTargetGroup);
 
             if (buildTargetGroup != CurrentBuildTargetGroup || m_LoaderMetadata == null)
@@ -127,6 +186,9 @@ namespace UnityEditor.XR.Management
 
                 foreach (var pmd in XRPackageMetadataStore.GetLoadersForBuildTarget(buildTargetGroup))
                 {
+                    if (IsDeprecated(pmd.loaderName))
+                        continue;
+
                     var newLi = new LoaderInformation() {
                         packageName = pmd.packageName,
                         packageId = pmd.packageId,

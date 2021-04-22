@@ -78,7 +78,12 @@ namespace UnityEngine.XR.Management
         {
             T subsystem = GetLoadedSubsystem<T>();
             if (subsystem != null)
+            {
+                var subsystemType = typeof(T);
+                if (m_SubsystemInstanceMap.ContainsKey(subsystemType))
+                    m_SubsystemInstanceMap.Remove(subsystemType);
                 subsystem.Destroy();
+            }
         }
 
         /// <summary>

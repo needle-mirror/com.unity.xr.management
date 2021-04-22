@@ -132,9 +132,14 @@ namespace UnityEditor.XR.Management
 
             if (loaderManager != null)
             {
+                var loaders = loaderManager.activeLoaders;
                 // If there are no loaders present in the current manager instance, then the settings will not be included in the current build.
-                if (loaderManager.activeLoaders.Count == 0)
+                if (loaders.Count == 0)
                     return;
+
+                var summary = report.summary;
+
+                XRManagementAnalytics.SendBuildEvent(summary.guid, summary.platform, summary.platformGroup, loaders);
 
                 // chances are that our devices won't fall back to graphics device types later in the list so it's better to assume the device will be created with the first gfx api in the list.
                 // furthermore, we have no way to influence falling back to other graphics API types unless we automatically change settings underneath the user which is no good!
@@ -149,7 +154,6 @@ namespace UnityEditor.XR.Management
                 }
 
                 PreInitInfo preInitInfo = null;
-                var loaders = loaderManager.activeLoaders;
                 if (loaders.Count >= 1)
                 {
                     preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);

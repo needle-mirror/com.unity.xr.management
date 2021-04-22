@@ -4,6 +4,23 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.3] - 2021-04-22
+### Fixes
+* Minor fix to deprecation messaging for Windows Mixed Reality.
+
+## [4.0.2] - 2021-04-16
+
+### Fixes
+* When using `XRLoaderHelper`, Subsystems are now correctly removed from the cached subsystems map once they are destroyed.
+* Fixed an issue where a `NullReferenceException` could be thrown if a Package Manager query failed but returned completed when updating known packages.
+* Fixed an issue where `Plug-in Provider` user interface documentation link redirected to an old version of the documentation.
+* Fixed an issue where `TryAddLoader` could ignore the safety checks when modifying the registered loaders in the editor during playmode.
+* Fixed an issue where `TryRemoveLoader` could remove a registered loader even if the loader is still in the list of `currentLoaders`.
+
+### Changes
+* Add `Open XR` to the list of known plug-in providers when on Unity version 2020.3 and above.
+* Added additional safety checks to the behaviour of `TryAddLoader` and `TryRemoveLoader` in the editor. Both now user `EditorApplication.isPlaying` instead of `Application.IsPlaying` when determining whether the editor is in play mode.
+
 ## [4.0.1] - 2021-01-22
 * Changed `activeLoaders` to instead of returning a shallow copy, it will now just return a read only list to prevent additional garbage collection.
 * Changed the behavior of `TryRemoveLoader` to return `true` if the loader is no longer present in the list even if it wasn't present to begin with.
