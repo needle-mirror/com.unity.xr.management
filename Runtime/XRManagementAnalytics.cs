@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 #endif
 
-#if UNITY_ANALYTICS
+#if UNITY_ANALYTICS && ENABLE_CLOUD_SERVICES_ANALYTICS
 using UnityEngine.Analytics;
-#endif
+#endif //UNITY_ANALYTICS && ENABLE_CLOUD_SERVICES_ANALYTICS
 
 [assembly:InternalsVisibleTo("Unity.XR.Management.Editor")]
 namespace UnityEngine.XR.Management
@@ -22,7 +22,9 @@ namespace UnityEngine.XR.Management
         private const string kVendorKey = "unity.xrmanagement";
         private const string kEventBuild = "xrmanagment_build";
 
+#if ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
         private static bool s_Initialized = false;
+#endif //ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
 
         [Serializable]
         private struct BuildEvent
@@ -35,7 +37,7 @@ namespace UnityEngine.XR.Management
 
         private static bool Initialize()
         {
-#if ENABLE_TEST_SUPPORT || !UNITY_ANALYTICS
+#if ENABLE_TEST_SUPPORT || !ENABLE_CLOUD_SERVICES_ANALYTICS || !UNITY_ANALYTICS
             return false;
 #else
 
@@ -46,16 +48,17 @@ namespace UnityEngine.XR.Management
             if(AnalyticsResult.Ok != EditorAnalytics.RegisterEventWithLimit(kEventBuild, kMaxEventsPerHour, kMaxNumberOfElements, kVendorKey))
                 return false;
             s_Initialized = true;
-#endif
+#endif //UNITY_EDITOR
             return s_Initialized;
-#endif
+#endif //ENABLE_TEST_SUPPORT || !ENABLE_CLOUD_SERVICES_ANALYTICS || !UNITY_ANALYTICS
+
         }
 
 #if UNITY_EDITOR
         public static void SendBuildEvent(GUID guid, BuildTarget buildTarget, BuildTargetGroup buildTargetGroup, IEnumerable<XRLoader> loaders)
         {
 
-#if UNITY_ANALYTICS
+#if UNITY_ANALYTICS && ENABLE_CLOUD_SERVICES_ANALYTICS
 
             if (!s_Initialized && !Initialize())
             {
@@ -78,7 +81,7 @@ namespace UnityEngine.XR.Management
 
             EditorAnalytics.SendEventWithLimit(kEventBuild, data);
 
-#endif //UNITY_ANALYTICS
+#endif //UNITY_ANALYTICS && ENABLE_CLOUD_SERVICES_ANALYTICS
 
         }
 #endif //UNITY_EDITOR

@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.5] - 2021-05-06
+### Fixes
+* Fix issue with changelog.
+
+## [4.0.4] - 2021-05-04
+### Fixes
+* Fix issue with analytics on some platforms.
+
 ## [4.0.3] - 2021-04-22
 ### Fixes
 * Minor fix to deprecation messaging for Windows Mixed Reality.
