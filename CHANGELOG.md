@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.6] - 2021-05-18
+### Fixes
+* Fix issue where XR was not being started when entering play mode if the settings UI was never displayed.
+* Fixed an issue where custom XR packages would not get registered when running the Unity Editor using the [-batchmode](https://docs.unity3d.com/Manual/CommandLineArguments.html) argument.
+
+### Added
+
+* Added additional documentation explaining that manual XR Initialization should only be called from [Start](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) or later as calling it from [Awake](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Awake.html) or [OnEnable](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnEnable.html) can cause issues if graphics initialization hasn't finished yet.
+
 ## [4.0.5] - 2021-05-06
 ### Fixes
 * Fix issue with changelog.

@@ -46,11 +46,11 @@ There are two target audiences for XR Plug-in Management: the end user and the p
 
 This version of XR Plug-in Management is compatible with the following versions of the Unity Editor:
 
-* 2019.3 and later (recommended)
+* 2019.4.15f1 and later
 
 ### Known limitations
 
-None.
+Attempting to manually initialize XR using [XRManagerSettings.InitializeLoader](https://docs.unity3d.com/Packages/com.unity.xr.management@4.0/api/UnityEngine.XR.Management.XRManagerSettings.html#UnityEngine_XR_Management_XRManagerSettings_InitializeLoader) from [Awake](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Awake.html) could potentially interfere with graphics initialization. If you wish to manually initialize XR then call `InitializeLoader` from [Start](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) to ensure the graphics initialization has completed.
 
 ### Package contents
 

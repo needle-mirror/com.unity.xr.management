@@ -410,6 +410,7 @@ namespace UnityEditor.XR.Management.Metadata
         {
             InitKnownPluginPackages();
 
+            EditorApplication.playModeStateChanged -= PlayModeStateChanged;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
 
             if (IsEditorInPlayMode())

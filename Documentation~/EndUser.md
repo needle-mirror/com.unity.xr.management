@@ -20,7 +20,7 @@ If you want to start XR on a per-Scene basis (for example, to start in 2D and tr
 
 |Method|Description|
 |---|---|
-|`InitializeLoader(Async)`|Sets up the XR environment to run manually.|
+|`InitializeLoader(Async)`|Sets up the XR environment to run manually. Should be called on or after [Start](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) has finished to avoid conflicts with graphics initialization sequence.|
 |`StartSubsystems`|Starts XR and puts your application into XR mode.|
 |`StopSubsystems`|Stops XR and takes your application out of XR mode. You can call `StartSubsystems` again to go back into XR mode.|
 |`DeinitializeLoader`|Shuts down XR and removes it entirely. You must call `InitializeLoader(Async)` before you can run XR again.|
@@ -238,7 +238,6 @@ By default, the XR Plug-in Management UI displays loaders in strict alphabetical
 You would most likely place this script in a custom build script, but that isn't required. Regardless of the script's location location, you should do this as a setup step before you start a build. This is because the first thing that XR Plug-in Manager does at build time is to serialize the loader list to the build target.
 
 **Note:** A new loader that wasn't known at startup can't be added to the loader list at runtime, which causes the modification operation to fail. You can still modify the list during runtime, whether the app runs in Play mode or as a standalone build.
-
 
 This means that you are able to do the following during runtime:
 

@@ -41,13 +41,17 @@ namespace UnityEditor.XR.Management
     {
         static XRPackageInitializationBootstrap()
         {
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && !Application.isBatchMode)
             {
                 EditorApplication.update += BeginPackageInitialization;
             }
+            else
+            {
+                BeginPackageInitialization();
+            }
 
+            EditorApplication.playModeStateChanged -= PlayModeStateChanged;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
-
         }
 
         private static void PlayModeStateChanged(PlayModeStateChange state)
@@ -126,7 +130,7 @@ namespace UnityEditor.XR.Management
             ret = ret && InitializeSettingsFromMetadata(package, packageMetadata.packageName, packageMetadata.settingsType);
             return ret;
         }
-        
+
         static bool InitializeLoaderFromMetadata(string packageName, List<IXRLoaderMetadata> loaderMetadatas)
         {
             if (String.IsNullOrEmpty(packageName))

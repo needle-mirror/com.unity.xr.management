@@ -24,6 +24,13 @@ namespace UnityEditor.XR.Management
 
 
 #if UNITY_EDITOR
+
+        static XRGeneralSettingsPerBuildTarget()
+        {
+            EditorApplication.playModeStateChanged -= PlayModeStateChanged;
+            EditorApplication.playModeStateChanged += PlayModeStateChanged;
+        }
+
         // Simple class to give us updates when the asset database changes.
         class AssetCallbacks : AssetPostprocessor
         {
@@ -49,14 +56,8 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        private void OnDisable()
-        {
-            EditorApplication.playModeStateChanged -= PlayModeStateChanged;
-        }
-
         void OnEnable()
         {
-            EditorApplication.playModeStateChanged += PlayModeStateChanged;
             foreach (var setting in Settings.Values)
             {
                 var assignedSettings = setting.AssignedSettings;
