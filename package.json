@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "unity": "2019.4",
   "unityRelease": "15f1",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
@@ -24,10 +24,10 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "abdf3fbaa4f4cde7145c508df7d60d9ca6f4ecc3"
+    "revision": "3348f9eabec889376a8c4615b6df73cd5a76b1cc"
   },
   "upmCi": {
-    "footprint": "d9cbbe0a2f9ce6a9d9d4d44e4c7be43dd0fd8783"
+    "footprint": "16596b51b3b00a63d8388135ed5180c12d0613d4"
   },
   "samples": [
     {

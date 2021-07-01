@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.7] - 2021-07-01
+
+### Fixes
+
+* Fixed an issue where object from deleted asset got reused, when upgrading setting asset
+
 ## [4.0.6] - 2021-05-18
 ### Fixes
 * Fix issue where XR was not being started when entering play mode if the settings UI was never displayed.

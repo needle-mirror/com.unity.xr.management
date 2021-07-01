@@ -23,6 +23,8 @@ namespace UnityEditor.XR.Management
             newSettings.Manager = generalSettings.Manager;
             generalSettings = null;
 
+            AssetDatabase.RemoveObjectFromAsset(newSettings.Manager); // Remove object from asset, before deleting asset
+
             AssetDatabase.DeleteAsset(path);
 
             XRGeneralSettingsPerBuildTarget buildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>() as XRGeneralSettingsPerBuildTarget;
