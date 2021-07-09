@@ -191,6 +191,38 @@ namespace UnityEditor.XR.Management.Metadata
             return retList;
         }
 
+        /// <summary>
+        /// Return a read only list of all package metadata information currently known.
+        /// </summary>
+        /// <returns>Read only list of <see cref="IXRPackage" />.</returns>
+        public static IReadOnlyList<IXRPackage> GetAllPackageMetadata()
+        {
+            return s_Packages.Values.ToList().AsReadOnly();
+        }
+
+        /// <summary>
+        /// Return a read only list of all package metadata information currently known that has loaders that support the given build.
+        /// </summary>
+        /// <returns>Read only list of <see cref="IXRPackage" />.</returns>
+        public static IReadOnlyList<IXRPackage> GetAllPackageMetadataForBuildTarget(BuildTargetGroup buildTargetGroup)
+        {
+            HashSet<IXRPackage> ret = new HashSet<IXRPackage>();
+
+            foreach (var p in s_Packages.Values)
+            {
+                foreach (var lm in p.metadata.loaderMetadata)
+                {
+                    if (lm.supportedBuildTargets.Contains(buildTargetGroup))
+                    {
+                        ret.Add(p);
+                        break;
+                    }
+                }
+            }
+
+            return ret.ToList().AsReadOnly();
+        }
+
         internal static IXRPackageMetadata GetMetadataForPackage(string packageId)
         {
             return s_Packages.Values.
