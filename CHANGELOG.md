@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.1.0-pre.2] - 2021-07-26
+### Fixes
+* More public API changes for  [1343655](https://issuetracker.unity3d.com/product/unity/issues/guid/1343655/).
+
 ## [4.1.0-pre.1] - 2021-07-09
 ### Fixes
 * Fix [1343655](https://issuetracker.unity3d.com/product/unity/issues/guid/1343655/) by adding an API for getting all package metadata so that users can use the correct information when dealing with package metadata store.

@@ -223,7 +223,12 @@ namespace UnityEditor.XR.Management.Metadata
             return ret.ToList().AsReadOnly();
         }
 
-        internal static IXRPackageMetadata GetMetadataForPackage(string packageId)
+        /// <summary>
+        /// Given a package id, return the metadata for that package.
+        /// </summary>
+        /// <param name="packageId">The package id to check for.</param>
+        /// <returns>An instance of <see cref="IXRPackageMetadata" /> if the package has metadata or null.</returns>
+        public static IXRPackageMetadata GetMetadataForPackage(string packageId)
         {
             return s_Packages.Values.
                 Select(x => x.metadata).
@@ -246,7 +251,14 @@ namespace UnityEditor.XR.Management.Metadata
             return s_CachedMDStoreInformation.installablePackages?.Contains(package) ?? false;
         }
 
-        internal static bool IsLoaderAssigned(string loaderTypeName, BuildTargetGroup buildTargetGroup)
+        /// <summary>
+        /// Given a loader type and a build target group will return whether or not that loader
+        /// is currently assigned to be active for that build target.
+        /// </summary>
+        /// <param name="loaderTypeName">Loader type to check.</param>
+        /// <param name="buildTargetGroup">Build target group to check for assignment in.</param>
+        /// <returns></returns>
+        public static bool IsLoaderAssigned(string loaderTypeName, BuildTargetGroup buildTargetGroup)
         {
 
             var settings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(buildTargetGroup);
