@@ -97,6 +97,8 @@ namespace UnityEditor.XR.Management.Metadata
                 }
             });
 
+// This section will get replaced with the RELISH package in the near future.
+#if !UNITY_2021_2_OR_NEWER
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
                     packageName = "Magic Leap XR Plugin",
@@ -120,7 +122,7 @@ namespace UnityEditor.XR.Management.Metadata
                     }
                 }
             });
-
+#endif // !UNITY_2021_2_OR_NEWER
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){

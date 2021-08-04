@@ -16,6 +16,12 @@ namespace UnityEditor.XR.Management
         private static XRPackageInitializationSettings s_PackageSettings = null;
         private static object s_Lock = new object();
 
+        internal static string s_ProjectSettingsAssetName = "XRPackageSettings.asset";
+        internal static string s_ProjectSettingsFolder = "../ProjectSettings";
+        internal static string s_ProjectSettingsPath;
+        internal static string s_PackageInitPath;
+
+
         [SerializeField]
         private List<string> m_Settings = new List<string>();
 
@@ -40,13 +46,23 @@ namespace UnityEditor.XR.Management
             }
         }
 
+        void InitPaths()
+        {
+            if (String.IsNullOrEmpty(s_ProjectSettingsPath)) s_ProjectSettingsPath = Path.Combine(Application.dataPath, s_ProjectSettingsFolder);
+            if (String.IsNullOrEmpty(s_PackageInitPath)) s_PackageInitPath = Path.Combine(s_ProjectSettingsPath, s_ProjectSettingsAssetName);
+        }
+
+        void OnEnable()
+        {
+            InitPaths();
+        }
+
         internal void LoadSettings()
         {
-            string packageInitPath = Path.Combine("ProjectSettings", "XRPackageSettings.asset");
-
-            if (File.Exists(packageInitPath))
+            InitPaths();
+            if (File.Exists(s_PackageInitPath))
             {
-                using (StreamReader sr = new StreamReader(packageInitPath))
+                using (StreamReader sr = new StreamReader(s_PackageInitPath))
                 {
                     string settings = sr.ReadToEnd();
                     JsonUtility.FromJsonOverwrite(settings, this);
@@ -57,8 +73,11 @@ namespace UnityEditor.XR.Management
 
         internal void SaveSettings()
         {
-            string packageInitPath = Path.Combine("ProjectSettings", "XRPackageSettings.asset");
-            using (StreamWriter sw = new StreamWriter(packageInitPath))
+            InitPaths();
+            if (!Directory.Exists(s_ProjectSettingsPath))
+                Directory.CreateDirectory(s_ProjectSettingsPath);
+
+            using (StreamWriter sw = new StreamWriter(s_PackageInitPath))
             {
                 string settings = JsonUtility.ToJson(this, true);
                 sw.Write(settings);

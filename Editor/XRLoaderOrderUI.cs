@@ -62,11 +62,13 @@ namespace UnityEditor.XR.Management
 
 #if UNITY_2021_1_OR_NEWER
         static string k_DeprecatedWMRLoaderName = "Windows Mixed Reality";
+        private static string k_DeprecatedLuminLoaderName = "Magic Leap - Note: Lumin Platform will be deprecated in Unity 2021.2!";
 #endif //UNITY_2021_1_OR_NEWER
+
         static bool IsDeprecated(string loaderName)
         {
 #if UNITY_2021_2_OR_NEWER
-            if (loaderName == k_DeprecatedWMRLoaderName)
+            if (loaderName == k_DeprecatedWMRLoaderName || loaderName == k_DeprecatedLuminLoaderName)
                 return true;
 #endif //UNITY_2021_2_OR_NEWER
             return false;
@@ -85,6 +87,14 @@ namespace UnityEditor.XR.Management
                 renderContent = new GUIContent("",
                     EditorGUIUtility.IconContent("console.warnicon.sml").image,
                     @"Microsoft has transitioned support of Windows MR devices to OpenXR in Unity 2021, and recommends using Unity's OpenXR plugin. As such, this Windows XR plugin is marked as deprecated and will be removed in the 2021.2 release. It will continue to be supported in the 2020 LTS.")
+            };
+            s_DeprecationInfo[k_DeprecatedLuminLoaderName] = new DeprecationInfo {
+                icon = EditorGUIUtility.IconContent("console.warnicon.sml"),
+                renderContent = new GUIContent("",
+                    EditorGUIUtility.IconContent("console.warnicon.sml").image,
+@"Unity 2020 LTS will be the last version of the editor which supports Magic Leap 1.
+
+Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 LTS.")
             };
 #endif //UNITY_2021_1_OR_NEWER
         }

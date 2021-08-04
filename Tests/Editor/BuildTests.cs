@@ -93,7 +93,9 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(BuildTargetGroup.Standalone)]
     [TestFixture(BuildTargetGroup.Android)]
     [TestFixture(BuildTargetGroup.iOS)]
+#if (!UNITY_2021_2_OR_NEWER)
     [TestFixture(BuildTargetGroup.Lumin)]
+#endif    
     [TestFixture(BuildTargetGroup.PS4)]
     class XRGeneralSettingsBuildTests
     {
