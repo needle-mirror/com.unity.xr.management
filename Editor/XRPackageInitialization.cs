@@ -41,14 +41,6 @@ namespace UnityEditor.XR.Management
     {
         static XRPackageInitializationBootstrap()
         {
-            if (!EditorApplication.isPlayingOrWillChangePlaymode && !Application.isBatchMode)
-            {
-                EditorApplication.update += BeginPackageInitialization;
-            }
-            else
-            {
-                BeginPackageInitialization();
-            }
 
             EditorApplication.playModeStateChanged -= PlayModeStateChanged;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;

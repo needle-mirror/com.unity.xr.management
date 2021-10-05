@@ -53,6 +53,35 @@ namespace UnityEditor.XR.Management.Tests
             Assert.IsNotNull(settings.Manager);
             Assert.AreEqual(testManager, settings.Manager);
         }
+
+        [Test]
+        public void CanCreateNewSettingsForMissingBuildTargetSettings()
+        {
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            Assert.False(buildTargetSettings == null);
+
+            Assert.IsFalse(buildTargetSettings.HasSettingsForBuildTarget(BuildTargetGroup.PS5));
+            if (!buildTargetSettings.HasSettingsForBuildTarget(BuildTargetGroup.PS5))
+                buildTargetSettings.CreateDefaultSettingsForBuildTarget(BuildTargetGroup.PS5);
+            var settings = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.PS5);
+            Assert.False(settings == null);
+
+
+        }
+
+        [Test]
+        public void CanCreateNewManagerSettingsForMissingBuildTargetSettings()
+        {
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            Assert.False(buildTargetSettings == null);
+
+            Assert.IsFalse(buildTargetSettings.HasManagerSettingsForBuildTarget(BuildTargetGroup.PS5));
+            if (!buildTargetSettings.HasManagerSettingsForBuildTarget(BuildTargetGroup.PS5))
+                buildTargetSettings.CreateDefaultManagerSettingsForBuildTarget(BuildTargetGroup.PS5);
+            var settings = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.PS5);
+            Assert.IsNotNull(settings);
+            Assert.IsNotNull(settings.Manager);
+        }
     }
 
     [TestFixture(0)] // Test case where no loaders exist in the list

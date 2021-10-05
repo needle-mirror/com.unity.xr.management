@@ -64,6 +64,8 @@ namespace UnityEditor.XR.Management
 
         public override void OnDeactivate()
         {
+            if(m_CachedEditor != null)
+                UnityEngine.Object.DestroyImmediate(m_CachedEditor);
             m_CachedEditor = null;
             m_SettingsWrapper = null;
         }

@@ -9,7 +9,7 @@ For instructions on how to install the XR Plug-in Manager, see the [XR Plug-in F
 
 ## Automatic XR loading
 
-By default, XR Plug-in Management intializes automatically and starts your XR environment when the application loads. At runtime, this happens immediately before the first Scene loads. In Play mode, this happens immediately after the first Scene loads, but before `Start` is called on your GameObjects. In both scenarios, XR should be set up before calling the MonoBehaviour [Start](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) method, so you should be able to query the state of XR in the `Start` method of your GameObjects.
+By default, XR Plug-in Management initializes automatically and starts your XR environment when the application loads. At runtime, this happens immediately before the first Scene loads. In Play mode, this happens immediately after the first Scene loads, but before `Start` is called on your GameObjects. In both scenarios, XR should be set up before calling the MonoBehaviour [Start](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) method, so you should be able to query the state of XR in the `Start` method of your GameObjects.
 
 If you want to start XR on a per-Scene basis (for example, to start in 2D and transition into VR), follow these steps:
 
@@ -17,6 +17,11 @@ If you want to start XR on a per-Scene basis (for example, to start in 2D and tr
 2. Select the **XR Plug-in Management** tab on the left.
 3. Disable the **Initialize on start** option for each platform you support.
 4. At runtime, call the following methods on `XRGeneralSettings.Instance.Manager` to add/create, remove, and reorder the Loaders from your scripts:
+
+<b>Manual initialization can not be done before Start completes as it depends on graphics initialization within Unity completing.</b>
+
+Initialization of XR must be complete either before the Unity graphics system is setup and initialized (as in Automatic life cycle management) or must be put off till after graphics is completely initialized. The easiest way to check this is to just make sure you do not try to start XR until Start is called on your MonoBehaviour instance.
+
 
 |Method|Description|
 |---|---|
@@ -75,7 +80,7 @@ Use the script above, with some minor tweaks, to manage specific loaders at runt
 |`XRLoader.Initialize`|Sets up the XR environment to run manually and initializes all subsystems for the XR loader.|
 |`XRLoader.Start`|Starts XR and requests the XR loader to start all initialized subsystems.|
 |`XRLoader.Stop`|Stops XR and requests the XR loader to stop all initialized subsystems. You can call `StartSubsystems` again to go back into XR mode.|
-|`XRLoader.Deinitialize`|Shuts down the XR loader and deinitializes all initialized subsystems. You must call `XRLoader.Initialize` before you can use the loader again.|
+|`XRLoader.Deinitialize`|Shuts down the XR loader and de-initializes all initialized subsystems. You must call `XRLoader.Initialize` before you can use the loader again.|
 
 The following code example demonstrates how to manage individual loaders at runtime.
 

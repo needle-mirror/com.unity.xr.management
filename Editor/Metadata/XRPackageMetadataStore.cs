@@ -123,9 +123,23 @@ namespace UnityEditor.XR.Management.Metadata
             public List<LoaderAssignmentRequest> activeRequests;
         }
 
-        static List<LoaderAssignmentRequest> m_AddRequests = new List<LoaderAssignmentRequest>();
-        static Dictionary<string, IXRPackage> s_Packages = new Dictionary<string, IXRPackage>();
+        static Dictionary<string, IXRPackage> s_Packages = null;
         static SearchRequest s_SearchRequest = null;
+
+        static Dictionary<string, IXRPackage> packages
+        {
+            get
+            {
+                if(s_Packages == null)
+                {
+                    s_Packages = new Dictionary<string, IXRPackage>();
+                    InitKnownPluginPackages();
+                    XRPackageInitializationBootstrap.BeginPackageInitialization();
+                }
+
+                return s_Packages;
+            }
+        }
 
         const string k_DefaultSessionStateString = "DEADBEEF";
         static bool SessionStateHasStoredData(string queueName)
@@ -168,7 +182,7 @@ namespace UnityEditor.XR.Management.Metadata
 
         internal static List<LoaderBuildTargetQueryResult> GetAllLoadersForBuildTarget(BuildTargetGroup buildTarget)
         {
-            var ret = from pm in (from p in s_Packages.Values select p.metadata)
+            var ret = from pm in (from p in packages.Values select p.metadata)
                       from lm in pm.loaderMetadata
                       where lm.supportedBuildTargets.Contains(buildTarget)
                       orderby lm.loaderName
@@ -181,7 +195,7 @@ namespace UnityEditor.XR.Management.Metadata
 
         internal static List<LoaderBuildTargetQueryResult> GetLoadersForBuildTarget(BuildTargetGroup buildTargetGroup)
         {
-            var ret = from pm in (from p in s_Packages.Values select p.metadata)
+            var ret = from pm in (from p in packages.Values select p.metadata)
                       from lm in pm.loaderMetadata
                       where lm.supportedBuildTargets.Contains(buildTargetGroup)
                       orderby lm.loaderName
@@ -197,7 +211,7 @@ namespace UnityEditor.XR.Management.Metadata
         /// <returns>Read only list of <see cref="IXRPackage" />.</returns>
         public static IReadOnlyList<IXRPackage> GetAllPackageMetadata()
         {
-            return s_Packages.Values.ToList().AsReadOnly();
+            return packages.Values.ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -208,7 +222,7 @@ namespace UnityEditor.XR.Management.Metadata
         {
             HashSet<IXRPackage> ret = new HashSet<IXRPackage>();
 
-            foreach (var p in s_Packages.Values)
+            foreach (var p in packages.Values)
             {
                 foreach (var lm in p.metadata.loaderMetadata)
                 {
@@ -230,7 +244,7 @@ namespace UnityEditor.XR.Management.Metadata
         /// <returns>An instance of <see cref="IXRPackageMetadata" /> if the package has metadata or null.</returns>
         public static IXRPackageMetadata GetMetadataForPackage(string packageId)
         {
-            return s_Packages.Values.
+            return packages.Values.
                 Select(x => x.metadata).
                 FirstOrDefault(xmd => String.Compare(xmd.packageId, packageId) == 0);
         }
@@ -392,7 +406,7 @@ namespace UnityEditor.XR.Management.Metadata
 
         internal static IXRPackage GetPackageForSettingsTypeNamed(string settingsTypeName)
         {
-            var ret = s_Packages.Values.
+            var ret = packages.Values.
                 Where((p => String.Compare(p.metadata.settingsType, settingsTypeName, true) == 0)).
                 Select((p) => p);
             return ret.Any() ? ret.First() : null;
@@ -439,7 +453,7 @@ namespace UnityEditor.XR.Management.Metadata
 
         static void InternalAddPluginPackage(IXRPackage package)
         {
-            s_Packages[package.metadata.packageId] = package;
+            packages[package.metadata.packageId] = package;
         }
 
         internal static void InitKnownPluginPackages()
@@ -452,8 +466,6 @@ namespace UnityEditor.XR.Management.Metadata
 
         static XRPackageMetadataStore()
         {
-            InitKnownPluginPackages();
-
             EditorApplication.playModeStateChanged -= PlayModeStateChanged;
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
 
@@ -556,7 +568,7 @@ namespace UnityEditor.XR.Management.Metadata
 
             foreach (var package in s_SearchRequest.Result)
             {
-                if (s_Packages.ContainsKey(package.name))
+                if (packages.ContainsKey(package.name))
                 {
                     var kpi = new KnownPackageInfo();
                     kpi.packageId = package.name;
@@ -669,7 +681,7 @@ namespace UnityEditor.XR.Management.Metadata
                         installedPackages.Add(packageInfo.name);
                     }
 
-                    var packageIds = s_Packages.Values.
+                    var packageIds = packages.Values.
                         Where((p) => installedPackages.Contains(p.metadata.packageId)).
                         Select((p) => p.metadata.packageId);
                     s_CachedMDStoreInformation.installedPackages = packageIds.ToArray();

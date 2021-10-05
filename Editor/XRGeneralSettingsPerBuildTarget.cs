@@ -102,6 +102,31 @@ namespace UnityEditor.XR.Management
         }
 #endif
 
+        /// <summary>
+        /// Query this settings store to see if there are settings for a specific <see cref="BuildTargetGroup"/>.
+        /// </summary>
+        /// <param name="buildTargetGroup">Build target to check</param>
+        /// <returns>True if there are settings, otherwise false.</returns>
+        public bool HasSettingsForBuildTarget(BuildTargetGroup buildTargetGroup)
+        {
+            return SettingsForBuildTarget(buildTargetGroup) != null;
+        }
+
+        /// <summary>
+        /// Create default settings for a given build target.
+        ///
+        /// This <b>will overwrite</b> any current settings for that build target.
+        /// </summary>
+        /// <param name="buildTargetGroup">Build target to create default settings for.</param>
+        public void CreateDefaultSettingsForBuildTarget(BuildTargetGroup buildTargetGroup)
+        {
+            var settings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
+            SetSettingsForBuildTarget(buildTargetGroup, settings);
+            settings.name = $"{buildTargetGroup.ToString()} Settings";
+            AssetDatabase.AddObjectToAsset(settings, AssetDatabase.GetAssetOrScenePath(this));
+            AssetDatabase.SaveAssets();
+        }
+
         /// <summary>Set specific settings for a given build target.</summary>
         ///
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
@@ -122,6 +147,44 @@ namespace UnityEditor.XR.Management
             XRGeneralSettings ret = null;
             Settings.TryGetValue(targetGroup, out ret);
             return ret;
+        }
+
+        /// <summary>
+        /// Check if current settings instance has an instance of <see cref="XRManagerSettings"/>.
+        /// </summary>
+        /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
+        /// <returns>True if it exists, false otherwise.</returns>
+        public bool HasManagerSettingsForBuildTarget(BuildTargetGroup targetGroup)
+        {
+            return (SettingsForBuildTarget(targetGroup)?.Manager ?? null) != null;
+        }
+
+        /// <summary>
+        /// Create a new default instance of <see cref="XRManagerSettings"/> for a build target. Requires
+        /// that the there exists a settings instance for the build target. If there isn't, then one is created.
+        ///
+        /// This <b>will overwrite</b> any current settings for that build target.
+        /// </summary>
+        /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
+        public void CreateDefaultManagerSettingsForBuildTarget(BuildTargetGroup targetGroup)
+        {
+            if (!HasSettingsForBuildTarget(targetGroup))
+                CreateDefaultSettingsForBuildTarget(targetGroup);
+            var xrManagerSettings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
+            xrManagerSettings.name = $"{targetGroup.ToString()} Providers";
+            SettingsForBuildTarget(targetGroup).Manager = xrManagerSettings;
+            AssetDatabase.AddObjectToAsset(xrManagerSettings, AssetDatabase.GetAssetOrScenePath(this));
+            AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// Return the current instance of <see cref="XRManagerSettings"/> for a build target.
+        /// </summary>
+        /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
+        /// <returns></returns>
+        public XRManagerSettings ManagerSettingsForBuildTarget(BuildTargetGroup targetGroup)
+        {
+            return SettingsForBuildTarget(targetGroup)?.Manager ?? null;
         }
 
         /// <summary>Serialization override.</summary>

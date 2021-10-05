@@ -190,14 +190,11 @@ namespace UnityEditor.XR.Management
                 if (buildTargetChanged)
                     m_LastBuildTargetGroup = buildTargetGroup;
 
-                XRGeneralSettings settings = currentSettings.SettingsForBuildTarget(buildTargetGroup);
-                if (settings == null)
+                if (!currentSettings.HasManagerSettingsForBuildTarget(buildTargetGroup))
                 {
-                    settings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
-                    currentSettings.SetSettingsForBuildTarget(buildTargetGroup, settings);
-                    settings.name = $"{buildTargetGroup.ToString()} Settings";
-                    AssetDatabase.AddObjectToAsset(settings, AssetDatabase.GetAssetOrScenePath(currentSettings));
+                    currentSettings.CreateDefaultManagerSettingsForBuildTarget(buildTargetGroup);
                 }
+                XRGeneralSettings settings = currentSettings.SettingsForBuildTarget(buildTargetGroup);
 
                 var serializedSettingsObject = new SerializedObject(settings);
                 serializedSettingsObject.Update();
@@ -206,27 +203,18 @@ namespace UnityEditor.XR.Management
                 EditorGUILayout.PropertyField(initOnStart, Content.k_InitializeOnStart);
                 EditorGUILayout.Space();
 
+
                 SerializedProperty loaderProp = serializedSettingsObject.FindProperty("m_LoaderManagerInstance");
-
-                if (!CachedSettingsEditor.ContainsKey(buildTargetGroup))
-                {
-                    CachedSettingsEditor.Add(buildTargetGroup, null);
-                }
-
-                if (loaderProp.objectReferenceValue == null)
-                {
-                    var xrManagerSettings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
-                    xrManagerSettings.name = $"{buildTargetGroup.ToString()} Providers";
-                    AssetDatabase.AddObjectToAsset(xrManagerSettings, AssetDatabase.GetAssetOrScenePath(currentSettings));
-                    loaderProp.objectReferenceValue = xrManagerSettings;
-                    serializedSettingsObject.ApplyModifiedProperties();
-                }
-
                 var obj = loaderProp.objectReferenceValue;
 
                 if (obj != null)
                 {
                     loaderProp.objectReferenceValue = obj;
+
+                    if (!CachedSettingsEditor.ContainsKey(buildTargetGroup))
+                    {
+                        CachedSettingsEditor.Add(buildTargetGroup, null);
+                    }
 
                     if (CachedSettingsEditor[buildTargetGroup] == null)
                     {

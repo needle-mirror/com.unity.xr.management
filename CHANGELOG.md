@@ -4,6 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2021-10-05
+### Added
+* Resolve FB [1369638](https://fogbugz.unity3d.com/f/cases/resolve/1369638) by adding five new APIs to `XRGeneralSettingsPerBuildTarget` for scripting settings checking and creation : 
+    * `HasSettingsForBuildTarget`
+    * `CreateDefaultSettingsForBuildTarget`
+    * `HasManagerSettingsForBuildTarget`
+    * `CreateDefaultManagerSettingsForBuildTarget`
+    * `ManagerSettingsForBuildTarget`
+### Changes
+* Resolve FB [1346567](https://fogbugz.unity3d.com/f/cases/1346567/) by updating docs around initialization timing, especially around manual initialization.
+* Ensure cached package setting editors are destroyed when the management window is closed.
+### Fixes
+* Fix [1348587](https://issuetracker.unity3d.com/product/unity/issues/guid/1348587/) and [1357482](https://issuetracker.unity3d.com/product/unity/issues/guid/1357482/) by changing the package initialization to be loaded ondemand instead of loading on static initialization.
+
 ## [4.1.0] - 2021-08-04
 ### Changes
 * Messaging and removing the Lumin platform in 2021.1+. Support is still maintained for Unity 2020 LTS and 2019 LTS.

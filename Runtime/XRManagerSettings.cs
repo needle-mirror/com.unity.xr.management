@@ -37,7 +37,7 @@ namespace UnityEngine.XR.Management
     ///
     /// Automatic lifecycle management is executed as follows
     ///
-    /// * OnEnable -> <see cref="InitializeLoader"/>. The loader list will be iterated over and the first successful loader will be set as the active loader.
+    /// * Runtime Initialize -> <see cref="InitializeLoader"/>. The loader list will be iterated over and the first successful loader will be set as the active loader.
     /// * Start -> <see cref="StartSubsystems"/>. Ask the active loader to start all subsystems.
     /// * OnDisable -> <see cref="StopSubsystems"/>. Ask the active loader to stop all subsystems.
     /// * OnDestroy -> <see cref="DeinitializeLoader"/>. Deinitialize and remove the active loader.
@@ -169,6 +169,9 @@ namespace UnityEngine.XR.Management
         /// already set will cause a warning to be logged and immediate exit of this function.
         ///
         /// This method is synchronous and on return all state should be immediately checkable.
+        ///
+        /// <b>If manual initialization of XR is being done, this method can not be called before Start completes
+        /// as it depends on graphics initialization within Unity completing.</b>
         /// </summary>
         public void InitializeLoaderSync()
         {
@@ -208,6 +211,9 @@ namespace UnityEngine.XR.Management
         /// already set will cause a warning to be logged and immediate exit of this function.
         ///
         /// Iteration is done asynchronously and this method must be called within the context of a Coroutine.
+        ///
+        /// <b>If manual initialization of XR is being done, this method can not be called before Start completes
+        /// as it depends on graphics initialization within Unity completing.</b>
         /// </summary>
         ///
         /// <returns>Enumerator marking the next spot to continue execution at.</returns>
