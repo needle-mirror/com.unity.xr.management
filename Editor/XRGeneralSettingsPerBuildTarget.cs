@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.XR.Management;
 
@@ -75,7 +76,9 @@ namespace UnityEditor.XR.Management
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
             EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
             if (buildTargetSettings == null)
-                return;
+            {
+                buildTargetSettings = GetOrCreate();
+            }
 
             XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
             if (instance == null || !instance.InitManagerOnStart)
@@ -86,7 +89,6 @@ namespace UnityEditor.XR.Management
 
         internal static bool ContainsLoaderForAnyBuildTarget(string loaderTypeName)
         {
-
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
             EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
             if (buildTargetSettings == null)
@@ -99,6 +101,37 @@ namespace UnityEditor.XR.Management
             }
 
             return false;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        internal static XRGeneralSettingsPerBuildTarget GetOrCreate()
+        {
+            EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out var generalSettings);
+            if (generalSettings == null)
+            {
+                string searchText = "t:XRGeneralSettings";
+                string[] assets = AssetDatabase.FindAssets(searchText);
+                if (assets.Length > 0)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(assets[0]);
+                    generalSettings = AssetDatabase.LoadAssetAtPath(path, typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
+                }
+            }
+
+            if (generalSettings == null)
+            {
+                generalSettings = CreateInstance(typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
+                string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultGeneralSettingsPath);
+                if (!string.IsNullOrEmpty(assetPath))
+                {
+                    assetPath = Path.Combine(assetPath, "XRGeneralSettings.asset");
+                    AssetDatabase.CreateAsset(generalSettings, assetPath);
+                }
+            }
+
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
+
+            return generalSettings;
         }
 #endif
 

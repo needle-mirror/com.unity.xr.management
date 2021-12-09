@@ -119,11 +119,7 @@ namespace UnityEditor.XR.Management
             // dirty later builds with assets that may not be needed or are out of date.
             CleanOldSettings();
 
-            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
-            if (buildTargetSettings == null)
-                return;
-
+            XRGeneralSettingsPerBuildTarget buildTargetSettings = XRGeneralSettingsPerBuildTarget.GetOrCreate();
             XRGeneralSettings settings = buildTargetSettings.SettingsForBuildTarget(report.summary.platformGroup);
             if (settings == null)
                 return;
@@ -134,39 +130,36 @@ namespace UnityEditor.XR.Management
             {
                 var loaders = loaderManager.activeLoaders;
                 // If there are no loaders present in the current manager instance, then the settings will not be included in the current build.
-                if (loaders.Count == 0)
-                    return;
-
-                var summary = report.summary;
-
-                XRManagementAnalytics.SendBuildEvent(summary.guid, summary.platform, summary.platformGroup, loaders);
-
-                // chances are that our devices won't fall back to graphics device types later in the list so it's better to assume the device will be created with the first gfx api in the list.
-                // furthermore, we have no way to influence falling back to other graphics API types unless we automatically change settings underneath the user which is no good!
-                GraphicsDeviceType[] deviceTypes = PlayerSettings.GetGraphicsAPIs(report.summary.platform);
-                if (deviceTypes.Length > 0)
+                if (loaders.Count > 0)
                 {
-                    VerifyGraphicsAPICompatibility(loaderManager, deviceTypes[0]);
-                }
-                else
-                {
-                    Debug.LogWarning("No Graphics APIs have been configured in Player Settings.");
-                }
+                    var summary = report.summary;
 
-                PreInitInfo preInitInfo = null;
-                if (loaders.Count >= 1)
-                {
+                    XRManagementAnalytics.SendBuildEvent(summary.guid, summary.platform, summary.platformGroup, loaders);
+
+                    // chances are that our devices won't fall back to graphics device types later in the list so it's better to assume the device will be created with the first gfx api in the list.
+                    // furthermore, we have no way to influence falling back to other graphics API types unless we automatically change settings underneath the user which is no good!
+                    GraphicsDeviceType[] deviceTypes = PlayerSettings.GetGraphicsAPIs(report.summary.platform);
+                    if (deviceTypes.Length > 0)
+                    {
+                        VerifyGraphicsAPICompatibility(loaderManager, deviceTypes[0]);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No Graphics APIs have been configured in Player Settings.");
+                    }
+
+                    PreInitInfo preInitInfo = null;
                     preInitInfo = new PreInitInfo(loaders[0] as IXRLoaderPreInit, report.summary.platform, report.summary.platformGroup);
-                }
 
-                var loader = preInitInfo?.loader ?? null;
-                if (loader != null)
-                {
-                    BootConfig bootConfig = new BootConfig(report);
-                    bootConfig.ReadBootConfig();
-                    string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget, preInitInfo.buildTargetGroup);
-                    bootConfig.SetValueForKey(kPreInitLibraryKey, preInitLibraryName);
-                    bootConfig.WriteBootConfig();
+                    var loader = preInitInfo?.loader ?? null;
+                    if (loader != null)
+                    {
+                        BootConfig bootConfig = new BootConfig(report);
+                        bootConfig.ReadBootConfig();
+                        string preInitLibraryName = loader.GetPreInitLibraryName(preInitInfo.buildTarget, preInitInfo.buildTargetGroup);
+                        bootConfig.SetValueForKey(kPreInitLibraryKey, preInitLibraryName);
+                        bootConfig.WriteBootConfig();
+                    }
                 }
             }
 

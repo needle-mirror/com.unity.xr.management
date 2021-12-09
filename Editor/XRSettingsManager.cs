@@ -74,47 +74,13 @@ namespace UnityEditor.XR.Management
 
         private Dictionary<BuildTargetGroup, XRManagerSettingsEditor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, XRManagerSettingsEditor>();
 
-
         private BuildTargetGroup m_LastBuildTargetGroup = BuildTargetGroup.Unknown;
 
         static XRGeneralSettingsPerBuildTarget currentSettings
         {
             get
             {
-                XRGeneralSettingsPerBuildTarget generalSettings = null;
-                EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out generalSettings);
-                if (generalSettings == null)
-                {
-                    lock(s_SettingsManager)
-                    {
-                        EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out generalSettings);
-                        if (generalSettings == null)
-                        {
-                            string searchText = "t:XRGeneralSettings";
-                            string[] assets = AssetDatabase.FindAssets(searchText);
-                            if (assets.Length > 0)
-                            {
-                                string path = AssetDatabase.GUIDToAssetPath(assets[0]);
-                                generalSettings = AssetDatabase.LoadAssetAtPath(path, typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
-                            }
-                        }
-
-                        if (generalSettings == null)
-                        {
-                            generalSettings = ScriptableObject.CreateInstance(typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
-                            string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultGeneralSettingsPath);
-                            if (!string.IsNullOrEmpty(assetPath))
-                            {
-                                assetPath = Path.Combine(assetPath, "XRGeneralSettings.asset");
-                                AssetDatabase.CreateAsset(generalSettings, assetPath);
-                            }
-                        }
-
-                        EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
-
-                    }
-                }
-                return generalSettings;
+                return XRGeneralSettingsPerBuildTarget.GetOrCreate();
             }
         }
 
@@ -165,7 +131,6 @@ namespace UnityEditor.XR.Management
                 m_SettingsWrapper = new SerializedObject(settings);
             }
         }
-
 
         /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
         public override void OnActivate(string searchContext, VisualElement rootElement)

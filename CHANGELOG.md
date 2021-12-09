@@ -4,9 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.2.1] - 2021-12-09
+### Fixed
+* Resolve FB [1378643](https://fogbugz.unity3d.com/f/cases/1378643/) by enforcing creation of `XRGeneralSettingsPerBuildTarget` using a new API `XRGeneralSettingsPerBuildTarget.GetOrCreate()`
+
 ## [4.2.0] - 2021-10-05
 ### Added
-* Resolve FB [1369638](https://fogbugz.unity3d.com/f/cases/resolve/1369638) by adding five new APIs to `XRGeneralSettingsPerBuildTarget` for scripting settings checking and creation : 
+* Resolve FB [1369638](https://fogbugz.unity3d.com/f/cases/resolve/1369638) by adding five new APIs to `XRGeneralSettingsPerBuildTarget` for scripting settings checking and creation :
     * `HasSettingsForBuildTarget`
     * `CreateDefaultSettingsForBuildTarget`
     * `HasManagerSettingsForBuildTarget`
