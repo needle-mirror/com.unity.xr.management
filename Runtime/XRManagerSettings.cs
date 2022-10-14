@@ -364,6 +364,18 @@ namespace UnityEngine.XR.Management
             return true;
         }
 
+        void Awake()
+        {
+            // Populate the loader set from the current list of loaders
+            foreach (var loader in currentLoaders)
+            {
+                if (!m_RegisteredLoaders.Contains(loader))
+                {
+                    m_RegisteredLoaders.Add(loader);
+                }
+            }
+        }
+
         private bool CheckGraphicsAPICompatibility(XRLoader loader)
         {
             GraphicsDeviceType deviceType = SystemInfo.graphicsDeviceType;

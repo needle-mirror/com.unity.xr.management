@@ -573,7 +573,11 @@ namespace UnityEditor.XR.Management.Metadata
                     var kpi = new KnownPackageInfo();
                     kpi.packageId = package.name;
 
+#if UNITY_2022_2_OR_NEWER
+                    kpi.verifiedVersion = package.versions.recommended;
+#else
                     kpi.verifiedVersion = package.versions.verified;
+#endif
                     if (string.IsNullOrEmpty(kpi.verifiedVersion))
                         kpi.verifiedVersion = package.versions.latestCompatible;
                     knownPackageInfos.Add(kpi);

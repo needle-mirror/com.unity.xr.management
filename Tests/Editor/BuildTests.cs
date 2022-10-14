@@ -1,10 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using UnityEditor.Android;
 using UnityEditor.Build;
+using UnityEditor.SceneManagement;
+using UnityEditor.XR.Management;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.Management.Tests;
 using Object = UnityEngine.Object;
@@ -13,18 +19,69 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.XR.Management.Tests.BuildTests
 {
+    static class BuildTestHelpers
+    {
+        public const string k_TemporaryTestPath = "Assets/Hidden_XRManagement_Test_Assets";
+        public const string k_TempAssetSearchTerm = "TestGeneralAsset";
+        public const string k_AssetName = "TestGeneralAsset.asset";
+
+        public static void SetupTemporaryTestAssets(BuildTargetGroup buildTargetGroup, out XRGeneralSettingsPerBuildTarget previousGeneralSettingsInstance)
+        {
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out previousGeneralSettingsInstance);
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+
+            var emptyBuildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
+            var generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
+            generalSettings.AssignedSettings = ScriptableObject.CreateInstance<XRManagerSettings>();
+            emptyBuildTargetSettings.SetSettingsForBuildTarget(buildTargetGroup, generalSettings);
+            emptyBuildTargetSettings.SettingsForBuildTarget(buildTargetGroup).AssignedSettings.TrySetLoaders(new List<XRLoader>());
+
+            Directory.CreateDirectory(k_TemporaryTestPath);
+            AssetDatabase.CreateAsset(emptyBuildTargetSettings, Path.Combine(k_TemporaryTestPath, k_AssetName));
+
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, emptyBuildTargetSettings, true);
+        }
+
+        public static void CleanupTemporaryAssets()
+        {
+            AssetDatabase.DeleteAsset(Path.Combine(k_TemporaryTestPath, k_AssetName));
+            if (Directory.Exists(Path.Combine("./", k_TemporaryTestPath)))
+            {
+                Directory.Delete(Path.Combine("./", k_TemporaryTestPath));
+                File.Delete($"./{k_TemporaryTestPath}.meta");
+                AssetDatabase.Refresh();
+            }
+        }
+
+        // Must match XRGeneralSettingsPerBuildTarget.TryFindSettingsAsset
+        public static bool TryFindTemporarySettingsAsset(out XRGeneralSettingsPerBuildTarget buildTargetSettings)
+        {
+            EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            if (buildTargetSettings == null)
+            {
+                var assets = AssetDatabase.FindAssets(k_TempAssetSearchTerm);
+                if (assets.Length > 0)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(assets[0]);
+                    buildTargetSettings = AssetDatabase.LoadAssetAtPath(path, typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
+                }
+            }
+            return buildTargetSettings != null;
+        }
+    }
+
 #if UNITY_EDITOR_WIN
-    [TestFixture(GraphicsDeviceType.Direct3D11, false, new [] { GraphicsDeviceType.Direct3D11})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, false, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Direct3D11})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, true, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, false, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, false, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
+    [TestFixture(GraphicsDeviceType.Direct3D11, false, GraphicsDeviceType.Direct3D11, null)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, false, GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Direct3D11)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, true, GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, false, GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, false, GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null)]
 #elif UNITY_EDITOR_OSX
-    [TestFixture(GraphicsDeviceType.Metal, false, new [] { GraphicsDeviceType.Metal})]
-    [TestFixture(GraphicsDeviceType.Metal, false, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal})]
-    [TestFixture(GraphicsDeviceType.Metal, true, new [] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Metal, false, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Metal, false, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
+    [TestFixture(GraphicsDeviceType.Metal, false, GraphicsDeviceType.Metal, null)]
+    [TestFixture(GraphicsDeviceType.Metal, false, GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal)]
+    [TestFixture(GraphicsDeviceType.Metal, true, GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Metal, false, GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Metal, false, GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null)]
 #endif
     class GraphicsAPICompatibilityTests
     {
@@ -35,11 +92,17 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         private GraphicsDeviceType[]  m_LoadersSupporteDeviceTypes;
         bool m_BuildFails;
 
-        public GraphicsAPICompatibilityTests(GraphicsDeviceType playerSettingsDeviceType, bool fails, GraphicsDeviceType[] loaders)
+        public GraphicsAPICompatibilityTests(GraphicsDeviceType playerSettingsDeviceType, bool fails, GraphicsDeviceType loader0, GraphicsDeviceType? loader1)
         {
             m_BuildFails = fails;
             m_PlayerSettingsDeviceType = playerSettingsDeviceType;
-            m_LoadersSupporteDeviceTypes = loaders;
+            if (loader1.HasValue)
+            {
+                m_LoadersSupporteDeviceTypes = new[] {loader0, loader1.Value};
+            }
+            else {
+                m_LoadersSupporteDeviceTypes = new [] {loader0};
+            }
         }
 
         [SetUp]
@@ -66,7 +129,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         }
 
         [TearDown]
-        public void TeadDown()
+        public void TearDown()
         {
             Object.DestroyImmediate(m_Manager);
             m_Manager = null;
@@ -95,13 +158,10 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(BuildTargetGroup.iOS)]
 #if (!UNITY_2021_2_OR_NEWER)
     [TestFixture(BuildTargetGroup.Lumin)]
-#endif    
+#endif
     [TestFixture(BuildTargetGroup.PS4)]
     class XRGeneralSettingsBuildTests
     {
-        const string k_TemporaryTestPath = "Assets/Hidden_XRManagement_Test_Assets";
-        const string k_AssetName = "TestGeneralAsset.asset";
-
         BuildTargetGroup m_BuildTargetGroup;
 
         XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
@@ -116,19 +176,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         [SetUp]
         public void SetupPlayerSettings()
         {
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out m_OldBuildTargetSettings);
-            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
-
-            var emptyBuildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
-            var generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
-            generalSettings.AssignedSettings = ScriptableObject.CreateInstance<XRManagerSettings>();
-            emptyBuildTargetSettings.SetSettingsForBuildTarget(m_BuildTargetGroup, generalSettings);
-            emptyBuildTargetSettings.SettingsForBuildTarget(m_BuildTargetGroup).AssignedSettings.TrySetLoaders(new List<XRLoader>());
-
-            Directory.CreateDirectory(k_TemporaryTestPath);
-            AssetDatabase.CreateAsset(emptyBuildTargetSettings, Path.Combine(k_TemporaryTestPath, k_AssetName));
-
-            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, emptyBuildTargetSettings, true);
+            BuildTestHelpers.SetupTemporaryTestAssets(m_BuildTargetGroup, out m_OldBuildTargetSettings);
         }
 
         [TearDown]
@@ -137,14 +185,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
             if (m_OldBuildTargetSettings != null)
                 EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
 
-            // AssetDatabase.DeleteAsset(k_TemporaryTestPath);
-            AssetDatabase.DeleteAsset(Path.Combine(k_TemporaryTestPath, k_AssetName));
-            if (Directory.Exists(Path.Combine("./", k_TemporaryTestPath)))
-            {
-                Directory.Delete(Path.Combine("./", k_TemporaryTestPath));
-                File.Delete($"./{k_TemporaryTestPath}.meta");
-                AssetDatabase.Refresh();
-            }
+            BuildTestHelpers.CleanupTemporaryAssets();
         }
 
         [Test]
@@ -174,6 +215,319 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
 
             Assert.False(PlayerSettings.GetPreloadedAssets().Contains(settings));
         }
+    }
+
+    [TestFixture]
+    class XRGeneralSettingsPerBuildTargetExclusionTests
+    {
+        static readonly string k_DefaultAssetPathRoot = Path.GetFullPath(Path.Combine(".", "Assets", EditorUtilities.s_DefaultGeneralSettingsPath[0]));
+
+        XRGeneralSettingsPerBuildTarget m_PreviousSettings;
+
+        [SetUp]
+        public void SetupPlayerSettings()
+        {
+            if (EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out _))
+            {
+                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+            }
+
+            AssetDatabase.DeleteAsset("Assets/XR");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+        }
+
+        [Test]
+        public void CheckIfSettingsAreNotAddedIfNoSettingsExistInTheProject()
+        {
+            // Ensure Setup Functioned properly.
+            Assert.False(
+                EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out var buildSettings),
+                "Build Settings contains a settings config object when it should not.");
+
+            Assert.False(
+                XRGeneralBuildProcessor.TryGetSettingsPerBuildTarget(out buildSettings),
+                "Build Settings Configuration Object exists when it shouldn't in the current project");
+        }
+    }
+
+    /// <summary>
+    /// A set of tests that are explicitly designed to ensure if
+    /// an <see cref="XRGeneralSettingsPerBuildTarget"/> asset exists
+    /// in the current project that it would get processed.
+    /// </summary>
+    /// <remarks>
+    /// Functionally the opposite of the <see cref="XRGeneralSettingsPerBuildTargetBuildExclusionTests"/>
+    /// except that these tests will always run since it's possible to create just test assets.
+    /// </remarks>
+    [TestFixture(BuildTargetGroup.Standalone)]
+    [TestFixture(BuildTargetGroup.Android)]
+    [TestFixture(BuildTargetGroup.iOS)]
+#if (!UNITY_2021_2_OR_NEWER)
+    [TestFixture(BuildTargetGroup.Lumin)]
+#endif
+    [TestFixture(BuildTargetGroup.PS4)]
+    class XRGeneralSettingsPerBuildTargetInclusionTests
+    {
+        const string k_DefaultAssetPath = "Assets/XR";
+        const string k_DefaultAssetName = "XRGeneralSettings.asset";
+
+        BuildTargetGroup m_BuildTargetGroup;
+        XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
+
+        public XRGeneralSettingsPerBuildTargetInclusionTests(BuildTargetGroup group)
+        {
+            m_BuildTargetGroup = group;
+        }
+
+        [SetUp]
+        public void SetupPlayerSettings()
+        {
+            if (!EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out m_OldBuildTargetSettings))
+            {
+                // If not then we get or create the asset and delete it in the teardown
+                XRGeneralSettingsPerBuildTarget.GetOrCreate();
+                AssetDatabase.Refresh();
+            }
+            else
+            {
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
+            }
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (m_OldBuildTargetSettings == null)
+            {
+                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+
+                // Asset did not exists prior to test running so delete.
+                AssetDatabase.DeleteAsset(Path.Combine(k_DefaultAssetPath, k_DefaultAssetName));
+                if (Directory.Exists(Path.Combine("./", k_DefaultAssetPath)))
+                {
+                    Directory.Delete(Path.Combine("./", k_DefaultAssetPath), true);
+                    File.Delete($"./{k_DefaultAssetPath}.meta");
+                    AssetDatabase.Refresh();
+                }
+            }
+        }
+
+        [Test]
+        public void EnsureSettingsAreIncludedWhenAssetExists()
+        {
+            // Ensure Setup Functioned properly.
+            Assert.True(XRGeneralBuildProcessor.TryGetSettingsPerBuildTarget(out var originalSettings),
+                "XRGeneralSettingsPerBuildTarget should be included at the beginning of the test.");
+
+            // Remove the settings to check if the code functions properly
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+
+            Assert.True(XRGeneralBuildProcessor.TryGetSettingsPerBuildTarget(out var generalSettings),
+                "The asset should exist even if it's been removed from the editor configuration.");
+            Assert.True(EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out generalSettings),
+                "The configuration object was not set by the build processor!");
+            Assert.NotNull(generalSettings, "Build Settings Configuration Object does not exist when it in the current project.");
+        }
+    }
+
+
+    [TestFixture(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX)]
+    [TestFixture(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64)]
+    [TestFixture(BuildTargetGroup.Android, BuildTarget.Android)]
+    [TestFixture(BuildTargetGroup.iOS, BuildTarget.iOS)]
+#if (!UNITY_2021_2_OR_NEWER)
+    [TestFixture(BuildTargetGroup.Lumin, BuildTarget.Lumin)]
+#endif
+    [TestFixture(BuildTargetGroup.PS4, BuildTarget.PS4)]
+    class XRLoaderSelection
+    {
+        private readonly BuildTargetGroup m_BuildTargetGroup;
+        private readonly BuildTarget m_BuildTarget;
+
+        private DummyLoader m_Loader;
+        private string m_ExpectedConfigEntry;
+
+        private XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
+
+        public XRLoaderSelection(BuildTargetGroup group, BuildTarget buildTarget)
+        {
+            m_BuildTargetGroup = group;
+            m_BuildTarget = buildTarget;
+
+            m_Loader = ScriptableObject.CreateInstance(typeof(DummyLoader)) as DummyLoader;
+            string dummyLoaderLibName = m_Loader.GetPreInitLibraryName(m_BuildTarget, m_BuildTargetGroup);
+            m_ExpectedConfigEntry = XRGeneralBuildProcessor.kPreInitLibraryKey + ":" + dummyLoaderLibName;
+        }
+
+        void CleanupOldSettings() => BuildHelpers.CleanOldSettings<XRGeneralSettings>();
+
+        [SetUp]
+        public void SetupPlayerSettings()
+        {
+            BuildTestHelpers.SetupTemporaryTestAssets(m_BuildTargetGroup, out m_OldBuildTargetSettings);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (m_OldBuildTargetSettings != null)
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
+
+            BuildTestHelpers.CleanupTemporaryAssets();
+        }
+
+        [Test]
+        public void EnsureLoaderIsIncludedInConfigWhenSelected()
+        {
+            XRGeneralBuildProcessor processor = new XRGeneralBuildProcessor();
+
+            // Set up with DummyLoader
+            XRManagerSettings settings = GetXRManagerSettings();
+            Assert.True(settings.TryAddLoader(m_Loader));
+            processor.OnPreprocessBuildImpl(new GUID(""), m_BuildTargetGroup, m_BuildTarget);
+
+            // Determine that the DummyLoader was committed to Editor settings
+            string xrBootSettings = GetXRBootSettings();
+            Assert.False(String.IsNullOrEmpty(xrBootSettings));
+            string dummyLoaderLibName = m_Loader.GetPreInitLibraryName(m_BuildTarget, m_BuildTargetGroup);
+            Assert.True(xrBootSettings.Contains(m_ExpectedConfigEntry));
+        }
+
+        [Test]
+        public void EnsureXRPreInitKeyIsRemovedWhenNoLoaderSelected()
+        {
+            XRGeneralBuildProcessor processor = new XRGeneralBuildProcessor();
+
+            // Set up with DummyLoader
+            XRManagerSettings settings = GetXRManagerSettings();
+            Assert.True(settings.TryAddLoader(m_Loader));
+            processor.OnPreprocessBuildImpl(new GUID(""), m_BuildTargetGroup, m_BuildTarget);
+
+            // Determine that the DummyLoader was committed to Editor settings
+            string xrBootSettings = GetXRBootSettings();
+            Assert.False(String.IsNullOrEmpty(xrBootSettings));
+            Assert.True(xrBootSettings.Contains(m_ExpectedConfigEntry));
+
+            // Now try to remove it and make sure it's removed from the config
+            Assert.True(settings.TryRemoveLoader(m_Loader));
+            processor.OnPreprocessBuildImpl(new GUID(""), m_BuildTargetGroup, m_BuildTarget);
+
+            // Determine that the DummyLoader was removed from the Editor settings
+            xrBootSettings = GetXRBootSettings();
+            Assert.False(xrBootSettings.Contains(m_ExpectedConfigEntry));
+        }
+
+        private string GetXRBootSettings()
+        {
+            string buildTargetName = BuildPipeline.GetBuildTargetName(m_BuildTarget);
+            return UnityEditor
+                .EditorUserBuildSettings
+                    .GetPlatformSettings(buildTargetName, BootConfig.kXrBootSettingsKey);
+        }
+
+        private XRManagerSettings GetXRManagerSettings()
+        {
+            EditorBuildSettings
+                .TryGetConfigObject(
+                    XRGeneralSettings.k_SettingsKey,
+                    out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            return buildTargetSettings
+                    .SettingsForBuildTarget(m_BuildTargetGroup)
+                        .AssignedSettings;
+        }
+    }
+
+    [TestFixture(BuildTargetGroup.Android, BuildTarget.Android)]
+    class TestAndroidManifestReset
+    {
+        public class PostGradleCallback : IPostGenerateGradleAndroidProject
+        {
+            public int callbackOrder
+            {
+                get { return XRGeneralBuildProcessor.s_CallbackOrder + 1; }
+            }
+
+            public void OnPostGenerateGradleAndroidProject(string path)
+            {
+                s_onPostGenerateGradleAndroidProjectEvent?.Invoke(this, path);
+            }
+        }
+
+        private readonly BuildTargetGroup m_BuildTargetGroup;
+        private readonly BuildTarget m_BuildTarget;
+
+        private XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
+
+        private static event EventHandler<string> s_onPostGenerateGradleAndroidProjectEvent;
+
+        public TestAndroidManifestReset(BuildTargetGroup group, BuildTarget target)
+        {
+            m_BuildTargetGroup = group;
+            m_BuildTarget = target;
+        }
+
+        [Test]
+        public void DoesCleanUpAfterBuild()
+        {
+            const string k_ScenePath = "TestScene.unity";
+            const string k_BuildFolder = "./build";
+            const string k_BuildFile = k_BuildFolder + "/build.apk";
+
+            if (!BuildPipeline.IsBuildTargetSupported(m_BuildTargetGroup, m_BuildTarget))
+            {
+                Debug.LogWarning(
+                    string.Format(
+                        "Test platform lacks {0}/{1} build target support",
+                        m_BuildTargetGroup,
+                        m_BuildTarget
+                    )
+                );
+                return;
+            }
+
+            Scene currentScene = SceneManager.GetActiveScene();
+            currentScene.name = "TestScene";
+            EditorSceneManager.SaveScene(currentScene, k_ScenePath);
+
+            EventHandler<string> gradleCallback = (object sender, string s) =>
+            {
+                Assert.True(File.Exists(XRGeneralBuildProcessor.s_ManifestPath));
+            };
+            s_onPostGenerateGradleAndroidProjectEvent += gradleCallback;
+            
+            // if the project is blank and no package name was set, this prevents the test from
+            // failing
+            var packageID = PlayerSettings.GetApplicationIdentifier(m_BuildTargetGroup);
+            bool shouldChange = packageID?.StartsWith("com.DefaultCompany") ?? false;
+            if (shouldChange) {
+                PlayerSettings.SetApplicationIdentifier(m_BuildTargetGroup, "com.unity.test");
+            }
+
+            Directory.CreateDirectory(k_BuildFolder);
+            BuildPipeline.BuildPlayer(
+                new BuildPlayerOptions{
+                    locationPathName = k_BuildFile,
+                    options = BuildOptions.None,
+                    scenes = new string[]{k_ScenePath},
+                    target = m_BuildTarget,
+                    targetGroup =  m_BuildTargetGroup
+                }
+            );
+
+            Assert.False(File.Exists(XRGeneralBuildProcessor.s_ManifestPath));
+
+            File.Delete(k_ScenePath);
+            Directory.Delete(k_BuildFolder, true);
+            if (shouldChange) {
+                PlayerSettings.SetApplicationIdentifier(m_BuildTargetGroup, packageID);
+            }
+
+            s_onPostGenerateGradleAndroidProjectEvent -= gradleCallback;
+        } 
     }
 }
 #endif //UNITY_EDITOR_WIN || UNITY_EDITOR_OSX

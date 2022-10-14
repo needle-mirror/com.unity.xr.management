@@ -25,6 +25,11 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.subsystemregistration",
+            "define": "USE_LEGACY_SUBSYS_REGISTRATION"
+        }
+    ],
     "noEngineReferences": false
 }

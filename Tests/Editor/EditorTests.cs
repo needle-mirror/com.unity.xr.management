@@ -91,9 +91,11 @@ namespace UnityEditor.XR.Management.Tests
     [TestFixture(4)]
     class EditorActiveLoadersManipulationTests : XRSettingsManagerTestBase
     {
-        public EditorActiveLoadersManipulationTests(int loaderCount)
-            : base(loaderCount)
+        public override int loaderCount { get; }
+
+        public EditorActiveLoadersManipulationTests(int loaderCountIn)
         {
+            loaderCount = loaderCountIn;
         }
 
         [SetUp]

@@ -17,12 +17,7 @@ namespace UnityEngine.XR.Management.Tests
         private List<XRLoader> m_Loaders;
         public List<XRLoader> loaders => m_Loaders;
 
-        public int loaderCount { get; }
-
-        public XRSettingsManagerTestBase(int numberOfLoaders)
-        {
-            loaderCount = numberOfLoaders;
-        }
+        public abstract int loaderCount { get; }
 
         protected void SetupBase()
         {
@@ -68,10 +63,11 @@ namespace UnityEngine.XR.Management.Tests
     class ManualLifetimeTests : XRSettingsManagerTestBase
     {
         int m_LoaderIndexToWin;
+        public override int loaderCount { get; }
 
-        public ManualLifetimeTests(int loaderCount, int loaderIndexToWin)
-            : base(loaderCount)
+        public ManualLifetimeTests(int loaderCountIn, int loaderIndexToWin)
         {
+            loaderCount = loaderCountIn;
             m_LoaderIndexToWin = loaderIndexToWin;
         }
 
@@ -121,30 +117,40 @@ namespace UnityEngine.XR.Management.Tests
     #if UNITY_EDITOR_WIN || UNITY_EDITOR_OSX
 
 #if UNITY_EDITOR_WIN
-    [TestFixture(GraphicsDeviceType.Direct3D11, 0, new [] { GraphicsDeviceType.Direct3D11})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, 1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Direct3D11})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, -1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, 0, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Direct3D11, 1, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 0, GraphicsDeviceType.Direct3D11, null)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 1, GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Direct3D11)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, -1, GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 0, GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Direct3D11, 1, GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null)]
 #elif UNITY_EDITOR_OSX
-    [TestFixture(GraphicsDeviceType.Metal, 0, new [] { GraphicsDeviceType.Metal})]
-    [TestFixture(GraphicsDeviceType.Metal, 1, new [] { GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal})]
-    [TestFixture(GraphicsDeviceType.Metal, -1, new [] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Metal, 0, new [] { GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan})]
-    [TestFixture(GraphicsDeviceType.Metal, 1, new [] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null})]
+    [TestFixture(GraphicsDeviceType.Metal, 0, GraphicsDeviceType.Metal, null)]
+    [TestFixture(GraphicsDeviceType.Metal, 1, GraphicsDeviceType.Direct3D12, GraphicsDeviceType.Metal)]
+    [TestFixture(GraphicsDeviceType.Metal, -1, GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Metal, 0, GraphicsDeviceType.Null, GraphicsDeviceType.Vulkan)]
+    [TestFixture(GraphicsDeviceType.Metal, 1, GraphicsDeviceType.Vulkan, GraphicsDeviceType.Null)]
 #endif
     class GraphicsAPICompatibilityTests : XRSettingsManagerTestBase
     {
+        public override int loaderCount { get; }
 
         private GraphicsDeviceType m_PlayerSettingsDeviceType;
         private GraphicsDeviceType[]  m_LoadersSupporteDeviceTypes;
         int m_LoaderIndexToWin;
-        public GraphicsAPICompatibilityTests(GraphicsDeviceType playerSettingsDeviceType,  int indexToWin, GraphicsDeviceType[] loaders)
-            : base(loaders.Length)
+        public GraphicsAPICompatibilityTests(GraphicsDeviceType playerSettingsDeviceType,  int indexToWin, GraphicsDeviceType loader0, GraphicsDeviceType? loader1)
         {
             m_LoaderIndexToWin = indexToWin;
             m_PlayerSettingsDeviceType = playerSettingsDeviceType;
-            m_LoadersSupporteDeviceTypes = loaders;
+            
+            if (loader1.HasValue)
+            {
+                m_LoadersSupporteDeviceTypes = new[] {loader0, loader1.Value};
+            }
+            else
+            {
+                m_LoadersSupporteDeviceTypes = new[] {loader0};
+            }
+
+            loaderCount = m_LoadersSupporteDeviceTypes.Length;
         }
 
         [SetUp]
@@ -238,9 +244,10 @@ namespace UnityEngine.XR.Management.Tests
     [TestFixture(4)]
     class RuntimeActiveLoadersManipulationTests : XRSettingsManagerTestBase
     {
-        public RuntimeActiveLoadersManipulationTests(int loaderCount)
-            : base(loaderCount)
+        public override int loaderCount { get; }
+        public RuntimeActiveLoadersManipulationTests(int loaderCountIn)
         {
+            loaderCount = loaderCountIn;
         }
 
         [SetUp]
@@ -285,14 +292,14 @@ namespace UnityEngine.XR.Management.Tests
 
             if (loaderCount > 0)
                 Assert.IsNotEmpty(manager.registeredLoaders);
-            Assert.AreEqual(manager.registeredLoaders.Count, loaderCount > 0 ? loaderCount : 0);
+            Assert.AreEqual(manager.registeredLoaders.Count, loaderCount);
 
             for (var i = 0; i < originalLoaders.Count; ++i)
             {
                 Assert.True(manager.TryAddLoader(originalLoaders[originalLoaders.Count - 1 - i]));
             }
 
-            Assert.AreEqual(manager.registeredLoaders.Count, loaderCount >= 0 ? loaderCount : 0);
+            Assert.AreEqual(manager.registeredLoaders.Count, loaderCount);
         }
 
         [Test]

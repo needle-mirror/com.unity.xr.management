@@ -1,12 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 using NUnit.Framework;
 
 using Unity.XR.TestTooling;
 using UnityEngine.XR.Management.Tests.Standalone;
+#if USE_LEGACY_SUBSYS_REGISTRATION && !UNITY_2020_2_OR_NEWER
 using UnityEngine.XR.Management.Tests.Standalone.Providing;
+#endif
 
 namespace UnityEngine.XR.Management.Tests
 {
@@ -17,8 +15,17 @@ namespace UnityEngine.XR.Management.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+#if UNITY_2020_2_OR_NEWER
+            StandaloneSubsystemParams parms = new StandaloneSubsystemParams{
+                id = "Standalone Subsystem",
+                subsystemTypeOverride = typeof(StandaloneSubsystemImpl),
+                providerType = typeof(StandaloneSubsystemImpl.ProviderImpl)
+            };
+            StandaloneSubsystemDescriptor.Create(parms);
+#elif USE_LEGACY_SUBSYS_REGISTRATION
             StandaloneSubsystemParams parms = new StandaloneSubsystemParams("Standalone Subsystem", typeof(StandaloneSubsystem));
             StandaloneSubsystemDescriptor.Create(parms);
+#endif
         }
 
         [SetUp]

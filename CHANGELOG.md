@@ -4,6 +4,27 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.3.1] - 2022-10-14
+
+### Fixed
+- Clean up AndroidManifest.xml every XR build to prevent conflicts with other configurations.
+- Remove a spurious error when no XR providers were selected
+
+### Changes
+- Removed dependency on `com.unity.subsystemregistration` package for supported editors (2022.2+)
+
+## [4.2.2] - 2022-04-08
+
+### Fixed
+* Related Bug: FB [1378643](https://fogbugz.unity3d.com/f/cases/1378643/).
+
+Fixed an issue where packages that contained `XRGeneralSettingsPerBuildTarget` assets could potentially fail to reimport.
+
+* Fixed an issue where `m_RegisteredLoaders` list would not get populated on `Awake` at runtime in a built player.
+
+### Changes
+* Updated documentation with new sections `Manual Lifecycle Handling`, `Initializing a Specific Loader`, `Changing the Loader List`, and add examples for the new documentation sections.
+
 ## [4.2.1] - 2021-12-09
 ### Fixed
 * Resolve FB [1378643](https://fogbugz.unity3d.com/f/cases/1378643/) by enforcing creation of `XRGeneralSettingsPerBuildTarget` using a new API `XRGeneralSettingsPerBuildTarget.GetOrCreate()`

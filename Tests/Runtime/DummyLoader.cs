@@ -2,10 +2,13 @@ using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using UnityEditor;
+using UnityEngine.XR.Management;
+
 [assembly: InternalsVisibleTo("Unity.XR.Management.EditorTests")]
 namespace UnityEngine.XR.Management.Tests
 {
-    internal class DummyLoader : XRLoader
+    internal class DummyLoader : XRLoader, IXRLoaderPreInit
     {
         public bool shouldFail = false;
         public int id;
@@ -56,6 +59,11 @@ namespace UnityEngine.XR.Management.Tests
                 hashCode = (hashCode * 397) ^ id;
                 return hashCode;
             }
+        }
+
+        public string GetPreInitLibraryName(BuildTarget target, BuildTargetGroup targetGroup)
+        {
+            return "DummyLoader";
         }
     }
 }

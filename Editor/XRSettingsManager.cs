@@ -74,15 +74,10 @@ namespace UnityEditor.XR.Management
 
         private Dictionary<BuildTargetGroup, XRManagerSettingsEditor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, XRManagerSettingsEditor>();
 
+
         private BuildTargetGroup m_LastBuildTargetGroup = BuildTargetGroup.Unknown;
 
-        static XRGeneralSettingsPerBuildTarget currentSettings
-        {
-            get
-            {
-                return XRGeneralSettingsPerBuildTarget.GetOrCreate();
-            }
-        }
+        static XRGeneralSettingsPerBuildTarget currentSettings => XRGeneralSettingsPerBuildTarget.GetOrCreate();
 
         [UnityEngine.Internal.ExcludeFromDocs]
         XRSettingsManager(string path, SettingsScope scopes = SettingsScope.Project) : base(path, scopes)

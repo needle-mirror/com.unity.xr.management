@@ -32,6 +32,40 @@ namespace UnityEditor.XR.Management
             EditorApplication.playModeStateChanged += PlayModeStateChanged;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        internal static bool TryFindSettingsAsset(out XRGeneralSettingsPerBuildTarget generalSettings)
+        {
+            EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out generalSettings);
+            if (generalSettings == null)
+            {
+                var assets = AssetDatabase.FindAssets("t:XRGeneralSettingsPerBuildTarget");
+                if (assets.Length > 0)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(assets[0]);
+                    generalSettings = AssetDatabase.LoadAssetAtPath(path, typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
+                }
+            }
+            return generalSettings != null;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        static XRGeneralSettingsPerBuildTarget CreateAssetSynchronized()
+        {
+            var generalSettings = CreateInstance(typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
+            string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultGeneralSettingsPath);
+            if (!string.IsNullOrEmpty(assetPath))
+            {
+                assetPath = Path.Combine(assetPath, "XRGeneralSettingsPerBuildTarget.asset");
+                AssetDatabase.CreateAsset(generalSettings, assetPath);
+                AssetDatabase.SaveAssets();
+            }
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
+            return generalSettings;
+        }
+
+        internal static XRGeneralSettingsPerBuildTarget GetOrCreate()
+            => TryFindSettingsAsset(out var generalSettings) ? generalSettings : CreateAssetSynchronized();
+
         // Simple class to give us updates when the asset database changes.
         class AssetCallbacks : AssetPostprocessor
         {
@@ -76,9 +110,7 @@ namespace UnityEditor.XR.Management
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
             EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
             if (buildTargetSettings == null)
-            {
-                buildTargetSettings = GetOrCreate();
-            }
+                return;
 
             XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
             if (instance == null || !instance.InitManagerOnStart)
@@ -89,6 +121,7 @@ namespace UnityEditor.XR.Management
 
         internal static bool ContainsLoaderForAnyBuildTarget(string loaderTypeName)
         {
+
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
             EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
             if (buildTargetSettings == null)
@@ -101,37 +134,6 @@ namespace UnityEditor.XR.Management
             }
 
             return false;
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        internal static XRGeneralSettingsPerBuildTarget GetOrCreate()
-        {
-            EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out var generalSettings);
-            if (generalSettings == null)
-            {
-                string searchText = "t:XRGeneralSettings";
-                string[] assets = AssetDatabase.FindAssets(searchText);
-                if (assets.Length > 0)
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(assets[0]);
-                    generalSettings = AssetDatabase.LoadAssetAtPath(path, typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
-                }
-            }
-
-            if (generalSettings == null)
-            {
-                generalSettings = CreateInstance(typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
-                string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultGeneralSettingsPath);
-                if (!string.IsNullOrEmpty(assetPath))
-                {
-                    assetPath = Path.Combine(assetPath, "XRGeneralSettings.asset");
-                    AssetDatabase.CreateAsset(generalSettings, assetPath);
-                }
-            }
-
-            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
-
-            return generalSettings;
         }
 #endif
 

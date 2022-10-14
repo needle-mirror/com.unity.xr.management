@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+#if UNITY_2020_2_OR_NEWER
+using UnityEngine.SubsystemsImplementation.Extensions;
+#endif
 
 namespace UnityEngine.XR.Management.Tests.Standalone
 {
@@ -6,13 +9,7 @@ namespace UnityEngine.XR.Management.Tests.Standalone
     {
         static List<StandaloneSubsystemDescriptor> s_StandaloneSubsystemDescriptors = new List<StandaloneSubsystemDescriptor>();
 
-        public StandaloneSubsystem standaloneSubsystem
-        {
-            get
-            {
-                return GetLoadedSubsystem<StandaloneSubsystem>();
-            }
-        }
+        public StandaloneSubsystem standaloneSubsystem => GetLoadedSubsystem<StandaloneSubsystem>();
 
         public bool started { get; protected set; }
         public bool stopped { get; protected set; }
@@ -43,9 +40,21 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             if (standaloneSubsystem == null)
                 return false;
 
+#if UNITY_2020_2_OR_NEWER
+            var provider = standaloneSubsystem.GetProvider();
+
+            if (provider == null)
+				return false;
+
+            provider.startCalled += OnStartCalled;
+            provider.stopCalled += OnStopCalled;
+            provider.destroyCalled += OnDestroyCalled;
+#elif USE_LEGACY_SUBSYS_REGISTRATION
             standaloneSubsystem.startCalled += OnStartCalled;
             standaloneSubsystem.stopCalled += OnStopCalled;
             standaloneSubsystem.destroyCalled += OnDestroyCalled;
+#endif
+
             return true;
         }
 
@@ -68,9 +77,20 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             DestroySubsystem<StandaloneSubsystem>();
             if (standaloneSubsystem != null)
             {
+#if UNITY_2020_2_OR_NEWER
+                var provider = standaloneSubsystem.GetProvider();
+
+                if (provider != null)
+                {
+                    provider.startCalled -= OnStartCalled;
+                    provider.stopCalled -= OnStopCalled;
+                    provider.destroyCalled -= OnDestroyCalled;
+                }
+#elif USE_LEGACY_SUBSYS_REGISTRATION
                 standaloneSubsystem.startCalled -= OnStartCalled;
                 standaloneSubsystem.stopCalled -= OnStopCalled;
                 standaloneSubsystem.destroyCalled -= OnDestroyCalled;
+#endif
             }
             return base.Deinitialize();
         }
