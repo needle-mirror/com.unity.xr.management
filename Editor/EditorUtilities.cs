@@ -83,11 +83,16 @@ namespace UnityEditor.XR.Management
             if (!typeParts.Any())
                 return String.Empty;
 
-            string[] words = Regex.Matches(typeParts.Last(), "(^[a-z]+|[A-Z]+(?![a-z])|[A-Z][a-z]+)")
+            for (int i = 0; i < typeParts.Length; ++i)
+            {
+                typeParts[i] = typeParts[i].TrimStart('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+            }
+
+            string[] words = Regex.Matches(typeParts.Last(), "[\\w\\d]+")
                 .OfType<Match>()
                 .Select(m => m.Value)
                 .ToArray();
-            return string.Join(" ", words);
+            return string.Join("", words);
         }
 
         internal static ScriptableObject CreateScriptableObjectInstance(string typeName, string path)

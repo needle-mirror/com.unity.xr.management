@@ -82,6 +82,26 @@ namespace UnityEditor.XR.Management.Tests
             Assert.IsNotNull(settings);
             Assert.IsNotNull(settings.Manager);
         }
+
+        [Test]
+        public void VerifyValidLoaderAndSettingsTypeNames()
+        {
+            // The Expected Valid Strings must fit the C# expectations for valid type formats
+            Dictionary<string, string> TypeNamesAndExpectedValidStrings = new Dictionary<string, string>()
+            {
+                { "My.Loader", "Loader" },
+                { "MyLoader2", "MyLoader2" },
+                { "Prefix.My3 Loader3", "My3Loader3" },
+                { "4444MyLoader", "MyLoader" },
+                { "Prefix.My'; Loader_5", "MyLoader_5" },
+            };
+
+            foreach (KeyValuePair<string, string> typeAndValidation in TypeNamesAndExpectedValidStrings)
+            {
+                string result = EditorUtilities.TypeNameToString(typeAndValidation.Key);
+                Assert.AreEqual(typeAndValidation.Value, result);
+            }
+        }
     }
 
     [TestFixture(0)] // Test case where no loaders exist in the list
