@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2023-03-30
+
+### Added
+- Created `AndroidManifestProcessor` as an Android manifest management system for XR packages and providers that target platforms based on Android.
+
+### Removed
+- AndroidManifest.xml is no longer deleted after each Android build.
+
 ## [4.3.3] - 2023-02-14
 
 ### Fixed
