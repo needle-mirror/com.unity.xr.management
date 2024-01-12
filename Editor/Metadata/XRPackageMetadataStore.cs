@@ -167,6 +167,18 @@ namespace UnityEditor.XR.Management.Metadata
             public string packageId;
             public string loaderName;
             public string loaderType;
+            public bool disabled;
+
+            public LoaderBuildTargetQueryResult(IXRPackageMetadata pm, IXRLoaderMetadata lm)
+            {
+                packageName = pm.packageName;
+                packageId = pm.packageId;
+                loaderName = lm.loaderName;
+                loaderType = lm.loaderType;
+                disabled = false;
+                if (pm is KnownPackages.KnownPackageMetadata knownMetadata)
+                    disabled = knownMetadata.disabled;
+            }
         }
 
         internal static void MoveMockInListToEnd(List<LoaderBuildTargetQueryResult> loaderList)
@@ -186,7 +198,7 @@ namespace UnityEditor.XR.Management.Metadata
                       from lm in pm.loaderMetadata
                       where lm.supportedBuildTargets.Contains(buildTarget)
                       orderby lm.loaderName
-                      select new LoaderBuildTargetQueryResult() { packageName = pm.packageName, packageId = pm.packageId, loaderName = lm.loaderName, loaderType = lm.loaderType };
+                      select new LoaderBuildTargetQueryResult(pm, lm);
             var retList = ret.Distinct().ToList<LoaderBuildTargetQueryResult>();
             MoveMockInListToEnd(retList);
             return retList;
@@ -199,7 +211,7 @@ namespace UnityEditor.XR.Management.Metadata
                       from lm in pm.loaderMetadata
                       where lm.supportedBuildTargets.Contains(buildTargetGroup)
                       orderby lm.loaderName
-                      select new LoaderBuildTargetQueryResult() { packageName = pm.packageName, packageId = pm.packageId, loaderName = lm.loaderName, loaderType = lm.loaderType };
+                      select new LoaderBuildTargetQueryResult(pm, lm);
             var retList = ret.ToList<LoaderBuildTargetQueryResult>();
             MoveMockInListToEnd(retList);
             return retList;

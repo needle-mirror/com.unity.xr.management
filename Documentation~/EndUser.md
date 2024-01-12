@@ -1,15 +1,32 @@
 ---
 uid: xr-plug-in-management-end-user
 ---
-# End-user documentation
+# Advanced configuration for plug-in management
 
-## Installing and using XR Plug-in Management
+To use the XR Plug-in Manager to manage XR plug-ins and settings, refer to the following documentation in the Unity Manual:
 
-For instructions on how to install the XR Plug-in Manager, see the [XR Plug-in Framework](https://docs.unity3d.com/2020.1/Documentation/Manual/XRPluginArchitecture.html) page in the Unity Manual.
+| Topic | Description |
+| :---  | :---        |
+| [Choose XR provider plug-ins](xref:xr-configure-providers) | How to configure your project to use specific XR provider plug-ins, such as OpenXR. |
+| [XR Plug-in Management settings](xref:xr-plugin-management) | Reference information describing the XR Plug-in Management settings. |
 
-## Automatic XR loading
+The topics on this page describe more advanced uses of the XR Plug-in Manager and its API. Refer to this information when:
+
+* You want to control when XR provider plug-ins are loaded and initialized
+* You want to decide at runtime which XR provider plug-in to use
+* You want to set the order in which the XR provider plug-in manager attempts to load plug-ins
+* You want to assign values to XR provider plug-in settings at build or runtime using a script
+
+<a id="automatic-xr-loading"></a>
+<a id="load-xr-plug-ins"></a>
+## Load XR plug-ins
 
 By default, XR Plug-in Management initializes automatically and starts your XR environment when the application loads. At runtime, this happens immediately before the first Scene loads. In Play mode, this happens immediately after the first Scene loads, but before `Start` is called on your GameObjects. In both scenarios, XR should be set up before calling the MonoBehaviour [Start](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) method, so you should be able to query the state of XR in the `Start` method of your GameObjects.
+
+Alternately, you can wait until after the `Start` event completes and manually initialize XR.
+
+> [!IMPORTANT]
+> Do not start manual initialization of XR until after the Unity `Start` event completes. The Unity graphics system must be completely initialized before you can manually initialize XR, which isn't guaranteed until after `Start` is finished. (Automatic XR initialization take places before graphics initialization, but there's no way to invoke manual XR initalization early enough.) 
 
 If you want to start XR on a per-Scene basis (for example, to start in 2D and transition into VR), follow these steps:
 
@@ -17,11 +34,6 @@ If you want to start XR on a per-Scene basis (for example, to start in 2D and tr
 2. Select the **XR Plug-in Management** tab on the left.
 3. Disable the **Initialize on start** option for each platform you support.
 4. At runtime, call the following methods on `XRGeneralSettings.Instance.Manager` to add/create, remove, and reorder the Loaders from your scripts:
-
-<b>Manual initialization can not be done before Start completes as it depends on graphics initialization within Unity completing.</b>
-
-Initialization of XR must be complete either before the Unity graphics system is setup and initialized (as in Automatic life cycle management) or must be put off till after graphics is completely initialized. The easiest way to check this is to just make sure you do not try to start XR until Start is called on your MonoBehaviour instance.
-
 
 |Method|Description|
 |---|---|
@@ -69,7 +81,9 @@ public class ManualXRControl
 }
 ```
 
-## Managing XR Loader Lifecycles Manually
+<a id="managing-xr-loader-lifecycles-manually"></a>
+<a id="manage-xr-loader-lifecycles"></a>
+## Manage XR loader lifecycles
 
 The previous section showed how to manage the entire XR system lifecycle. If you require more granular control, you can manage an individual loader's lifecycle instead.
 
@@ -86,11 +100,10 @@ You can use the following methods in your script to control the lifecycle of XR 
 
 The following code example demonstrates how to manage individual loaders at runtime.
 
-### Disclaimer
-
-The following circumvents XR Management Lifecycle control. The developer is indicating that they intend to manage the lifecycle of the loaders initialized in this manner manually. APIs that expect to use XR Plug-In Management to acquire subsystems from a loader will not function properly when manually handling loader lifecycles.
-
-If you need a specific loader initialized but want that loader to still be managed by XR Plug-In Management, look into the '[Modifying the Loader List](./EndUser.md#example-modifying-the-loader-list)' section on how to do that.
+> [!IMPORTANT]
+> The following example circumvents XR Management Lifecycle control. When you take this route, you must manually manage the lifecycle of all the loaders initialized in this manner. APIs that expect to use XR Plug-In Management to acquire subsystems from a loader will not function properly when manually handling loader lifecycles.
+>
+> If you need a specific loader initialized but want that loader to still be managed by XR Plug-In Management, look into the '[Modifying the Loader List](#example-modifying-the-loader-list)' section on how to do that.
 
 ### Example
 
@@ -149,7 +162,7 @@ public class RuntimeXRLoaderManager : MonoBehaviour
 }
 ```
 
-## Using XR Plug-In Management to Initialize a Specific Loader
+## Use XR Plug-In Management to initialize a specific loader
 
 Sometimes, you may want to include multiple loaders in a build and have them fall through in a specific order. By default, XR Plug-In Management will attempt to initialize the loader in alphabetical order based on the loaders' name. If this isn't adequate you can modify the loader list in Edit Mode, Play Mode, and in a built player with some caveats.
 
@@ -165,7 +178,8 @@ Sometimes, you may want to include multiple loaders in a build and have them fal
 
 3) Any operation on the XR Plug-in Manager UI will reset the ordering to the original alphabetical ordering.
 
-### Example: Modifying the Active Loader List at Runtime
+<a id="example-modifying-the-loader-list"></a>
+### Example: Modify the active loader list at runtime
 
 If you wish to reorder the set of loaders so XR Plug-In Management attempts to initialize a specific loader first you could do the following at runtime:
 
@@ -212,9 +226,9 @@ If you wish to reorder the set of loaders so XR Plug-In Management attempts to i
 
 ```
 
-### Example: General Modification the loader list
+### Example: general modifications of the loader list
 
-You may also modify the loader list in other more general ways. The following shows how to use `TryAdd`, `TryRemove`, and `TrySet` in a variety of ways.
+You can also modify the loader list in other more general ways. The following example shows how to use `TryAdd`, `TryRemove`, and `TrySet` in a variety of ways.
 
 ```csharp
     var generalSettings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTarget.Standalone);
@@ -252,15 +266,17 @@ You may also modify the loader list in other more general ways. The following sh
 
 You would most likely place this script in a custom pre-process build script, but that isn't required. Regardless of the script's location, you should do this as a setup step before you start a build as XR Plug-in Manager will serialize this list as part of the build execution.
 
-## Customizing build and runtime settings
+<a id="customizing build and runtime settings"></a>
+## Customize build and runtime settings
 
 Any package that needs build or runtime settings should provide a settings data type for use. This data type appears in the **Project Settings** window, underneath a top level **XR** node.
 
 You can use scripts to configure the settings for a specific plug-in, or change the active and inactive plug-ins per build target.
 
-### Example: Accessing custom settings
+### Example: Access custom settings
 
-**Note**: This doesn't install any plug-ins for you. Make sure your plug-ins are installed and available before you try this script.
+> [!NOTE]
+> The code in this example doesn't install any plug-ins for you. Make sure your plug-ins are installed and available before you try this script.
 
 ```csharp
     var metadata = XRPackageMetadataStore.GetMetadataForPackage(my_pacakge_id);
@@ -283,11 +299,12 @@ You can use scripts to configure the settings for a specific plug-in, or change 
     AssetDatabase.SaveAssets();
 ```
 
-### Example: Configuring plug-ins per build target
+### Example: Configure plug-ins per build target
 
-**Note**: This doesn't install any plug-ins for you. Make sure your plug-ins are installed and available before you try this script.
+> [!NOTE]
+> The code in this example doesn't install any plug-ins for you. Make sure your plug-ins are installed and available before you try this script.
 
-Adding a plug-in to the set of assigned plug-ins for a build target:
+To add a plug-in to the set of assigned plug-ins for a build target:
 
 ```csharp
     var buildTargetSettings = XRGeneralSettingsPerBuildTarget.SettingsForBuildTarget(BuildTarget.Standalone);
@@ -301,7 +318,7 @@ Adding a plug-in to the set of assigned plug-ins for a build target:
     }
 ```
 
-Removing a plug-in from the set of assigned plug-ins for a build target:
+To remove a plug-in from the set of assigned plug-ins for a build target:
 
 ```csharp
     var buildTargetSettings = XRGeneralSettingsPerBuildTarget.SettingsForBuildTarget(BuildTarget.Standalone);
@@ -314,7 +331,3 @@ Removing a plug-in from the set of assigned plug-ins for a build target:
         ...
     }
 ```
-
-## Installing the XR Plug-in Management package
-
-Please see related Unity documentation for [Configuring XR](https://docs.unity3d.com/Manual/configuring-project-for-xr.html ).

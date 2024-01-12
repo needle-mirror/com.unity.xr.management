@@ -205,7 +205,7 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                         loaderName = pmd.loaderName,
                         loaderType = pmd.loaderType,
                         toggled = XRPackageMetadataStore.IsLoaderAssigned(pmd.loaderType, buildTargetGroup),
-                        disabled = false,
+                        disabled = pmd.disabled,
                         customLoaderUI = XRCustomLoaderUIManager.GetCustomLoaderUI(pmd.loaderType, buildTargetGroup)
                         };
 

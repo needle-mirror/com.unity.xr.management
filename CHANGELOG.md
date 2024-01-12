@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.4.1] - 2024-01-12
+
+### Added
+- Added [Apple visionOS XR provider](https://create.unity.com/spatial) to the list of known packages.
+
 ## [4.4.0] - 2023-03-30
 
 ### Added

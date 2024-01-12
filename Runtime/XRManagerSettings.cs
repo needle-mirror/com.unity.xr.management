@@ -418,7 +418,7 @@ namespace UnityEngine.XR.Management
         /// If there is an active loader, this will request the loader to stop all the subsystems that it
         /// is managing.
         ///
-        /// You must wait for <see cref="isInitializationComplete"/> to be set to tru prior to calling this API.
+        /// You must wait for <see cref="isInitializationComplete"/> to be set to true before calling this API.
         /// </summary>
         public void StopSubsystems()
         {
@@ -441,7 +441,7 @@ namespace UnityEngine.XR.Management
         /// management. We will automatically call <see cref="StopSubsystems"/> prior to deinitialization to make sure
         /// that things are cleaned up appropriately.
         ///
-        /// You must wait for <see cref="isInitializationComplete"/> to be set to tru prior to calling this API.
+        /// You must wait for <see cref="isInitializationComplete"/> to be set to true before calling this API.
         ///
         /// Upon return <see cref="isInitializationComplete"/> will be rest to false;
         /// </summary>

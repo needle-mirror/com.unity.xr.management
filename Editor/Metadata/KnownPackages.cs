@@ -8,7 +8,46 @@ namespace UnityEditor.XR.Management.Metadata
 {
     internal class KnownPackages
     {
+#if UNITY_XR_VISIONOS_SUPPORTED
+        [XRCustomLoaderUI(k_VisionOSLoaderTypeName, BuildTargetGroup.VisionOS)]
+        class VisionOSCustomLoaderUI : IXRCustomLoaderUI
+        {
+            GUIContent m_LabelContent;
+
+            public bool IsLoaderEnabled { get; set; }
+            public string[] IncompatibleLoaders => Array.Empty<string>();
+            public float RequiredRenderHeight { get; private set; }
+            public BuildTargetGroup ActiveBuildTargetGroup { get; set; }
+
+            public void SetRenderedLineHeight(float height)
+            {
+                RequiredRenderHeight = height;
+            }
+
+            void SetUpLabelContentIfNeeded()
+            {
+                if (m_LabelContent != null)
+                    return;
+
+                var tooltip = UnityEditorInternal.InternalEditorUtility.HasPro() ? string.Empty : k_VisionOSLicenseTooltip;
+                m_LabelContent = new GUIContent(k_VisionOSLoaderName,  tooltip);
+            }
+
+            public void OnGUI(Rect rect)
+            {
+                SetUpLabelContentIfNeeded();
+                IsLoaderEnabled = EditorGUI.ToggleLeft(rect, m_LabelContent, IsLoaderEnabled);
+            }
+        }
+#endif
+
         internal static string k_KnownPackageMockHMDLoader = "Unity.XR.MockHMD.MockHMDLoader";
+
+#if UNITY_XR_VISIONOS_SUPPORTED
+        const string k_VisionOSLoaderTypeName = "UnityEngine.XR.VisionOS.VisionOSLoader";
+        const string k_VisionOSLicenseTooltip = "Support for Fully Immersive (VR) applications on Apple visionOS requires a Unity Pro, Unity Enterprise, or Unity Industry license";
+        const string k_VisionOSLoaderName = "Apple visionOS";
+#endif
 
         class KnownLoaderMetadata : IXRLoaderMetadata
         {
@@ -17,12 +56,14 @@ namespace UnityEditor.XR.Management.Metadata
             public List<BuildTargetGroup> supportedBuildTargets { get; set; }
         }
 
-        class KnownPackageMetadata : IXRPackageMetadata
+        internal class KnownPackageMetadata : IXRPackageMetadata
         {
             public string packageName { get; set; }
             public string packageId { get; set; }
             public string settingsType { get; set; }
             public List<IXRLoaderMetadata> loaderMetadata { get; set; }
+
+            public bool disabled { get; set; }
         }
 
         class KnownPackage : IXRPackage
@@ -97,7 +138,6 @@ namespace UnityEditor.XR.Management.Metadata
                 }
             });
 
-// This section will get replaced with the RELISH package in the near future.
 #if !UNITY_2021_2_OR_NEWER
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
@@ -177,6 +217,26 @@ namespace UnityEditor.XR.Management.Metadata
                     }
                 }
             });
+
+#if UNITY_XR_VISIONOS_SUPPORTED
+            packages.Add(new KnownPackage() {
+                metadata = new KnownPackageMetadata() {
+                    packageName = "Apple visionOS XR Plugin",
+                    packageId = "com.unity.xr.visionos",
+                    settingsType = "UnityEditor.XR.VisionOS.VisionOSSettings",
+                    loaderMetadata = new List<IXRLoaderMetadata>() {
+                        new KnownLoaderMetadata() {
+                            loaderName = k_VisionOSLoaderName,
+                            loaderType = k_VisionOSLoaderTypeName,
+                            supportedBuildTargets = new List<BuildTargetGroup>() {
+                                BuildTargetGroup.VisionOS
+                            },
+                        },
+                    },
+                    disabled = !UnityEditorInternal.InternalEditorUtility.HasPro()
+                }
+            });
+#endif
             return packages;
         }
     }
