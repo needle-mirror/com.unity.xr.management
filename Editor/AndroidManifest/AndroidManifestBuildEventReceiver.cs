@@ -29,7 +29,14 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         {
 #if UNITY_2021_1_OR_NEWER
             var xrManagementPackagePath = EditorUtilities.GetPackagePath("com.unity.xr.management");
-            return new AndroidManifestProcessor(gradleProjectPath, xrManagementPackagePath, GetXRManagerSettings());
+            var processor = new AndroidManifestProcessor(gradleProjectPath, xrManagementPackagePath, GetXRManagerSettings());
+
+#if UNITY_2023_1_OR_NEWER
+            processor.UseActivityAppEntry = PlayerSettings.Android.applicationEntry.HasFlag(AndroidApplicationEntry.Activity);
+            processor.UseGameActivityAppEntry = PlayerSettings.Android.applicationEntry.HasFlag(AndroidApplicationEntry.GameActivity);
+#endif
+
+            return processor;
 #else
             return new AndroidManifestProcessor(gradleProjectPath, GetXRManagerSettings());
 #endif

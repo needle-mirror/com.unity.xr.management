@@ -92,7 +92,8 @@ namespace UnityEditor.XR.Management.Metadata
                             loaderType = "UnityEngine.XR.OpenXR.OpenXRLoader",
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Standalone,
-                                BuildTargetGroup.WSA
+                                BuildTargetGroup.WSA,
+                                BuildTargetGroup.Android
                             }
                         },
                     }

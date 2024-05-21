@@ -84,18 +84,108 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             }
         }
 
-        internal void CreateNewElementIfDoesntExist(List<string> path, Dictionary<string, string> attributes)
+        internal struct PathNode
         {
-            var existingNodeElements = SelectNodes(string.Join("/", path));
-            foreach(XmlElement element in existingNodeElements)
+            public XmlElement parent;
+            public XmlElement node;
+            public int DepthIndex;
+        };
+
+        internal void CreateNewElementInAllPaths(List<string> path, Dictionary<string, string> attributes)
+        {
+            // Nodes that match the path, just need to add attributes
+            var nodesToEdit = new List<XmlElement>();
+            // Nodes that are missing the full path, hence, the desired node and its parents should be created
+            var incompletePathNodes = new List<PathNode>();
+
+            var nodesToCheckQueue = new Queue<PathNode>();
+            if (DocumentElement.Name.Equals(path.First()))
             {
-                if (CheckNodeAttributesMatch(element, attributes))
+                nodesToCheckQueue.Enqueue(new PathNode { parent = null, node = DocumentElement, DepthIndex = 0 });
+            }
+            else
+            {
+                incompletePathNodes.Add(new PathNode { parent = null, node = DocumentElement, DepthIndex = 0 });
+            }
+
+            var targetNodeName = path.Last();
+
+            while (nodesToCheckQueue.Any())
+            {
+                var currentNode = nodesToCheckQueue.Dequeue();
+
+                var nextPathIndex = currentNode.DepthIndex + 1;
+
+                if (currentNode.node.ChildNodes.Count == 0 || nextPathIndex >= path.Count)
                 {
-                    return;
+                    // No children left, needs to add elements to complete the path
+                    var incompletePathNode = targetNodeName.Equals(currentNode.node.Name) ?
+                        // There's a node with the same name, but attributes don't match
+                        new PathNode { node = currentNode.parent, DepthIndex = currentNode.DepthIndex - 1 } :
+                        // No node with the same name, create nodes in the path
+                        currentNode;
+                    incompletePathNodes.Add(incompletePathNode);
+                    continue;
+                }
+
+                // Select only children that match the next path element
+                var matchingPathChildNodes = currentNode.node.SelectNodes(path[nextPathIndex]);
+
+                // Find if a matching child node with the attributes exists
+                bool foundMatchingNode = false;
+                foreach (XmlElement childNode in matchingPathChildNodes)
+                {
+                    if(targetNodeName.Equals(childNode.Name) && CheckNodeAttributesMatch(childNode, attributes))
+                    {
+                        foundMatchingNode = true;
+                        break;
+                    }
+                }
+
+                // If no matching node was found, add all children to the queue to continue searching
+                if (!foundMatchingNode)
+                {
+                    foreach (XmlElement childNode in matchingPathChildNodes)
+                    {
+                        nodesToCheckQueue.Enqueue(new PathNode { parent = currentNode.node, node = childNode, DepthIndex = nextPathIndex });
+                    }
                 }
             }
 
-            CreateNewElement(path, attributes);
+            foreach (var incompletePathNode in incompletePathNodes)
+            {
+                var parentNode = incompletePathNode.node;
+                XmlElement newNode = null;
+                // If nodes are missing between root and leaf, fill out hierarchy including leaf node
+                for (var i = incompletePathNode.DepthIndex + 1; i < path.Count; i++)
+                {
+                    newNode = CreateElement(path[i]);
+                    parentNode.AppendChild(newNode);
+                    parentNode = newNode;
+                }
+                if (newNode != null)
+                {
+                    // Only add new nodes that were created
+                    nodesToEdit.Add(parentNode);
+                }
+            }
+
+            foreach (var node in nodesToEdit)
+            {
+                // Apply attributes to leaf node
+                foreach (var attributePair in attributes)
+                {
+                    node.SetAttribute(attributePair.Key, k_androidXmlNamespace, attributePair.Value);
+                }
+            }
+        }
+
+        internal void CreateNewElementIfDoesntExist(List<string> path, Dictionary<string, string> attributes)
+        {
+            if (!ElementExists(path, attributes))
+            {
+                CreateNewElement(path, attributes);
+            }
         }
 
         internal void CreateOrOverrideElement(List<string> path, Dictionary<string, string> attributes)
@@ -183,9 +273,22 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         {
             foreach (var requirement in overrideElements)
             {
-                this
-                    .CreateOrOverrideElement(
-                    requirement.ElementPath, requirement.Attributes);
+                var matchingNodes = SelectNodes(string.Join("/", requirement.ElementPath));
+                if (matchingNodes.Count == 0)
+                {
+                    this.CreateOrOverrideElement(
+                        requirement.ElementPath, requirement.Attributes);
+                }
+                else
+                {
+                    foreach (XmlElement node in matchingNodes)
+                    {
+                        foreach (var attributePair in requirement.Attributes)
+                        {
+                            node.SetAttribute(attributePair.Key, k_androidXmlNamespace, attributePair.Value);
+                        }
+                    }
+                }
             }
         }
 
@@ -197,6 +300,20 @@ namespace Unity.XR.Management.AndroidManifest.Editor
                     .RemoveMatchingElement(
                     requirement.ElementPath, requirement.Attributes);
             }
+        }
+
+        private bool ElementExists(List<string> path, Dictionary<string, string> attributes)
+        {
+            var existingNodeElements = SelectNodes(string.Join("/", path));
+            foreach (XmlElement element in existingNodeElements)
+            {
+                if (CheckNodeAttributesMatch(element, attributes))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

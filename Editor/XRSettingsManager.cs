@@ -37,6 +37,7 @@ namespace UnityEditor.XR.Management
             public static readonly GUIContent k_XRConfigurationText = new GUIContent("Information about configuration, tracking and migration can be found below.");
             public static readonly GUIContent k_XRConfigurationDocUriText = new GUIContent("View Documentation");
             public static readonly Uri k_XRConfigurationUri = new Uri(" https://docs.unity3d.com/Manual/configuring-project-for-xr.html");
+            public static readonly GUIContent k_EditorTargetPlatform = new GUIContent("Editor Play mode uses Desktop Platform Settings regardless of Active Build Target.");
         }
 
         internal static GUIStyle GetStyle(string styleName)
@@ -162,6 +163,12 @@ namespace UnityEditor.XR.Management
                 SerializedProperty initOnStart = serializedSettingsObject.FindProperty("m_InitManagerOnStart");
                 EditorGUILayout.PropertyField(initOnStart, Content.k_InitializeOnStart);
                 EditorGUILayout.Space();
+
+                if (BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget) != BuildTargetGroup.Standalone)
+                {
+                    EditorGUILayout.HelpBox(Content.k_EditorTargetPlatform.text, MessageType.Info);
+                    EditorGUILayout.Space();
+                }
 
 
                 SerializedProperty loaderProp = serializedSettingsObject.FindProperty("m_LoaderManagerInstance");

@@ -6,7 +6,7 @@ This package is primarily intented for XR Package authors to provide management 
 
 ## Installing XR Management
 
-To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
+To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Manual/Packages.html).
 
 This package is `com.unity.xr.management`
 

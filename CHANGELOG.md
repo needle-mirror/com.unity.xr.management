@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.5.0] - 2024-05-21
+
+### Fixed
+- Fixed compile errors on Unity versions [2023.1.0f1 - 2023.2.6f1] caused by missing `BuildTargetGroup.VisionOS` enum value.
+
+### Added
+- Added Android manifest support for applications that use Game Activity entry point. Note that Game Activities are only supported in projects made with Unity versions 2023.1 onwards.
+
 ## [4.4.1] - 2024-01-12
 
 ### Added

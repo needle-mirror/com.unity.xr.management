@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using UnityEditor;
 using UnityEditor.Android;
 using UnityEditor.XR.Management;
@@ -21,6 +22,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         private static readonly string k_xrLibraryDirectoryName = "xrmanifest.androidlib";
         private static readonly string k_xrLibraryManifestRelativePath = string.Join(Path.DirectorySeparatorChar.ToString(), k_xrLibraryDirectoryName, k_androidManifestFileName);
 #endif
+        private static readonly List<string> k_activityElementPath = new List<string>() { "manifest", "application", "activity" };
 
         private readonly string m_unityLibraryManifestFilePath;
 #if UNITY_2021_1_OR_NEWER
@@ -49,6 +51,9 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         }
 #endif
 
+        internal bool UseActivityAppEntry { get; set; } = true;
+        internal bool UseGameActivityAppEntry { get; set; } = false;
+
         internal void ProcessManifestRequirements(List<IAndroidManifestRequirementProvider> manifestProviders)
         {
             var activeLoaders = GetActiveLoaderList();
@@ -76,7 +81,12 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             // Otherwise, the application won't load correctly.
             var newRequiredElements = manifestRequirements
                 .SelectMany(requirement => requirement.NewElements)
-                .Where(element => !element.ElementPath.Contains("intent-filter"));
+                .Where(element => !element.ElementPath.Contains("activity"));
+            var newActivityElements = manifestRequirements
+                .SelectMany(requirement => requirement.NewElements)
+                .Where(element =>
+                    element.ElementPath.Contains("activity")
+                    && !element.ElementPath.Contains("intent-filter"));
             var newIntentElements = manifestRequirements
                 .SelectMany(requirement => requirement.NewElements)
                 .Where(element => element.ElementPath.Contains("intent-filter"));
@@ -85,10 +95,46 @@ namespace Unity.XR.Management.AndroidManifest.Editor
                 var xrLibraryManifest = new AndroidManifestDocument(m_xrPackageManifestTemplateFilePath);
                 var unityLibraryManifest = new AndroidManifestDocument(m_unityLibraryManifestFilePath);
 
-                xrLibraryManifest.CreateElements(newRequiredElements);
-                xrLibraryManifest.OverrideElements(mergedRequiredElements);
-                unityLibraryManifest.CreateElements(newIntentElements, false); // Add the intents in the unity library manifest
-                unityLibraryManifest.RemoveElements(elementsToBeRemoved);
+                // Create activity elements depending on the selected application entry in Player Settings
+                if (UseActivityAppEntry)
+                {
+                    xrLibraryManifest.CreateNewElement(k_activityElementPath, new Dictionary<string, string> { { "name", "com.unity3d.player.UnityPlayerActivity" } });
+                }
+
+                if (UseGameActivityAppEntry)
+                {
+                    xrLibraryManifest.CreateNewElement(k_activityElementPath, new Dictionary<string, string> { { "name", "com.unity3d.player.UnityPlayerGameActivity" } });
+                }
+
+                AddExportedAttributeToActivity(xrLibraryManifest, newIntentElements);
+
+                if (UseActivityAppEntry && UseGameActivityAppEntry)
+                {
+                    xrLibraryManifest.CreateElements(newRequiredElements);
+                    // Add all related activity elements to each element
+                    foreach (var newActivityElement in newActivityElements)
+                    {
+                        xrLibraryManifest.CreateNewElementInAllPaths(newActivityElement.ElementPath, newActivityElement.Attributes);
+                    }
+
+                    xrLibraryManifest.OverrideElements(mergedRequiredElements);
+
+                    // Add all related activity elements to each element
+                    foreach (var newIntentElement in newIntentElements)
+                    {
+                        unityLibraryManifest.CreateNewElementInAllPaths(newIntentElement.ElementPath, newIntentElement.Attributes);
+                    }
+
+                    unityLibraryManifest.RemoveElements(elementsToBeRemoved);
+                }
+                else
+                {
+                    xrLibraryManifest.CreateElements(newRequiredElements);
+                    xrLibraryManifest.CreateElements(newActivityElements);
+                    xrLibraryManifest.OverrideElements(mergedRequiredElements);
+                    unityLibraryManifest.CreateElements(newIntentElements, false); // Add the intents in the unity library manifest
+                    unityLibraryManifest.RemoveElements(elementsToBeRemoved);
+                }
 
                 // Write updated manifests
                 xrLibraryManifest.SaveAs(m_xrLibraryManifestFilePath);
@@ -100,6 +146,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
 
             { 
                 var manifest = new AndroidManifestDocument(m_unityLibraryManifestFilePath);
+                manifest.CreateNewElement(k_activityElementPath, new Dictionary<string, string> { { "name", "com.unity3d.player.UnityPlayerActivity" } });
 
                 manifest.CreateElements(newRequiredElements);
                 manifest.OverrideElements(mergedRequiredElements);
@@ -148,6 +195,24 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             return m_xrSettings.activeLoaders
                 .Select(loader => loader.GetType())
                 .ToList();
+        }
+
+        private void AddExportedAttributeToActivity(
+            AndroidManifestDocument xrLibraryManifest,
+            IEnumerable<ManifestElement> newIntentElements)
+        {
+            if (newIntentElements.Any())
+            {
+                // Add exported attribute to all activities in the XR library manifest, as required by the Android manifest
+                var activityPath = string.Join("/", k_activityElementPath);
+                var activityNodes = xrLibraryManifest.SelectNodes(activityPath);
+                foreach (var activity in activityNodes)
+                {
+                    XmlAttribute exportedAttribute = xrLibraryManifest.CreateAttribute("android:exported", "http://schemas.android.com/apk/res/android");
+                    exportedAttribute.Value = "true";
+                    ((XmlElement)activity).Attributes.Append(exportedAttribute);
+                }
+            }
         }
     }
 }

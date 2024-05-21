@@ -44,7 +44,7 @@ The root folder of a package is the one where the `package.json` file is located
 
 This version of XR Plug-in Management is compatible with the following versions of the Unity Editor:
 
-* 2019.4.15f1 and later
+* 2020.3.0f1 and later
 
 ### Known limitations
 
