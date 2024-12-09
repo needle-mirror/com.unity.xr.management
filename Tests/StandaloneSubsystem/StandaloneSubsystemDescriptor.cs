@@ -60,5 +60,5 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             this.subsystemImplementationType = subsystemImplType;
         }
     }
-#endif 
+#endif
 }

@@ -43,6 +43,10 @@ namespace UnityEditor.XR.Management
                 {
                     string path = AssetDatabase.GUIDToAssetPath(assets[0]);
                     generalSettings = AssetDatabase.LoadAssetAtPath(path, typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
+
+                    // If we found the settings asset, make sure it gets cached in the EditorBuildSettings, since it wasn't found initially
+                    if (generalSettings != null)
+                        EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
                 }
             }
             return generalSettings != null;
@@ -216,7 +220,7 @@ namespace UnityEditor.XR.Management
         /// Return the current instance of <see cref="XRManagerSettings"/> for a build target.
         /// </summary>
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
-        /// <returns></returns>
+        /// <returns>The current instance of <see cref="XRManagerSettings"/>.</returns>
         public XRManagerSettings ManagerSettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
             return SettingsForBuildTarget(targetGroup)?.Manager ?? null;

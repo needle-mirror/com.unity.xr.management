@@ -12,14 +12,14 @@ namespace Unity.XR.Management.TestPackage.Editor
     {
         public TestPackage() {}
 
-        public IXRPackageMetadata metadata 
-        { 
+        public IXRPackageMetadata metadata
+        {
             get
             {
                 return TestMetadata.CreateAndGetMetadata();
             }
         }
-        
+
         public bool PopulateNewSettingsInstance(ScriptableObject obj)
         {
             TestSettings packageSettings = obj as TestSettings;

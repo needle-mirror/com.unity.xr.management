@@ -342,7 +342,7 @@ public class AndroidManifestTests
 
         AssertAttributesAreEqual(nodes[0].Name, expectedElementAttrributes, attributeList);
     }
-    
+
     [Test]
     public void AndroidManifestProcessor_UpdateAllActivityElementWithOverridenElement()
     {

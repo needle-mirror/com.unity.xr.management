@@ -15,7 +15,7 @@ namespace UnityEngine.XR.Management
         /// Initialize the loader. This should initialize all subsystems to support the desired runtime setup this
         /// loader represents.
         ///
-        /// This is the only method on XRLoader that Management uses to determine the active loader to use. If this 
+        /// This is the only method on XRLoader that Management uses to determine the active loader to use. If this
         /// method returns true, Management locks this loader as the <see cref="XRManagerSettings.activeLoader"/>
         /// and and stops fall through processing on the <see cref="XRManagerSettings.loaders"/> list of current loaders.
         ///

@@ -44,7 +44,7 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             var provider = standaloneSubsystem.GetProvider();
 
             if (provider == null)
-				return false;
+                return false;
 
             provider.startCalled += OnStartCalled;
             provider.stopCalled += OnStopCalled;

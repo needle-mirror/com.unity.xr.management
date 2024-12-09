@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -37,11 +37,29 @@ namespace UnityEditor.XR.Management
                 {
                     string searchText = String.Format("t:{0}", m_BuildDataType.Name);
                     string[] assets = AssetDatabase.FindAssets(searchText);
-                    if (assets.Length > 0)
+                    foreach (var guid in assets)
                     {
-                        string path = AssetDatabase.GUIDToAssetPath(assets[0]);
+                        string path = AssetDatabase.GUIDToAssetPath(guid);
+
+                        // Check if this asset is from an immutable package
+                        var packageInfo = PackageManager.PackageInfo.FindForAssetPath(path);
+                        if (packageInfo != null)
+                        {
+                            switch (packageInfo.source)
+                            {
+                                case PackageSource.Local:
+                                case PackageSource.Embedded:
+                                    // Do nothing, local and embedded packages can be edited
+                                    break;
+                                default:
+                                    continue;
+                            }
+                        }
+
                         settings = AssetDatabase.LoadAssetAtPath(path, m_BuildDataType) as ScriptableObject;
                         EditorBuildSettings.AddConfigObject(m_BuildSettingsKey, settings, true);
+
+                        break;
                     }
                 }
                 return settings;
@@ -91,18 +109,22 @@ namespace UnityEditor.XR.Management
             ScriptableObject settings = ScriptableObject.CreateInstance(m_BuildDataType) as ScriptableObject;
             if (settings != null)
             {
-                var package = XRPackageMetadataStore.GetPackageForSettingsTypeNamed(m_BuildDataType.FullName);
-                package?.PopulateNewSettingsInstance(settings);
-
                 string newAssetName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(m_BuildDataType));
                 string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath);
-                if (!string.IsNullOrEmpty(assetPath))
+                if (string.IsNullOrEmpty(assetPath))
                 {
-                    assetPath = Path.Combine(assetPath, newAssetName);
-                    AssetDatabase.CreateAsset(settings, assetPath);
-                    EditorBuildSettings.AddConfigObject(m_BuildSettingsKey, settings, true);
-                    return settings;
+                    Debug.LogError($"Invalid default settings path");
+                    return null;
                 }
+
+                assetPath = Path.Combine(assetPath, newAssetName);
+                AssetDatabase.CreateAsset(settings, assetPath);
+                AssetDatabase.SaveAssets();
+                EditorBuildSettings.AddConfigObject(m_BuildSettingsKey, settings, true);
+
+                var package = XRPackageMetadataStore.GetPackageForSettingsTypeNamed(m_BuildDataType.FullName);
+                package?.PopulateNewSettingsInstance(settings);
+                return settings;
             }
             return null;
         }

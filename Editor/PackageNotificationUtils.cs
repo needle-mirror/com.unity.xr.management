@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.XR.Management.Metadata;
@@ -20,6 +20,9 @@ namespace UnityEditor.XR.Management
         /// <param name="userInterfaceIcon">
         /// The <c>GUIContent</c> icon to display in the XR Plug-in Management window.  If the tooltip of this
         /// icon is empty, null, only whitespace, or otherwise invalid, the constructor will throw an exception.
+        /// </param>
+        /// <param name="tooltip">
+        /// The <c>string</c> used for the tooltip.
         /// </param>
         /// <param name="additionalInfoUri">
         /// Used to surface a URI that points to additional information about the notification. For example, clicking the

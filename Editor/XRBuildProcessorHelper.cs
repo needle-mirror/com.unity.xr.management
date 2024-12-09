@@ -15,11 +15,11 @@ namespace UnityEditor.XR.Management
     public abstract class XRBuildHelper<T>  : IPreprocessBuildWithReport, IPostprocessBuildWithReport where T : UnityEngine.Object
     {
         /// <summary>Override of base IXxxprocessBuildWithReport</summary>
-        /// <returns>The callback order.</returns>
+        /// <value>The callback order.</value>
         public virtual int callbackOrder { get { return 0; } }
 
         /// <summary>Override of base IXxxprocessBuildWithReport</summary>
-        /// <returns>A string specifying the key to be used to set/get settigns in EditorBuildSettings.</returns>
+        /// <value>A string specifying the key to be used to set/get settigns in EditorBuildSettings.</value>
         public abstract string BuildSettingsKey { get; }
 
         /// <summary>Helper functin to return current settings for a specific build target.</summary>

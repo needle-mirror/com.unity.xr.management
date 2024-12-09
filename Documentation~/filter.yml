@@ -1,0 +1,22 @@
+apiRules:
+  - exclude:
+      hasAttribute:
+        uid: System.ComponentModel.EditorBrowsableAttribute
+        ctorArguments:
+          - System.ComponentModel.EditorBrowsableState.Never
+  - exclude:
+      uidRegex: ^AndroidManifestTests$
+  - exclude:
+      uidRegex: ^Unity\.XR\.TestTooling\.*
+  - exclude:
+      uidRegex: ^Unity\.XR\.Management\.TestPackage\.*
+  - exclude:
+      uidRegex: ^UnityEditor\.XR\.Management\.Tests\.DomainReloadTests$
+  - exclude:
+      uidRegex: ^Unity\.XR\.TestTooling\.ManagementTestSetup$
+  - exclude:
+      uidRegex: ^UnityEngine\.XR\.Management\.Tests\.Standalone\.*
+  - exclude:
+      uidRegex: ^Unity\.XR\.Management\.Tests\.*
+  - exclude:
+      uidRegex: ^UnityEngine\.XR\.Management\.Tests$

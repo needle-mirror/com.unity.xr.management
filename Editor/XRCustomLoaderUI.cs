@@ -77,7 +77,7 @@ namespace UnityEditor.XR.Management
         /// calculate the necessary area height required to render the custom UI into the component space. The calculated value should
         /// be returned from the <see cref="RequiredRenderHeight"/>.
         /// </summary>
-        /// <param name="height"></param>
+        /// <param name="height">The height to set.</param>
         void SetRenderedLineHeight(float height);
 
         /// <summary>

@@ -26,7 +26,7 @@ By default, XR Plug-in Management initializes automatically and starts your XR e
 Alternately, you can wait until after the `Start` event completes and manually initialize XR.
 
 > [!IMPORTANT]
-> Do not start manual initialization of XR until after the Unity `Start` event completes. The Unity graphics system must be completely initialized before you can manually initialize XR, which isn't guaranteed until after `Start` is finished. (Automatic XR initialization take places before graphics initialization, but there's no way to invoke manual XR initalization early enough.) 
+> Do not start manual initialization of XR until after the Unity `Start` event completes. The Unity graphics system must be completely initialized before you can manually initialize XR, which isn't guaranteed until after `Start` is finished. (Automatic XR initialization take places before graphics initialization, but there's no way to invoke manual XR initalization early enough.)
 
 If you want to start XR on a per-Scene basis (for example, to start in 2D and transition into VR), follow these steps:
 

@@ -27,7 +27,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         public List<ManifestElement> OverrideElements { get; set; } = new List<ManifestElement>();
 
         /// <summary>
-        /// List of <see cref="ManifestElement"/> elements which will be removed from the Android manifest. 
+        /// List of <see cref="ManifestElement"/> elements which will be removed from the Android manifest.
         /// Entries not found will be ignored.
         /// Only entries that specify the same attributes and its respective values in the manifest will be taken in account for deletion.
         /// </summary>

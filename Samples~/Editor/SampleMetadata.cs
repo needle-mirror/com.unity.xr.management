@@ -44,9 +44,9 @@ namespace Samples
                         supportedBuildTargets = new List<BuildTargetGroup>() {
                             BuildTargetGroup.Android,
                             BuildTargetGroup.iOS,
-#if !UNITY_2021_2_OR_NEWER                            
+#if !UNITY_2021_2_OR_NEWER
                             BuildTargetGroup.Lumin
-#endif                            
+#endif
                         }
                     }
                 }

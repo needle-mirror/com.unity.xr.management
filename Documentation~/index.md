@@ -3,7 +3,7 @@ uid: xr-plug-in-management-manual
 ---
 # About the XR Plug-in Management package
 
-Application developers use the XR Plug-in Management package to configure and manage the XR provider plug-ins in their Unity projects. 
+Application developers use the XR Plug-in Management package to configure and manage the XR provider plug-ins in their Unity projects.
 
 XR provider plug-in developers can use the **XR Plug-in Management** package to streamline **XR plug-in** lifecycle management and, optionally, provide users with build time UI through the Unity **Unified Settings** system.
 

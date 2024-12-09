@@ -14,25 +14,28 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         ///         List of element names representing the full XML path to the element. It must include last the element that this object represents.
         ///     </para>
         /// </summary>
-        /// 
+        ///
         /// <remarks>
         ///     <para>
         ///         The order in which the elements are added is important,
         ///         as each list member represents an XML element name in the order,
-        ///         so specifying a list as { "manifest", "application" } is not the same 
+        ///         so specifying a list as { "manifest", "application" } is not the same
         ///         as { "application", "manifest"}.
         ///     </para>
-        ///     <example>
-        ///         Example for accessing a meta-data element:
-        ///         <code>
-        ///             new ManifestElement {
-        ///                 ElementPath = new List() {
-        ///                     "manifest", "application", "meta-data"
-        ///                 }
-        ///             }
-        ///         </code>
-        ///     </example>
         /// </remarks>
+        ///
+        /// <example>
+        ///     <para>
+        ///     Example for accessing a meta-data element:
+        ///     </para>
+        ///     <code>
+        ///         new ManifestElement {
+        ///             ElementPath = new List() {
+        ///                 "manifest", "application", "meta-data"
+        ///             }
+        ///         }
+        ///     </code>
+        /// </example>
         public List<string> ElementPath { get; set; }
 
         /// <summary>

@@ -229,6 +229,9 @@ namespace UnityEditor.XR.Management.Metadata
         /// <summary>
         /// Return a read only list of all package metadata information currently known that has loaders that support the given build.
         /// </summary>
+        /// <param name="buildTargetGroup">
+        /// The <c>BuildTargetGroup</c> used to filter the package Metadata.
+        /// </param>
         /// <returns>Read only list of <see cref="IXRPackage" />.</returns>
         public static IReadOnlyList<IXRPackage> GetAllPackageMetadataForBuildTarget(BuildTargetGroup buildTargetGroup)
         {
@@ -283,7 +286,7 @@ namespace UnityEditor.XR.Management.Metadata
         /// </summary>
         /// <param name="loaderTypeName">Loader type to check.</param>
         /// <param name="buildTargetGroup">Build target group to check for assignment in.</param>
-        /// <returns></returns>
+        /// <returns>True if the loader is assigned.</returns>
         public static bool IsLoaderAssigned(string loaderTypeName, BuildTargetGroup buildTargetGroup)
         {
 

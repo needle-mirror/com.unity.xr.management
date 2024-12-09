@@ -7,7 +7,7 @@ using UnityEditor.XR.Management.Metadata;
 [assembly:InternalsVisibleTo("UnityEditor.XR.Management.Tests")]
 namespace Unity.XR.Management.TestPackage.Editor
 {
-    class TestLoaderMetadata : IXRLoaderMetadata 
+    class TestLoaderMetadata : IXRLoaderMetadata
     {
         public string loaderName { get; set; }
         public string loaderType { get; set; }
@@ -19,7 +19,7 @@ namespace Unity.XR.Management.TestPackage.Editor
         public string packageName { get; set; }
         public string packageId { get; set; }
         public string settingsType { get; set; }
-        public List<IXRLoaderMetadata> loaderMetadata { get; set; } 
+        public List<IXRLoaderMetadata> loaderMetadata { get; set; }
     }
 
     static class TestMetadata

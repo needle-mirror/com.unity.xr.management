@@ -4,7 +4,12 @@ using System.Collections.Generic;
 using UnityEditorInternal;
 using UnityEngine;
 
+#if UNITY_6000_1_OR_NEWER
+using UnityEditor.Build.Profile;
+#endif
+
 using UnityEditor.XR.Management.Metadata;
+using System.Linq;
 
 namespace UnityEditor.XR.Management
 {
@@ -35,6 +40,8 @@ namespace UnityEditor.XR.Management
 
         const string k_AtNoLoaderInstance = "There are no XR plugins applicable to this platform.";
         private List<LoaderInformation> m_LoaderMetadata = null;
+
+        private const string m_OpenXRLoaderType = "UnityEngine.XR.OpenXR.OpenXRLoader";
 
 
         ReorderableList m_OrderedList = null;
@@ -112,16 +119,60 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     continue;
                 if (li.customLoaderUI != null && Array.IndexOf(li.customLoaderUI.IncompatibleLoaders, otherLi.loaderType) >= 0)
                 {
+                    if (!otherLi.disabled && otherLi.toggled)
+                    {
+                        Debug.LogWarning("Enabling " + otherLi.customLoaderUI + " has disabled " + li.customLoaderUI + " due to incompatibilities between the two.");
+                    }
                     if (li.toggled && otherLi.toggled)
                     {
                         otherLi.toggled = false;
                         otherLi.stateChanged = true;
                     }
+
                     otherLi.disabled = li.toggled;
                     m_LoaderMetadata[i] = otherLi;
                 }
             }
         }
+
+#if UNITY_6000_1_OR_NEWER && UNITY_META_QUEST
+        void MetaBuildProfileLoaderForce()
+        {
+            if (CurrentBuildTargetGroup == BuildTargetGroup.Android)
+            {
+                for (int i = 0; i < m_LoaderMetadata.Count; i++)
+                {
+                    var li = m_LoaderMetadata[i];
+                    if (li.loaderType == m_OpenXRLoaderType)
+                    {
+                        li.toggled = true;
+                        li.stateChanged = true;
+                        li.disabled = false;
+
+                        if (li.customLoaderUI != null)
+                        {
+                            li.customLoaderUI.ActiveBuildTargetGroup = BuildTargetGroup.Android;
+                            li.customLoaderUI.IsLoaderEnabled = true;
+                        }
+                    }
+                    else
+                    {
+                        li.toggled = false;
+                        li.stateChanged = true;
+                        li.disabled = true;
+
+                        if (li.customLoaderUI != null)
+                        {
+                            li.customLoaderUI.ActiveBuildTargetGroup = BuildTargetGroup.Android;
+                            li.customLoaderUI.IsLoaderEnabled = false;
+                        }
+                    }
+
+                    m_LoaderMetadata[i] = li;
+                }
+            }
+        }
+#endif
 
         void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
         {
@@ -234,7 +285,6 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                             {
                                 loadersWantingToDisableOtherLoaders.Add(li);
                             }
-                            break;
                         }
                     }
 
@@ -242,6 +292,10 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     {
                         SetDisablesStateOnLoadersFromLoader(loader);
                     }
+
+#if UNITY_6000_1_OR_NEWER && UNITY_META_QUEST
+                    MetaBuildProfileLoaderForce();
+#endif
                 }
 
                 m_OrderedList = new ReorderableList(m_LoaderMetadata, typeof(LoaderInformation), false, true, false, false);

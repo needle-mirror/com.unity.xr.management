@@ -4,6 +4,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.5.1] - 2024-12-09
+
+### Fixed
+- RunInBackground is not checked and when the application is paused locking the visuals to the users face.
+- Issue where disabled loaders could be inadvertently enabled.
+
+### Added
+- Added a Project Validation check for project settings related to running in background in order to avoid head-locked rendering of the main camera when focus is lost.
+
+### Changes
+- Meta Quest Platform and Build Profile enable 'Unity: Meta OpenXR' when switched to.
+
 ## [4.5.0] - 2024-05-21
 
 ### Fixed
@@ -93,7 +105,7 @@ Fixed an issue where packages that contained `XRGeneralSettingsPerBuildTarget` a
 * Fixed an issue where the ProjectSettings folder may not have been created prior to Initialization of settings.
 
 ## [4.1.0-exp.1] - 2021-06-29
-## Updates
+### Updates
 Initial test release to Candidates
 
 ## [4.0.6] - 2021-05-18

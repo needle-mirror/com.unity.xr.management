@@ -144,7 +144,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             var newRequiredElements = manifestRequirements
                 .SelectMany(requirement => requirement.NewElements);
 
-            { 
+            {
                 var manifest = new AndroidManifestDocument(m_unityLibraryManifestFilePath);
                 manifest.CreateNewElement(k_activityElementPath, new Dictionary<string, string> { { "name", "com.unity3d.player.UnityPlayerActivity" } });
 
@@ -184,7 +184,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         }
 
         private List<Type> GetActiveLoaderList()
-        {       
+        {
             if (!m_xrSettings)
             {
                 // No loaders active, don't throw error

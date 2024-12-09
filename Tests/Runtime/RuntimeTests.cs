@@ -140,7 +140,7 @@ namespace UnityEngine.XR.Management.Tests
         {
             m_LoaderIndexToWin = indexToWin;
             m_PlayerSettingsDeviceType = playerSettingsDeviceType;
-            
+
             if (loader1.HasValue)
             {
                 m_LoadersSupporteDeviceTypes = new[] {loader0, loader1.Value};

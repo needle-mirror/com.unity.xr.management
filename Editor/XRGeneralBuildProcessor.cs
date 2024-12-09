@@ -153,9 +153,9 @@ namespace UnityEditor.XR.Management
             // dirty later builds with assets that may not be needed or are out of date.
             CleanOldSettings();
 
-	    var buildTargetSettings = XRGeneralSettingsPerBuildTarget.GetOrCreate();
-	    if (!buildTargetSettings)
-		return;
+            var buildTargetSettings = XRGeneralSettingsPerBuildTarget.GetOrCreate();
+            if (!buildTargetSettings)
+                return;
 
             XRGeneralSettings settings = buildTargetSettings.SettingsForBuildTarget(targetGroup);
             if (settings == null)
