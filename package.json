@@ -1,9 +1,8 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.5.1",
-  "unity": "2020.3",
-  "unityRelease": "15f1",
+  "version": "4.5.2",
+  "unity": "2021.3",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
   "keywords": [
     "xr",
@@ -24,13 +23,13 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "0fe78d9177c9f96352ea5d06283c26e42f9ed490"
+    "revision": "64bbf2a286703019c5b76ed574b439e2d843b7d8"
   },
   "_upm": {
-    "changelog": "### Fixed\n- RunInBackground is not checked and when the application is paused locking the visuals to the users face.\n- Issue where disabled loaders could be inadvertently enabled.\n\n### Added\n- Added a Project Validation check for project settings related to running in background in order to avoid head-locked rendering of the main camera when focus is lost.\n\n### Changes\n- Meta Quest Platform and Build Profile enable 'Unity: Meta OpenXR' when switched to."
+    "changelog": "### Changed\n- Updated the minimum supported Unity version to 2022.3 LTS.\n\n### Fixed\n- Fixed issue where the documentation link for configurations was incorrectly pointing to docs for the newest version of Unity.\n- Fixed the display name of Google ARCore (previously ARCore).\n- Fixed the display name of Apple ARKit (previously ARKit).\n\n### Removed\n- Removed scripts which processes the deprecated XR packages. This also fixes an intermittent issue where Domain Reload hangs due to XR Plug-in Management tries to automatically uninstall legacy XR Packages."
   },
   "upmCi": {
-    "footprint": "96cf27dc56ac36c84cfcaec5c28cfda979aa8845"
+    "footprint": "784969fbb4ebc343df56cab5787505bc812e7846"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.5/manual/index.html",
   "samples": [

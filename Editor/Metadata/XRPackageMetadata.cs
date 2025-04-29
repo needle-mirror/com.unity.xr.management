@@ -1,13 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using UnityEngine;
-using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
-using UnityEngine.XR.Management;
-
 
 namespace UnityEditor.XR.Management.Metadata
 {

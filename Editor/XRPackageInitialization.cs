@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using UnityEditor.MPE;
 using UnityEditor.XR.Management.Metadata;
 
 namespace UnityEditor.XR.Management
@@ -64,6 +65,10 @@ namespace UnityEditor.XR.Management
         internal static void BeginPackageInitialization()
         {
             EditorApplication.update -= BeginPackageInitialization;
+
+            // Stops secondary process from doing any asset handling.
+            if (ProcessService.level == ProcessLevel.Secondary)
+                return;
 
             foreach (var t in TypeLoaderExtensions.GetAllTypesWithInterface<IXRPackage>())
             {

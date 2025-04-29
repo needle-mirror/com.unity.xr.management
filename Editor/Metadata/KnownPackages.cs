@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
 
@@ -80,7 +79,6 @@ namespace UnityEditor.XR.Management.Metadata
         {
             List<IXRPackage> packages = new List<IXRPackage>();
 
-#if UNITY_2020_3_OR_NEWER
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
                     packageName = "Open XR Plugin",
@@ -99,27 +97,6 @@ namespace UnityEditor.XR.Management.Metadata
                     }
                 }
             });
-#endif
-
-#if !UNITY_2021_2_OR_NEWER
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata(){
-                    packageName = "Windows XR Plugin",
-                    packageId = "com.unity.xr.windowsmr",
-                    settingsType = "UnityEditor.XR.WindowsMR.WindowsMRPackageSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
-                            loaderName = "Windows Mixed Reality",
-                            loaderType = "UnityEngine.XR.WindowsMR.WindowsMRLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
-                                BuildTargetGroup.Standalone,
-                                BuildTargetGroup.WSA
-                            }
-                        },
-                    }
-                }
-            });
-#endif
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
@@ -139,40 +116,14 @@ namespace UnityEditor.XR.Management.Metadata
                 }
             });
 
-#if !UNITY_2021_2_OR_NEWER
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
-                    packageName = "Magic Leap XR Plugin",
-                    packageId = "com.unity.xr.magicleap",
-                    settingsType = "UnityEngine.XR.MagicLeap.MagicLeapSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
-                            loaderName = "Magic Leap Zero Iteration",
-                            loaderType = "UnityEngine.XR.MagicLeap.MagicLeapLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
-                                BuildTargetGroup.Standalone,
-                            }
-                        },
-                    new KnownLoaderMetadata() {
-                            loaderName = "Magic Leap",
-                            loaderType = "UnityEngine.XR.MagicLeap.MagicLeapLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
-                                BuildTargetGroup.Lumin
-                            }
-                        },
-                    }
-                }
-            });
-#endif // !UNITY_2021_2_OR_NEWER
-
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata(){
-                    packageName = "ARCore XR Plugin",
+                    packageName = "Google ARCore XR Plugin",
                     packageId = "com.unity.xr.arcore",
                     settingsType = "UnityEditor.XR.ARCore.ARCoreSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
-                            loaderName = "ARCore",
+                            loaderName = "Google ARCore",
                             loaderType = "UnityEngine.XR.ARCore.ARCoreLoader",
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Android,
@@ -185,12 +136,12 @@ namespace UnityEditor.XR.Management.Metadata
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
-                    packageName = "ARKit XR Plugin",
+                    packageName = "Apple ARKit XR Plugin",
                     packageId = "com.unity.xr.arkit",
                     settingsType = "UnityEditor.XR.ARKit.ARKitSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
-                            loaderName = "ARKit",
+                            loaderName = "Apple ARKit",
                             loaderType = "UnityEngine.XR.ARKit.ARKitLoader",
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.iOS,

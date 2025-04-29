@@ -720,7 +720,6 @@ public class AndroidManifestTests
         Assert.IsTrue(newCategoryFound, "New category element not found");
     }
 
-#if UNITY_2021_1_OR_NEWER
     [Test]
     public void AndroidManifestProcessor_AddNewIntentsOnlyInUnityLibraryManifest()
     {
@@ -869,16 +868,10 @@ public class AndroidManifestTests
             $"Expected only 1 element in path \"{elementPath}\" in Unity Library manifest");
 
     }
-#endif
 
     private AndroidManifestDocument GetXrLibraryManifest()
     {
-#if UNITY_2021_1_OR_NEWER
         return new AndroidManifestDocument(xrLibraryManifestFilePath);
-#else
-        // Unity 2020 and lower use the same manifest for XR entries as the rest of the app
-        return GetUnityLibraryManifest();
-#endif
     }
 
     private AndroidManifestDocument GetUnityLibraryManifest()
@@ -888,14 +881,10 @@ public class AndroidManifestTests
 
     private AndroidManifestProcessor CreateProcessor()
     {
-#if UNITY_2021_1_OR_NEWER
         return new AndroidManifestProcessor(
             tempProjectPath,
             tempProjectPath,
             mockXrSettings);
-#else
-        return new AndroidManifestProcessor(tempProjectPath, mockXrSettings);
-#endif
     }
 
     private void CreateMockManifestDocument(string filePath)

@@ -4,6 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.5.2] - 2025-04-29
+
+### Changed
+- Updated the minimum supported Unity version to 2022.3 LTS.
+
+### Fixed
+- Fixed issue where the documentation link for configurations was incorrectly pointing to docs for the newest version of Unity.
+- Fixed the display name of Google ARCore (previously ARCore).
+- Fixed the display name of Apple ARKit (previously ARKit).
+
+### Removed
+- Removed scripts which processes the deprecated XR packages. This also fixes an intermittent issue where Domain Reload hangs due to XR Plug-in Management tries to automatically uninstall legacy XR Packages.
+
+
 ## [4.5.1] - 2024-12-09
 
 ### Fixed

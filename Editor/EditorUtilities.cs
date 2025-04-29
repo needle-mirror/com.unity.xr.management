@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 using UnityEngine;
 
@@ -121,14 +119,10 @@ namespace UnityEditor.XR.Management
         /// <returns><see cref="string"/> of the XML file path.</returns>
         internal static string GetPackagePath(string packageName)
         {
-#if UNITY_2021_3_OR_NEWER
             var xrManagementPackageInfo = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
                 .Where(package => package.name == packageName)
                 .First();
             return xrManagementPackageInfo.resolvedPath;
-#else
-            throw new System.NotSupportedException("XR Management package couldn't be found, please make sure you have the XR Management package added to your project through the Package Management window.");
-#endif // UNITY_2021_3_OR_NEWER
         }
     }
 }

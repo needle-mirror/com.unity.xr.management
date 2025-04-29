@@ -179,10 +179,9 @@ namespace UnityEditor.XR.Management.Tests
 
                         case "Test Loader Two":
                             Assert.AreEqual(typeof(TestLoaderTwo).FullName, lm.loaderType);
-                            Assert.IsTrue(lm.supportedBuildTargets.Count == 3);
+                            Assert.IsTrue(lm.supportedBuildTargets.Count == 2);
                             Assert.IsTrue(lm.supportedBuildTargets.Contains(BuildTargetGroup.Android));
                             Assert.IsTrue(lm.supportedBuildTargets.Contains(BuildTargetGroup.iOS));
-                            Assert.IsTrue(lm.supportedBuildTargets.Contains(BuildTargetGroup.Lumin));
                         break;
 
                         case "Test Loader Three":

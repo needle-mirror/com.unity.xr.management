@@ -156,9 +156,6 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(BuildTargetGroup.Standalone)]
     [TestFixture(BuildTargetGroup.Android)]
     [TestFixture(BuildTargetGroup.iOS)]
-#if (!UNITY_2021_2_OR_NEWER)
-    [TestFixture(BuildTargetGroup.Lumin)]
-#endif
     [TestFixture(BuildTargetGroup.PS4)]
     class XRGeneralSettingsBuildTests
     {
@@ -266,9 +263,6 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(BuildTargetGroup.Standalone)]
     [TestFixture(BuildTargetGroup.Android)]
     [TestFixture(BuildTargetGroup.iOS)]
-#if (!UNITY_2021_2_OR_NEWER)
-    [TestFixture(BuildTargetGroup.Lumin)]
-#endif
     [TestFixture(BuildTargetGroup.PS4)]
     class XRGeneralSettingsPerBuildTargetInclusionTests
     {
@@ -339,9 +333,6 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64)]
     [TestFixture(BuildTargetGroup.Android, BuildTarget.Android)]
     [TestFixture(BuildTargetGroup.iOS, BuildTarget.iOS)]
-#if (!UNITY_2021_2_OR_NEWER)
-    [TestFixture(BuildTargetGroup.Lumin, BuildTarget.Lumin)]
-#endif
     [TestFixture(BuildTargetGroup.PS4, BuildTarget.PS4)]
     class XRLoaderSelection
     {

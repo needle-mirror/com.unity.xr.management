@@ -176,36 +176,13 @@ namespace UnityEditor.XR.Management.Tests
         [UnityTest]
         public IEnumerator TestInvalidPackageErrorsOut()
         {
-#if !UNITY_2020_2_OR_NEWER
-            XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget("com.unity.invalid.package.id", String.Empty, BuildTargetGroup.Standalone);
-
-            LogAssert.Expect(LogType.Error, new Regex(@"Management error"));
-
-            while (XRPackageMetadataStore.isDoingQueueProcessing)
-            {
-                yield return null;
-            }
-#else
             yield return null;
-#endif //UNITY_2020_2_OR_NEWER
-
         }
 
         [UnityTest]
         public IEnumerator TestNoPackageIdErrorsOut()
         {
-#if !UNITY_2020_2_OR_NEWER
-            XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget("", String.Empty, BuildTargetGroup.Standalone);
-
-            LogAssert.Expect(LogType.Error, new Regex(@"no package id"));
-
-            while (XRPackageMetadataStore.isDoingQueueProcessing)
-            {
-                yield return null;
-            }
-#else
             yield return null;
-#endif //UNITY_2020_2_OR_NEWER
         }
     }
 }

@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
-using UnityEditor;
-using UnityEditor.Android;
-using UnityEditor.XR.Management;
 using UnityEngine;
 using UnityEngine.XR.Management;
 
@@ -18,17 +14,13 @@ namespace Unity.XR.Management.AndroidManifest.Editor
     internal class AndroidManifestProcessor
     {
         private static readonly string k_androidManifestFileName = "AndroidManifest.xml";
-#if UNITY_2021_1_OR_NEWER
         private static readonly string k_xrLibraryDirectoryName = "xrmanifest.androidlib";
         private static readonly string k_xrLibraryManifestRelativePath = string.Join(Path.DirectorySeparatorChar.ToString(), k_xrLibraryDirectoryName, k_androidManifestFileName);
-#endif
         private static readonly List<string> k_activityElementPath = new List<string>() { "manifest", "application", "activity" };
 
         private readonly string m_unityLibraryManifestFilePath;
-#if UNITY_2021_1_OR_NEWER
         private readonly string m_xrPackageManifestTemplateFilePath;
         private readonly string m_xrLibraryManifestFilePath;
-#endif
         private readonly XRManagerSettings m_xrSettings;
 
         internal AndroidManifestProcessor(string gradleProjectPath, XRManagerSettings settings)
@@ -38,7 +30,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         }
 
 
-#if UNITY_2021_1_OR_NEWER
         internal AndroidManifestProcessor(
             string gradleProjectPath,
             string xrManagementPackagePath,
@@ -49,7 +40,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             m_unityLibraryManifestFilePath = string.Join(Path.DirectorySeparatorChar.ToString(), gradleProjectPath, "src", "main", k_androidManifestFileName);
             m_xrSettings = settings;
         }
-#endif
 
         internal bool UseActivityAppEntry { get; set; } = true;
         internal bool UseGameActivityAppEntry { get; set; } = false;
@@ -75,7 +65,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
                 .SelectMany(requirement => requirement.RemoveElements)
                 .OfType<ManifestElement>();
 
-#if UNITY_2021_1_OR_NEWER
             // The intent-filter elements are not merged by default,
             // so we separate them from the XR manifest to add them later.
             // Otherwise, the application won't load correctly.
@@ -140,22 +129,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
                 xrLibraryManifest.SaveAs(m_xrLibraryManifestFilePath);
                 unityLibraryManifest.Save();
             }
-#else
-            var newRequiredElements = manifestRequirements
-                .SelectMany(requirement => requirement.NewElements);
-
-            {
-                var manifest = new AndroidManifestDocument(m_unityLibraryManifestFilePath);
-                manifest.CreateNewElement(k_activityElementPath, new Dictionary<string, string> { { "name", "com.unity3d.player.UnityPlayerActivity" } });
-
-                manifest.CreateElements(newRequiredElements);
-                manifest.OverrideElements(mergedRequiredElements);
-                manifest.RemoveElements(elementsToBeRemoved);
-
-                // Write manifest into project's library path
-                manifest.Save();
-            }
-#endif
         }
 
         /// <summary>

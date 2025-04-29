@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-#if UNITY_2020_2_OR_NEWER
 using UnityEngine.SubsystemsImplementation.Extensions;
-#endif
 
 namespace UnityEngine.XR.Management.Tests.Standalone
 {
@@ -40,7 +38,6 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             if (standaloneSubsystem == null)
                 return false;
 
-#if UNITY_2020_2_OR_NEWER
             var provider = standaloneSubsystem.GetProvider();
 
             if (provider == null)
@@ -49,11 +46,6 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             provider.startCalled += OnStartCalled;
             provider.stopCalled += OnStopCalled;
             provider.destroyCalled += OnDestroyCalled;
-#elif USE_LEGACY_SUBSYS_REGISTRATION
-            standaloneSubsystem.startCalled += OnStartCalled;
-            standaloneSubsystem.stopCalled += OnStopCalled;
-            standaloneSubsystem.destroyCalled += OnDestroyCalled;
-#endif
 
             return true;
         }
@@ -77,7 +69,6 @@ namespace UnityEngine.XR.Management.Tests.Standalone
             DestroySubsystem<StandaloneSubsystem>();
             if (standaloneSubsystem != null)
             {
-#if UNITY_2020_2_OR_NEWER
                 var provider = standaloneSubsystem.GetProvider();
 
                 if (provider != null)
@@ -86,11 +77,6 @@ namespace UnityEngine.XR.Management.Tests.Standalone
                     provider.stopCalled -= OnStopCalled;
                     provider.destroyCalled -= OnDestroyCalled;
                 }
-#elif USE_LEGACY_SUBSYS_REGISTRATION
-                standaloneSubsystem.startCalled -= OnStartCalled;
-                standaloneSubsystem.stopCalled -= OnStopCalled;
-                standaloneSubsystem.destroyCalled -= OnDestroyCalled;
-#endif
             }
             return base.Deinitialize();
         }

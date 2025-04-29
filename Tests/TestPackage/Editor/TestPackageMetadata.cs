@@ -49,8 +49,7 @@ namespace Unity.XR.Management.TestPackage.Editor
                         loaderType = typeof(TestLoaderTwo).FullName,
                         supportedBuildTargets = new List<BuildTargetGroup>() {
                             BuildTargetGroup.Android,
-                            BuildTargetGroup.iOS,
-                            BuildTargetGroup.Lumin
+                            BuildTargetGroup.iOS
                         }
                     },
                     new TestLoaderMetadata() {

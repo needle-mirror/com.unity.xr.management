@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Management;
 
-
 namespace UnityEditor.XR.Management
 {
     /// <summary>Helper class to auto update settings across versions.</summary>

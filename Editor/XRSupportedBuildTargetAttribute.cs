@@ -1,21 +1,20 @@
 using System;
 
-#if UNITY_EDITOR
-
-using UnityEditor;
-
 namespace UnityEditor.XR.Management
 {
+    /// <summary>
+    /// Attribute to specify the supported build targets for a XR plugin.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class XRSupportedBuildTargetAttribute : Attribute
     {
         /// <summary>
-        /// String representation of <see href="https://docs.unity3d.com/ScriptReference/BuildTargetGroup.html">UnityEditor.Build.BuildTargetGroup
+        /// String representation of <a href="https://docs.unity3d.com/ScriptReference/BuildTargetGroup.html">UnityEditor.Build.BuildTargetGroup</a>
         /// </summary>
         public BuildTargetGroup buildTargetGroup { get; set; }
 
         /// <summary>
-        /// Array of BuildTargets, each of which is the representation of <see href="https://docs.unity3d.com/ScriptReference/BuildTarget.html">UnityEditor.Build.BuildTarget
+        /// Array of BuildTargets, each of which is the representation of <a href="https://docs.unity3d.com/ScriptReference/BuildTarget.html">UnityEditor.Build.BuildTarget</a>
         /// aligned with <see cref="buildTargetGroup"/>.
         ///
         /// Currently only advisory.
@@ -41,5 +40,3 @@ namespace UnityEditor.XR.Management
         }
     }
 }
-
-#endif

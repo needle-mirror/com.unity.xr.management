@@ -4,14 +4,13 @@ using System.IO;
 using System.Linq;
 
 using UnityEngine;
+using UnityEditor.MPE;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine.XR.Management;
 
-
 namespace UnityEditor.XR.Management.Metadata
 {
-
     /// <summary>
     /// Provide access to the metadata store. Currently only usable as a way to assign and remove loaders
     /// to/from an <see cref="XRManagerSettings"/> instance.
@@ -336,6 +335,10 @@ namespace UnityEditor.XR.Management.Metadata
         /// <returns>True if assignment succeeds, false if not.</returns>
         public static bool AssignLoader(XRManagerSettings settings, string loaderTypeName, BuildTargetGroup buildTargetGroup)
         {
+            // Stops secondary process from doing any asset handling.
+            if (ProcessService.level == ProcessLevel.Secondary)
+                return false;
+
             if (EditorApplication.isPlaying || EditorApplication.isPaused)
             {
                 Debug.LogError($"Attempt to add {loaderTypeName} for {buildTargetGroup} while in Play mode. XR Plug-in Management can not make changes to the loader list when running.");
@@ -364,10 +367,8 @@ namespace UnityEditor.XR.Management.Metadata
                     if (newInstance != null && assignedLoaders.Contains(newInstance))
                     {
                         orderedLoaders.Add(newInstance);
-#if UNITY_EDITOR
                         var loaderHelper = newLoader as XRLoaderHelper;
                         loaderHelper?.WasAssignedToBuildTarget(buildTargetGroup);
-#endif
                     }
                 }
 
@@ -409,10 +410,8 @@ namespace UnityEditor.XR.Management.Metadata
             {
                 EditorUtility.SetDirty(settings);
                 AssetDatabase.SaveAssets();
-#if UNITY_EDITOR
                 var loaderHelper = loader as XRLoaderHelper;
                 loaderHelper?.WasUnassignedFromBuildTarget(buildTargetGroup);
-#endif
                 return true;
             }
 

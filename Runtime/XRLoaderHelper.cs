@@ -1,15 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
-using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.XR;
 
 namespace UnityEngine.XR.Management
 {
@@ -180,12 +174,10 @@ namespace UnityEngine.XR.Management
 #if UNITY_EDITOR
         virtual public void WasAssignedToBuildTarget(BuildTargetGroup buildTargetGroup)
         {
-
         }
 
         virtual public void WasUnassignedFromBuildTarget(BuildTargetGroup buildTargetGroup)
         {
-
         }
 #endif
     }

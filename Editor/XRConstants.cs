@@ -1,5 +1,4 @@
 
-
 namespace UnityEditor.XR.Management
 {
     internal static class XRConstants

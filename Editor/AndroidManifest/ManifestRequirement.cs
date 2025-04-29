@@ -56,19 +56,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-#if UNITY_2021_3_OR_NEWER
             return HashCode.Combine(NewElements, OverrideElements, RemoveElements);
-#else
-            // Unfortunately, 2020.3 compiles against .NET 2.0, which doesn't include the more reasonable HashCode class.
-            // Still, a hash function is needed for comparing these objects, so going on with the option outlined here:
-            // https://stackoverflow.com/questions/1646807/quick-and-simple-hash-code-combinations
-            int factor = 31;
-            int hash = 17;
-            hash = hash * factor + (NewElements != null ? NewElements.GetHashCode() : 0);
-            hash = hash * factor + (OverrideElements != null ? OverrideElements.GetHashCode() : 0);
-            hash = hash * factor + (RemoveElements != null ? RemoveElements.GetHashCode() : 0);
-            return hash;
-#endif // UNITY_2021_3_OR_NEWER
         }
     }
 }

@@ -10,11 +10,11 @@ using UnityEditor.XR.Management.Metadata;
 
 namespace UnityEditor.XR.Management
 {
-#if UNITY_EDITOR
+    /// <summary>
+    /// Container class that holds general settings for each build target group installed in Unity.
+    /// </summary>
     [InitializeOnLoad]
-#endif
-   /// <summary>Container class that holds general settings for each build target group installed in Unity.</summary>
-   public class XRGeneralSettingsPerBuildTarget : ScriptableObject, ISerializationCallbackReceiver
+    public class XRGeneralSettingsPerBuildTarget : ScriptableObject, ISerializationCallbackReceiver
     {
         [SerializeField]
         List<BuildTargetGroup> Keys = new List<BuildTargetGroup>();
@@ -22,9 +22,6 @@ namespace UnityEditor.XR.Management
         [SerializeField]
         List<XRGeneralSettings> Values = new List<XRGeneralSettings>();
         Dictionary<BuildTargetGroup, XRGeneralSettings> Settings = new Dictionary<BuildTargetGroup, XRGeneralSettings>();
-
-
-#if UNITY_EDITOR
 
         static XRGeneralSettingsPerBuildTarget()
         {
@@ -139,7 +136,6 @@ namespace UnityEditor.XR.Management
 
             return false;
         }
-#endif
 
         /// <summary>
         /// Query this settings store to see if there are settings for a specific <see cref="BuildTargetGroup"/>.

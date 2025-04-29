@@ -27,7 +27,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
 
         private AndroidManifestProcessor CreateManifestProcessor(string gradleProjectPath)
         {
-#if UNITY_2021_1_OR_NEWER
             var xrManagementPackagePath = EditorUtilities.GetPackagePath("com.unity.xr.management");
             var processor = new AndroidManifestProcessor(gradleProjectPath, xrManagementPackagePath, GetXRManagerSettings());
 
@@ -37,9 +36,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
 #endif
 
             return processor;
-#else
-            return new AndroidManifestProcessor(gradleProjectPath, GetXRManagerSettings());
-#endif
         }
 
         /// <summary>

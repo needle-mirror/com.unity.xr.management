@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 using UnityEditor.XR.Management.Metadata;
 
@@ -36,7 +35,7 @@ namespace UnityEditor.XR.Management
             public static readonly GUIContent k_InitializeOnStart = new GUIContent("Initialize XR on Startup");
             public static readonly GUIContent k_XRConfigurationText = new GUIContent("Information about configuration, tracking and migration can be found below.");
             public static readonly GUIContent k_XRConfigurationDocUriText = new GUIContent("View Documentation");
-            public static readonly Uri k_XRConfigurationUri = new Uri(" https://docs.unity3d.com/Manual/configuring-project-for-xr.html");
+            public static readonly Uri k_XRConfigurationUri = new Uri(string.Format("https://docs.unity3d.com/{0}/Documentation/Manual/configuring-project-for-xr.html", Application.unityVersion.Substring(0, Application.unityVersion.LastIndexOf("."))));
             public static readonly GUIContent k_EditorTargetPlatform = new GUIContent("Editor Play mode uses Desktop Platform Settings regardless of Active Build Target.");
         }
 
