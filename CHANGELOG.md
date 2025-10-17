@@ -4,10 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.5.3] - 2025-10-17
+
+### Changed
+
+- Updated the minimum supported Unity version to 2022.3 LTS.
+
+### Removed
+
+- Removed `com.unity.modules.vr` dependency.
+
 ## [4.5.2] - 2025-04-29
 
 ### Changed
-- Updated the minimum supported Unity version to 2022.3 LTS.
+- Updated the minimum supported Unity version to 2021.3 LTS.
 
 ### Fixed
 - Fixed issue where the documentation link for configurations was incorrectly pointing to docs for the newest version of Unity.
@@ -16,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - Removed scripts which processes the deprecated XR packages. This also fixes an intermittent issue where Domain Reload hangs due to XR Plug-in Management tries to automatically uninstall legacy XR Packages.
-
+- Removed `com.unity.modules.vr` dependency.
 
 ## [4.5.1] - 2024-12-09
 

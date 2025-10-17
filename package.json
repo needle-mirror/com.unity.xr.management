@@ -1,8 +1,8 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.5.2",
-  "unity": "2021.3",
+  "version": "4.5.3",
+  "unity": "2022.3",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
   "keywords": [
     "xr",
@@ -15,7 +15,6 @@
   ],
   "dependencies": {
     "com.unity.modules.subsystems": "1.0.0",
-    "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
     "com.unity.xr.core-utils": "2.2.1",
     "com.unity.xr.legacyinputhelpers": "2.1.11"
@@ -23,13 +22,13 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "64bbf2a286703019c5b76ed574b439e2d843b7d8"
+    "revision": "7e83f6aed4d1f20c110f85e1f12fde33a11b134b"
   },
   "_upm": {
-    "changelog": "### Changed\n- Updated the minimum supported Unity version to 2022.3 LTS.\n\n### Fixed\n- Fixed issue where the documentation link for configurations was incorrectly pointing to docs for the newest version of Unity.\n- Fixed the display name of Google ARCore (previously ARCore).\n- Fixed the display name of Apple ARKit (previously ARKit).\n\n### Removed\n- Removed scripts which processes the deprecated XR packages. This also fixes an intermittent issue where Domain Reload hangs due to XR Plug-in Management tries to automatically uninstall legacy XR Packages."
+    "changelog": "### Changed\n\n- Updated the minimum supported Unity version to 2022.3 LTS.\n\n### Removed\n\n- Removed `com.unity.modules.vr` dependency."
   },
   "upmCi": {
-    "footprint": "784969fbb4ebc343df56cab5787505bc812e7846"
+    "footprint": "88d986aaf95ca5871bd90e0e67fea327a04bae88"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.5/manual/index.html",
   "samples": [
