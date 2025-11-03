@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.5.4] - 2025-11-03
+
+### Removed
+
+- Removed `com.unity.openxr` as an available package for Universal Windows Platform on 6000.4 and above.
+
 ## [4.5.3] - 2025-10-17
 
 ### Changed

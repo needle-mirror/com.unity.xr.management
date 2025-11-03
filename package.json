@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.5.3",
+  "version": "4.5.4",
   "unity": "2022.3",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
   "keywords": [
@@ -22,13 +22,13 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "7e83f6aed4d1f20c110f85e1f12fde33a11b134b"
+    "revision": "bc4c0079c6af1f1261e7ff475df4eda9875a72a0"
   },
   "_upm": {
-    "changelog": "### Changed\n\n- Updated the minimum supported Unity version to 2022.3 LTS.\n\n### Removed\n\n- Removed `com.unity.modules.vr` dependency."
+    "changelog": "### Removed\n\n- Removed `com.unity.openxr` as an available package for Universal Windows Platform on 6000.4 and above."
   },
   "upmCi": {
-    "footprint": "88d986aaf95ca5871bd90e0e67fea327a04bae88"
+    "footprint": "4b2bed3c1eb2ea5b5cb513e85a98e8a6ce5c6664"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.5/manual/index.html",
   "samples": [
