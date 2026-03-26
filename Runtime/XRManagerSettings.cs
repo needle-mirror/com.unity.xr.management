@@ -1,15 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-
+#if UNITY_EDITOR
 using UnityEditor;
-
-using UnityEngine.Rendering;
+#endif
 using UnityEngine.Serialization;
 
-[assembly: InternalsVisibleTo("Unity.XR.Management.Tests")]
-[assembly: InternalsVisibleTo("Unity.XR.Management.EditorTests")]
 namespace UnityEngine.XR.Management
 {
     /// <summary>
@@ -40,8 +36,7 @@ namespace UnityEngine.XR.Management
     /// </summary>
     public sealed class XRManagerSettings : ScriptableObject
     {
-        [HideInInspector]
-        bool m_InitializationComplete = false;
+        bool m_InitializationComplete;
 
 #pragma warning disable 414
         // This property is only used by the scriptable object editing part of the system and as such no one
@@ -49,13 +44,13 @@ namespace UnityEngine.XR.Management
         // get a clean console report.
         [HideInInspector]
         [SerializeField]
-        bool m_RequiresSettingsUpdate = false;
+        bool m_RequiresSettingsUpdate;
 #pragma warning restore 414
 
         [SerializeField]
         [Tooltip("Determines if the XR Manager instance is responsible for creating and destroying the appropriate loader instance.")]
         [FormerlySerializedAs("AutomaticLoading")]
-        bool m_AutomaticLoading = false;
+        bool m_AutomaticLoading;
 
         /// <summary>
         /// Get and set Automatic Loading state for this manager. When this is true, the manager will automatically call
@@ -65,14 +60,14 @@ namespace UnityEngine.XR.Management
         /// </summary>
         public bool automaticLoading
         {
-            get { return m_AutomaticLoading; }
-            set { m_AutomaticLoading = value; }
+            get => m_AutomaticLoading;
+            set => m_AutomaticLoading = value;
         }
 
         [SerializeField]
         [Tooltip("Determines if the XR Manager instance is responsible for starting and stopping subsystems for the active loader instance.")]
         [FormerlySerializedAs("AutomaticRunning")]
-        bool m_AutomaticRunning = false;
+        bool m_AutomaticRunning;
 
         /// <summary>
         /// Get and set automatic running state for this manager. When set to true the manager will call <see cref="StartSubsystems"/>
@@ -81,20 +76,20 @@ namespace UnityEngine.XR.Management
         /// </summary>
         public bool automaticRunning
         {
-            get { return m_AutomaticRunning; }
-            set { m_AutomaticRunning = value; }
+            get => m_AutomaticRunning;
+            set => m_AutomaticRunning = value;
         }
-
 
         [SerializeField]
         [Tooltip("List of XR Loader instances arranged in desired load order.")]
         [FormerlySerializedAs("Loaders")]
-        List<XRLoader> m_Loaders = new List<XRLoader>();
+        List<XRLoader> m_Loaders = new();
 
-        // Maintains a list of registered loaders that is immutable at runtime.
-        [SerializeField]
-        [HideInInspector]
-        HashSet<XRLoader> m_RegisteredLoaders = new HashSet<XRLoader>();
+        internal List<XRLoader> currentLoaders
+        {
+            get => m_Loaders;
+            set => m_Loaders = value;
+        }
 
         /// <summary>
         /// List of loaders currently managed by this XR Manager instance.
@@ -108,11 +103,16 @@ namespace UnityEngine.XR.Management
         [Obsolete("'XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.")]
         public List<XRLoader> loaders
         {
-            get { return m_Loaders; }
+            get => m_Loaders;
 #if UNITY_EDITOR
-            set { m_Loaders = value; }
+            set => m_Loaders = value;
 #endif
         }
+
+        // Maintains a list of registered loaders that is immutable at runtime.
+        HashSet<XRLoader> m_RegisteredLoaders = new();
+
+        internal HashSet<XRLoader> registeredLoaders => m_RegisteredLoaders;
 
         /// <summary>
         /// A shallow copy of the list of loaders currently managed by this XR Manager instance.
@@ -129,29 +129,20 @@ namespace UnityEngine.XR.Management
         /// handled as a Coroutine, people taking advantage of the auto-lifecycle management of XRManager
         /// will need to wait for init to complete before checking for an ActiveLoader and calling StartSubsystems.
         /// </summary>
-        public bool isInitializationComplete
-        {
-            get { return m_InitializationComplete; }
-        }
+        public bool isInitializationComplete => m_InitializationComplete;
 
         ///<summary>
         /// Return the current singleton active loader instance.
         ///</summary>
-        [HideInInspector]
         public XRLoader activeLoader { get; private set; }
 
         /// <summary>
         /// Return the current active loader, cast to the requested type. Useful shortcut when you need
         /// to get the active loader as something less generic than XRLoader.
         /// </summary>
-        ///
         /// <typeparam name="T">Requested type of the loader</typeparam>
-        ///
         /// <returns>The active loader as requested type, or null.</returns>
-        public T ActiveLoaderAs<T>() where T : XRLoader
-        {
-            return activeLoader as T;
-        }
+        public T ActiveLoaderAs<T>() where T : XRLoader => activeLoader as T;
 
         /// <summary>
         /// Iterate over the configured list of loaders and attempt to initialize each one. The first one
@@ -372,16 +363,17 @@ namespace UnityEngine.XR.Management
             }
         }
 
-        private bool CheckGraphicsAPICompatibility(XRLoader loader)
+        static bool CheckGraphicsAPICompatibility(XRLoader loader)
         {
-            GraphicsDeviceType deviceType = SystemInfo.graphicsDeviceType;
-            List<GraphicsDeviceType> supportedDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(false);
+            var deviceType = SystemInfo.graphicsDeviceType;
+            var supportedDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(false);
 
             // To help with backward compatibility, if the compatibility list is empty we assume that it does not implement the GetSupportedGraphicsDeviceTypes method
             // Therefore we revert to the previous behavior of building or starting the loader regardless of gfx api settings.
             if (supportedDeviceTypes.Count > 0 && !supportedDeviceTypes.Contains(deviceType))
             {
-                Debug.LogWarning(String.Format("The {0} does not support the initialized graphics device, {1}. Please change the preffered Graphics API in PlayerSettings. Attempting to start the next XR loader.", loader.name, deviceType.ToString()));
+                Debug.LogWarning(
+                    $"The {loader.name} does not support the initialized graphics device, {deviceType.ToString()}. Please change the preferred Graphics API in PlayerSettings. Attempting to start the next XR loader.");
                 return false;
             }
 
@@ -461,15 +453,6 @@ namespace UnityEngine.XR.Management
             m_InitializationComplete = false;
         }
 
-        // Use this for initialization
-        void Start()
-        {
-            if (automaticLoading && automaticRunning)
-            {
-                StartSubsystems();
-            }
-        }
-
         void OnDisable()
         {
             if (automaticLoading && automaticRunning)
@@ -484,22 +467,6 @@ namespace UnityEngine.XR.Management
             {
                 DeinitializeLoader();
             }
-        }
-
-        // To modify the list of loaders internally use `currentLoaders` as it will return a list reference rather
-        // than a shallow copy.
-        // TODO @davidmo 10/12/2020: remove this in next major version bump and make 'loaders' internal.
-        internal List<XRLoader> currentLoaders
-        {
-            get { return m_Loaders; }
-            set { m_Loaders = value; }
-        }
-
-        // To modify the set of registered loaders use `registeredLoaders` as it will return a reference to the
-        // hashset of loaders.
-        internal HashSet<XRLoader> registeredLoaders
-        {
-            get { return m_RegisteredLoaders; }
         }
     }
 }

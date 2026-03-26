@@ -26,8 +26,6 @@ namespace UnityEngine.XR.Management
         /// </summary>
         public string buildSettingsKey { get; set; }
 
-        private XRConfigurationDataAttribute() {}
-
         /// <summary>Constructor for attribute</summary>
         /// <param name="displayName">The display name to use in the Project Settings window.</param>
         /// <param name="buildSettingsKey">The key to use to get/set build settings with.</param>

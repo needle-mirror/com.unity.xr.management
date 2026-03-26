@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.5.4",
+  "version": "4.6.0",
   "unity": "2022.3",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
   "keywords": [
@@ -22,15 +22,15 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "bc4c0079c6af1f1261e7ff475df4eda9875a72a0"
+    "revision": "7e09bb3111da77539cdd80eca684c3abdb059158"
   },
   "_upm": {
-    "changelog": "### Removed\n\n- Removed `com.unity.openxr` as an available package for Universal Windows Platform on 6000.4 and above."
+    "changelog": "### Changed\n\n- Changed help box stlye for the XR Plug-in Management view for improved readability.\n- The following methods of `XRLoaderHelper` have been changed from `protected` to `public`:\n  - `StartSubsystem<T>`\n  - `StopSubsystem<T>`\n  - `DestroySubsystem<T>`\n  - `CreateSubsystem<T>`\n\n### Fixed\n\n- Fixed an issue where we now use a manual for loop instead of a foreach loop to avoid exceptions if the list of loaders is modified.\n- Fixed an issue to show the correct name for Mock HMD loader when the package is not installed. ([XRMB-152](https://issuetracker.unity3d.com/product/unity/issues/guid/XRMB-152))\n- Fixed an issue to show the correct name for OpenXR loader when the package is not installed. ([UUM-137703](https://issuetracker.unity3d.com/issues/xr-plug-in-management-inconsistant-openxr-wording))\n\n\n### Removed\n\n- Removed Oculus XR plugin from known packages due to Oculus XR plugin deprecation."
   },
   "upmCi": {
-    "footprint": "4b2bed3c1eb2ea5b5cb513e85a98e8a6ce5c6664"
+    "footprint": "9d2b1e59dee03e6e7304523bfe3dcb416885b3f9"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.5/manual/index.html",
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.6/manual/index.html",
   "samples": [
     {
       "displayName": "Example XR Management implementation",

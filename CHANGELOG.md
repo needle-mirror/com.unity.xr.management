@@ -4,6 +4,28 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.6.0] - 2026-03-26
+
+### Changed
+
+- Changed help box stlye for the XR Plug-in Management view for improved readability.
+- The following methods of `XRLoaderHelper` have been changed from `protected` to `public`:
+  - `StartSubsystem<T>`
+  - `StopSubsystem<T>`
+  - `DestroySubsystem<T>`
+  - `CreateSubsystem<T>`
+
+### Fixed
+
+- Fixed an issue where we now use a manual for loop instead of a foreach loop to avoid exceptions if the list of loaders is modified.
+- Fixed an issue to show the correct name for Mock HMD loader when the package is not installed. ([XRMB-152](https://issuetracker.unity3d.com/product/unity/issues/guid/XRMB-152))
+- Fixed an issue to show the correct name for OpenXR loader when the package is not installed. ([UUM-137703](https://issuetracker.unity3d.com/issues/xr-plug-in-management-inconsistant-openxr-wording))
+
+
+### Removed
+
+- Removed Oculus XR plugin from known packages due to Oculus XR plugin deprecation.
+
 ## [4.5.4] - 2025-11-03
 
 ### Removed

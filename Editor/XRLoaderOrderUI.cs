@@ -42,7 +42,7 @@ namespace UnityEditor.XR.Management
         private List<LoaderInformation> m_LoaderMetadata = null;
 
         private const string m_OpenXRLoaderType = "UnityEngine.XR.OpenXR.OpenXRLoader";
-
+        private const string m_OculusLoaderType = "Unity.XR.Oculus.OculusLoader";
 
         ReorderableList m_OrderedList = null;
 
@@ -132,24 +132,42 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
 #if UNITY_6000_1_OR_NEWER && UNITY_META_QUEST
         void MetaBuildProfileLoaderForce()
         {
+            // Force enable OpenXR loader if a non-supported loader is currently enabled or no loader is currently enabled.
             if (CurrentBuildTargetGroup == BuildTargetGroup.Android)
             {
+                var liOpenXR = new LoaderInformation();
+                var liOpenXRIndex = -1;
+                var isNonSupportedLoaderEnabled = false;
+                var isSupportedLoaderEnabled = false;
+
                 for (int i = 0; i < m_LoaderMetadata.Count; i++)
                 {
                     var li = m_LoaderMetadata[i];
+
+                    // Skip any work on OpenXR loader .
                     if (li.loaderType == m_OpenXRLoaderType)
                     {
-                        li.toggled = true;
-                        li.stateChanged = true;
-                        li.disabled = false;
+                        liOpenXR = li;
+                        liOpenXRIndex = i;
+                        continue;
+                    }
 
-                        if (li.customLoaderUI != null)
+                    // Check if what kind of loader is enabled.
+                    if (li.toggled == true)
+                    {
+                        if (li.loaderType == m_OculusLoaderType)
                         {
-                            li.customLoaderUI.ActiveBuildTargetGroup = BuildTargetGroup.Android;
-                            li.customLoaderUI.IsLoaderEnabled = true;
+                            isSupportedLoaderEnabled = true;
+                            continue;
+                        }
+                        else
+                        {
+                            isNonSupportedLoaderEnabled = true;
                         }
                     }
-                    else
+
+                    // Disable all non supported loaders.
+                    if (li.loaderType != m_OculusLoaderType)
                     {
                         li.toggled = false;
                         li.stateChanged = true;
@@ -160,12 +178,32 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                             li.customLoaderUI.ActiveBuildTargetGroup = BuildTargetGroup.Android;
                             li.customLoaderUI.IsLoaderEnabled = false;
                         }
+
+                        m_LoaderMetadata[i] = li;
+                    }
+                }
+
+                if (liOpenXRIndex < 0)
+                    return;
+
+                // Enable OpenXR Loader if a non-supported loader is enabled or no loader is enabled.
+                if (isNonSupportedLoaderEnabled || (!isNonSupportedLoaderEnabled && !isSupportedLoaderEnabled))
+                {
+                    liOpenXR.toggled = true;
+                    liOpenXR.stateChanged = true;
+                    liOpenXR.disabled = false;
+
+                    if (liOpenXR.customLoaderUI != null)
+                    {
+                        liOpenXR.customLoaderUI.ActiveBuildTargetGroup = BuildTargetGroup.Android;
+                        liOpenXR.customLoaderUI.IsLoaderEnabled = true;
                     }
 
-                    m_LoaderMetadata[i] = li;
+                    m_LoaderMetadata[liOpenXRIndex] = liOpenXR;
                 }
             }
         }
+
 #endif
 
         void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)

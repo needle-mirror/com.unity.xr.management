@@ -6,6 +6,7 @@ using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.XR.Management;
+using Object = UnityEngine.Object;
 
 namespace UnityEditor.XR.Management
 {
@@ -28,6 +29,30 @@ namespace UnityEditor.XR.Management
             };
 
             public static readonly GUIStyle k_LabelWordWrap = new GUIStyle(EditorStyles.label) { wordWrap = true };
+
+            public static readonly GUIStyle k_HelpBox = new(EditorStyles.helpBox)
+            {
+                fixedWidth = 376,
+                padding = new RectOffset(8, 8, 6, 6)
+            };
+
+            public static readonly GUIStyle k_HelpBoxContent = new()
+            {
+                alignment = TextAnchor.MiddleLeft,
+                margin = new RectOffset(0, 0, 0, 8)
+            };
+
+            public static readonly GUIStyle k_HelpBoxActions = new()
+            {
+                alignment = TextAnchor.MiddleRight
+            };
+
+            public static readonly GUIStyle k_Icon = new ()
+            {
+                fixedWidth = 16,
+                fixedHeight = 16,
+                margin = new RectOffset(0, 4, 0, 0)
+            };
         }
 
         struct Content
@@ -37,6 +62,7 @@ namespace UnityEditor.XR.Management
             public static readonly GUIContent k_XRConfigurationDocUriText = new GUIContent("View Documentation");
             public static readonly Uri k_XRConfigurationUri = new Uri(string.Format("https://docs.unity3d.com/{0}/Documentation/Manual/configuring-project-for-xr.html", Application.unityVersion.Substring(0, Application.unityVersion.LastIndexOf("."))));
             public static readonly GUIContent k_EditorTargetPlatform = new GUIContent("Editor Play mode uses Desktop Platform Settings regardless of Active Build Target.");
+            public static readonly GUIContent k_InfoIcon = EditorGUIUtility.IconContent("d_console.infoicon");
         }
 
         internal static GUIStyle GetStyle(string styleName)
@@ -214,7 +240,7 @@ namespace UnityEditor.XR.Management
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Error trying to display plug-in assingment UI : {ex.Message}");
+                Debug.LogError($"Error trying to display plug-in assignment UI : {ex.Message}");
             }
 
             EditorGUILayout.EndBuildTargetSelectionGrouping();
@@ -232,15 +258,24 @@ namespace UnityEditor.XR.Management
                 System.Diagnostics.Process.Start(link.AbsoluteUri);
             }
             EditorGUIUtility.AddCursorRect(uriRect, MouseCursor.Link);
-            EditorGUI.DrawRect(new Rect(uriRect.x, uriRect.y + uriRect.height - 1, uriRect.width, 1), labelStyle.normal.textColor);
         }
 
         private void DisplayXRTrackingDocumentationLink()
         {
-            GUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.BeginVertical(Styles.k_HelpBox);
             {
-                EditorGUILayout.LabelField(Content.k_XRConfigurationText, Styles.k_LabelWordWrap);
-                DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2);
+                GUILayout.BeginHorizontal(Styles.k_HelpBoxContent);
+                {
+                    GUILayout.Label(Content.k_InfoIcon, Styles.k_Icon);
+                    EditorGUILayout.LabelField(Content.k_XRConfigurationText, Styles.k_LabelWordWrap);
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal(Styles.k_HelpBoxActions);
+                {
+                    GUILayout.FlexibleSpace();
+                    DisplayLink(Content.k_XRConfigurationDocUriText, Content.k_XRConfigurationUri, 2);
+                }
+                GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
             EditorGUILayout.Space();

@@ -81,12 +81,12 @@ namespace UnityEditor.XR.Management.Metadata
 
             packages.Add(new KnownPackage() {
                 metadata = new KnownPackageMetadata(){
-                    packageName = "Open XR Plugin",
+                    packageName = "OpenXR Plugin",
                     packageId = "com.unity.xr.openxr",
                     settingsType = "UnityEditor.XR.OpenXR.OpenXRPackageSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
-                            loaderName = "Open XR",
+                            loaderName = "OpenXR",
                             loaderType = "UnityEngine.XR.OpenXR.OpenXRLoader",
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Standalone,
@@ -94,24 +94,6 @@ namespace UnityEditor.XR.Management.Metadata
                                 BuildTargetGroup.WSA,
 #endif
                                 BuildTargetGroup.Android
-                            }
-                        },
-                    }
-                }
-            });
-
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata(){
-                    packageName = "Oculus XR Plugin",
-                    packageId = "com.unity.xr.oculus",
-                    settingsType = "Unity.XR.Oculus.OculusSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
-                            loaderName = "Oculus",
-                            loaderType = "Unity.XR.Oculus.OculusLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
-                                BuildTargetGroup.Standalone,
-                                BuildTargetGroup.Android,
                             }
                         },
                     }
@@ -161,7 +143,7 @@ namespace UnityEditor.XR.Management.Metadata
                     settingsType = "Unity.XR.MockHMD.MockHMDBuildSettings",
                     loaderMetadata = new List<IXRLoaderMetadata>() {
                     new KnownLoaderMetadata() {
-                            loaderName = "Unity Mock HMD",
+                            loaderName = "Mock HMD",
                             loaderType = k_KnownPackageMockHMDLoader,
                             supportedBuildTargets = new List<BuildTargetGroup>() {
                                 BuildTargetGroup.Standalone,

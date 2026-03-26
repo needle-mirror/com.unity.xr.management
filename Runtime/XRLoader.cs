@@ -21,28 +21,24 @@ namespace UnityEngine.XR.Management
         /// If this method returns false, <see cref="XRManagerSettings"/> continues to process the next loader
         /// in the <see cref="XRManagerSettings.loaders"/> list, or fails completely when the list is exhausted.
         /// </summary>
-        ///
         /// <returns>Whether or not initialization succeeded.</returns>
         public virtual bool Initialize() { return true; }
 
         /// <summary>
         /// Ask loader to start all initialized subsystems.
         /// </summary>
-        ///
         /// <returns>Whether or not all subsystems were successfully started.</returns>
         public virtual bool Start() { return true; }
 
         /// <summary>
         /// Ask loader to stop all initialized subsystems.
         /// </summary>
-        ///
         /// <returns>Whether or not all subsystems were successfully stopped.</returns>
         public virtual bool Stop() { return true; }
 
         /// <summary>
         /// Ask loader to deinitialize all initialized subsystems.
         /// </summary>
-        ///
         /// <returns>Whether or not deinitialization succeeded.</returns>
         public virtual bool Deinitialize() { return true; }
 
@@ -50,16 +46,13 @@ namespace UnityEngine.XR.Management
         /// Gets the loaded subsystem of the specified type. Implementation dependent as only implemetnations
         /// know what they have loaded and how best to get it..
         /// </summary>
-        ///
         /// <typeparam name="T">Type of the subsystem to get</typeparam>
-        ///
         /// <returns>The loaded subsystem or null if not found.</returns>
         public abstract T GetLoadedSubsystem<T>() where T : class, ISubsystem;
 
         /// <summary>
         /// Gets the loader's supported graphics device types. If the list is empty, it is assumed that it supports all graphics device types.
         /// </summary>
-        ///
         /// <param name="buildingPlayer">True if the player is being built. You may want to include or exclude graphics apis if the player is being built or not.</param>
         /// <returns>Returns the loader's supported graphics device types.</returns>
         public virtual List<GraphicsDeviceType> GetSupportedGraphicsDeviceTypes(bool buildingPlayer)

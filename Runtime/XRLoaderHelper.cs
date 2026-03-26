@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,24 +14,21 @@ namespace UnityEngine.XR.Management
     public abstract class XRLoaderHelper : XRLoader
     {
         /// <summary>
-        /// Map of loaded susbsystems. Used so we don't always have to fo to XRSubsystemManger and do a manual
+        /// Map of loaded subsystems. Used so we don't always have to fo to XRSubsystemManger and do a manual
         /// search to find the instance we loaded.
         /// </summary>
-        protected Dictionary<Type, ISubsystem> m_SubsystemInstanceMap = new Dictionary<Type, ISubsystem>();
+        protected Dictionary<Type, ISubsystem> m_SubsystemInstanceMap = new();
 
         /// <summary>
         /// Gets the loaded subsystem of the specified type. Implementation dependent as only implemetnations
         /// know what they have loaded and how best to get it..
         /// </summary>
-        ///
         /// <typeparam name="T">Type of the subsystem to get.</typeparam>
-        ///
         /// <returns>The loaded subsystem or null if not found.</returns>
         public override T GetLoadedSubsystem<T>()
         {
-            Type subsystemType = typeof(T);
-            ISubsystem subsystem;
-            m_SubsystemInstanceMap.TryGetValue(subsystemType, out subsystem);
+            var subsystemType = typeof(T);
+            m_SubsystemInstanceMap.TryGetValue(subsystemType, out var subsystem);
             return subsystem as T;
         }
 
@@ -40,42 +36,36 @@ namespace UnityEngine.XR.Management
         /// Start a subsystem instance of a given type. Subsystem assumed to already be loaded from
         /// a previous call to CreateSubsystem
         /// </summary>
-        ///
         /// <typeparam name="T">A subclass of <see cref="ISubsystem"/></typeparam>
-        protected void StartSubsystem<T>() where T : class, ISubsystem
+        public void StartSubsystem<T>() where T : class, ISubsystem
         {
-            T subsystem = GetLoadedSubsystem<T>();
-            if (subsystem != null)
-                subsystem.Start();
+            var subsystem = GetLoadedSubsystem<T>();
+            subsystem?.Start();
         }
 
         /// <summary>
         /// Stop a subsystem instance of a given type. Subsystem assumed to already be loaded from
         /// a previous call to CreateSubsystem
         /// </summary>
-        ///
         /// <typeparam name="T">A subclass of <see cref="ISubsystem"/></typeparam>
-        protected void StopSubsystem<T>() where T : class, ISubsystem
+        public void StopSubsystem<T>() where T : class, ISubsystem
         {
-            T subsystem = GetLoadedSubsystem<T>();
-            if (subsystem != null)
-                subsystem.Stop();
+            var subsystem = GetLoadedSubsystem<T>();
+            subsystem?.Stop();
         }
 
         /// <summary>
         /// Destroy a subsystem instance of a given type. Subsystem assumed to already be loaded from
         /// a previous call to CreateSubsystem
         /// </summary>
-        ///
         /// <typeparam name="T">A subclass of <see cref="ISubsystem"/></typeparam>
-        protected void DestroySubsystem<T>() where T : class, ISubsystem
+        public void DestroySubsystem<T>() where T : class, ISubsystem
         {
-            T subsystem = GetLoadedSubsystem<T>();
+            var subsystem = GetLoadedSubsystem<T>();
             if (subsystem != null)
             {
                 var subsystemType = typeof(T);
-                if (m_SubsystemInstanceMap.ContainsKey(subsystemType))
-                    m_SubsystemInstanceMap.Remove(subsystemType);
+                m_SubsystemInstanceMap.Remove(subsystemType);
                 subsystem.Destroy();
             }
         }
@@ -88,45 +78,42 @@ namespace UnityEngine.XR.Management
         /// if you create them during initialization, but initialization fails. If that happens,
         /// you should clean up any subsystems created up to that point.
         /// </summary>
-        ///
         /// <typeparam name="TDescriptor">The descriptor type being passed in.</typeparam>
         /// <typeparam name="TSubsystem">The subsystem type being requested</typeparam>
         /// <param name="descriptors">List of TDescriptor instances to use for subsystem matching.</param>
         /// <param name="id">The identifier key of the particualr subsystem implementation being requested.</param>
-        protected void CreateSubsystem<TDescriptor, TSubsystem>(List<TDescriptor> descriptors, string id)
+        public void CreateSubsystem<TDescriptor, TSubsystem>(List<TDescriptor> descriptors, string id)
             where TDescriptor : ISubsystemDescriptor
             where TSubsystem : ISubsystem
         {
             if (descriptors == null)
-                throw new ArgumentNullException("descriptors");
+                throw new ArgumentNullException(nameof(descriptors));
 
-            SubsystemManager.GetSubsystemDescriptors<TDescriptor>(descriptors);
+            SubsystemManager.GetSubsystemDescriptors(descriptors);
 
             if (descriptors.Count > 0)
             {
                 foreach (var descriptor in descriptors)
                 {
-                    ISubsystem subsys = null;
-                    if (String.Compare(descriptor.id, id, true) == 0)
+                    ISubsystem subsystem = null;
+                    if (string.Compare(descriptor.id, id, true) == 0)
                     {
-                        subsys = descriptor.Create();
+                        subsystem = descriptor.Create();
                     }
-                    if (subsys != null)
+                    if (subsystem != null)
                     {
-                        m_SubsystemInstanceMap[typeof(TSubsystem)] = subsys;
+                        m_SubsystemInstanceMap[typeof(TSubsystem)] = subsystem;
                         break;
                     }
                 }
             }
         }
 
-
         /// <summary>
         /// Creates a native, integrated subsystem given a list of descriptors and a specific subsystem id.
         /// DEPRECATED: Please use the geenric CreateSubsystem method. This method is soley retained for
         /// backwards compatibility and will be removed in a future release.
         /// </summary>
-        ///
         /// <typeparam name="TDescriptor">The descriptor type being passed in.</typeparam>
         /// <typeparam name="TSubsystem">The subsystem type being requested</typeparam>
         /// <param name="descriptors">List of TDescriptor instances to use for subsystem matching.</param>
@@ -172,13 +159,9 @@ namespace UnityEngine.XR.Management
         }
 
 #if UNITY_EDITOR
-        virtual public void WasAssignedToBuildTarget(BuildTargetGroup buildTargetGroup)
-        {
-        }
+        public virtual void WasAssignedToBuildTarget(BuildTargetGroup buildTargetGroup) { }
 
-        virtual public void WasUnassignedFromBuildTarget(BuildTargetGroup buildTargetGroup)
-        {
-        }
+        public virtual void WasUnassignedFromBuildTarget(BuildTargetGroup buildTargetGroup) { }
 #endif
     }
 }

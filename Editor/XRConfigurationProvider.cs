@@ -122,8 +122,13 @@ namespace UnityEditor.XR.Management
                 AssetDatabase.SaveAssets();
                 EditorBuildSettings.AddConfigObject(m_BuildSettingsKey, settings, true);
 
-                var package = XRPackageMetadataStore.GetPackageForSettingsTypeNamed(m_BuildDataType.FullName);
-                package?.PopulateNewSettingsInstance(settings);
+                // We delay this last piece of initialization logic so that our settings asset we just created can be found in the same frame.
+                EditorApplication.delayCall += () =>
+                {
+                    var package = XRPackageMetadataStore.GetPackageForSettingsTypeNamed(m_BuildDataType.FullName);
+                    package?.PopulateNewSettingsInstance(settings);
+                };
+
                 return settings;
             }
             return null;
