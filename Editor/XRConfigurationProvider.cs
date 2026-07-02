@@ -3,21 +3,23 @@ using System.IO;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements;
-
 using UnityEditor.XR.Management.Metadata;
 
 namespace UnityEditor.XR.Management
 {
-    internal class XRConfigurationProvider : SettingsProvider
+    class XRConfigurationProvider : SettingsProvider
     {
-        static readonly GUIContent s_WarningToCreateSettings = EditorGUIUtility.TrTextContent("You must create a serialized instance of the settings data in order to modify the settings in this UI. Until then only default settings set by the provider will be available.");
-
-        Type m_BuildDataType = null;
+        Type m_BuildDataType;
         string m_BuildSettingsKey;
         Editor m_CachedEditor;
         SerializedObject m_SettingsWrapper;
 
-        public XRConfigurationProvider(string path, string buildSettingsKey, Type buildDataType, SettingsScope scopes = SettingsScope.Project) : base(path, scopes)
+        public XRConfigurationProvider(
+            string path,
+            string buildSettingsKey,
+            Type buildDataType,
+            SettingsScope scopes = SettingsScope.Project)
+            : base(path, scopes)
         {
             m_BuildDataType = buildDataType;
             m_BuildSettingsKey = buildSettingsKey;
@@ -31,11 +33,10 @@ namespace UnityEditor.XR.Management
         {
             get
             {
-                ScriptableObject settings = null;
-                EditorBuildSettings.TryGetConfigObject(m_BuildSettingsKey, out settings);
+                EditorBuildSettings.TryGetConfigObject(m_BuildSettingsKey, out ScriptableObject settings);
                 if (settings == null)
                 {
-                    string searchText = String.Format("t:{0}", m_BuildDataType.Name);
+                    string searchText = $"t:{m_BuildDataType.Name}";
                     string[] assets = AssetDatabase.FindAssets(searchText);
                     foreach (var guid in assets)
                     {
@@ -106,14 +107,14 @@ namespace UnityEditor.XR.Management
 
         ScriptableObject Create()
         {
-            ScriptableObject settings = ScriptableObject.CreateInstance(m_BuildDataType) as ScriptableObject;
+            var settings = ScriptableObject.CreateInstance(m_BuildDataType);
             if (settings != null)
             {
-                string newAssetName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(m_BuildDataType));
-                string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultSettingsPath);
+                string newAssetName = $"{EditorUtilities.TypeNameToString(m_BuildDataType)}.asset";
+                string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.k_DefaultSettingsPath);
                 if (string.IsNullOrEmpty(assetPath))
                 {
-                    Debug.LogError($"Invalid default settings path");
+                    Debug.LogError("Invalid default settings path");
                     return null;
                 }
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using UnityEngine;
 using UnityEditor.MPE;
 using UnityEditor.PackageManager;
@@ -18,55 +17,6 @@ namespace UnityEditor.XR.Management.Metadata
     [InitializeOnLoad]
     public class XRPackageMetadataStore
     {
-        const string k_WaitingPackmanQuery = "XRMGT Waiting Packman Query.";
-        const string k_RebuildCache = "XRMGT Rebuilding Cache.";
-        const string k_InstallingPackage = "XRMGT Installing XR Package.";
-        const string k_AssigningPackage = "XRMGT Assigning XR Package.";
-        const string k_UninstallingPackage = "XRMGT Uninstalling XR Package.";
-        const string k_CachedMDStoreKey = "XR Metadata Store";
-
-        static float k_TimeOutDelta = 30f;
-
-        [Serializable]
-        struct KnownPackageInfo
-        {
-            public string packageId;
-            public string verifiedVersion;
-        }
-
-
-        [Serializable]
-        struct CachedMDStoreInformation
-        {
-            public bool hasAlreadyRequestedData;
-            public KnownPackageInfo[] knownPackageInfos;
-            public string[] installedPackages;
-            public string[] installablePackages;
-        }
-
-        static CachedMDStoreInformation s_CachedMDStoreInformation = new CachedMDStoreInformation()
-        {
-            hasAlreadyRequestedData = false,
-            knownPackageInfos = { },
-            installedPackages = { },
-            installablePackages = { },
-        };
-
-
-        static void LoadCachedMDStoreInformation()
-        {
-            string data = SessionState.GetString(k_CachedMDStoreKey, "{}");
-            s_CachedMDStoreInformation = JsonUtility.FromJson<CachedMDStoreInformation>(data);
-        }
-
-        static void StoreCachedMDStoreInformation()
-        {
-            SessionState.EraseString(k_CachedMDStoreKey);
-            string data = JsonUtility.ToJson(s_CachedMDStoreInformation, true);
-            SessionState.SetString(k_CachedMDStoreKey, data);
-        }
-
-
         enum InstallationState
         {
             New,
@@ -87,43 +37,134 @@ namespace UnityEditor.XR.Management.Metadata
         }
 
         [Serializable]
-        struct LoaderAssignmentRequest
+        struct LoaderAssignmentRequest : IEquatable<LoaderAssignmentRequest>
         {
             [SerializeField]
-            public string packageId;
+            internal string packageId;
+
             [SerializeField]
-            public string loaderType;
+            internal string loaderType;
+
             [SerializeField]
-            public BuildTargetGroup buildTargetGroup;
+            internal BuildTargetGroup buildTargetGroup;
+
             [SerializeField]
-            public bool needsAddRequest;
+            internal bool needsAddRequest;
+
             [SerializeField]
-            public ListRequest packageListRequest;
+            internal ListRequest packageListRequest;
+
             [SerializeField]
-            public AddRequest packageAddRequest;
+            internal AddRequest packageAddRequest;
+
             [SerializeField]
 #pragma warning disable CS0649
-            public RemoveRequest packageRemoveRequest;
+            internal RemoveRequest packageRemoveRequest;
 #pragma warning disable CS0649
+
             [SerializeField]
-            public float timeOut;
+            internal float timeOut;
+
             [SerializeField]
-            public InstallationState installationState;
+            internal InstallationState installationState;
+
             [SerializeField]
-            public string logMessage;
+            internal string logMessage;
+
             [SerializeField]
-            public LogLevel logLevel;
+            internal LogLevel logLevel;
+
+            public bool Equals(LoaderAssignmentRequest other)
+            {
+                return packageId == other.packageId
+                    && loaderType == other.loaderType
+                    && buildTargetGroup == other.buildTargetGroup
+                    && needsAddRequest == other.needsAddRequest
+                    && Equals(packageListRequest, other.packageListRequest)
+                    && Equals(packageAddRequest, other.packageAddRequest)
+                    && Equals(packageRemoveRequest, other.packageRemoveRequest)
+                    && timeOut.Equals(other.timeOut)
+                    && installationState == other.installationState
+                    && logMessage == other.logMessage
+                    && logLevel == other.logLevel;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is LoaderAssignmentRequest other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                var hashCode = new HashCode();
+                hashCode.Add(packageId);
+                hashCode.Add(loaderType);
+                hashCode.Add((int)buildTargetGroup);
+                hashCode.Add(needsAddRequest);
+                hashCode.Add(packageListRequest);
+                hashCode.Add(packageAddRequest);
+                hashCode.Add(packageRemoveRequest);
+                hashCode.Add(timeOut);
+                hashCode.Add((int)installationState);
+                hashCode.Add(logMessage);
+                hashCode.Add((int)logLevel);
+                return hashCode.ToHashCode();
+            }
+        }
+
+        [Serializable]
+        struct CachedMDStoreInformation
+        {
+            internal bool hasAlreadyRequestedData;
+            internal KnownPackageInfo[] knownPackageInfos;
+            internal string[] installedPackages;
+            internal string[] installablePackages;
+        }
+
+        [Serializable]
+        struct KnownPackageInfo
+        {
+            internal string packageId;
+            internal string verifiedVersion;
         }
 
         [Serializable]
         struct LoaderAssignmentRequests
         {
             [SerializeField]
-            public List<LoaderAssignmentRequest> activeRequests;
+            internal List<LoaderAssignmentRequest> activeRequests;
         }
 
-        static Dictionary<string, IXRPackage> s_Packages = null;
-        static SearchRequest s_SearchRequest = null;
+        const string k_WaitingPackmanQuery = "XRMGT Waiting Packman Query.";
+        const string k_RebuildCache = "XRMGT Rebuilding Cache.";
+        const string k_InstallingPackage = "XRMGT Installing XR Package.";
+        const string k_AssigningPackage = "XRMGT Assigning XR Package.";
+        const string k_UninstallingPackage = "XRMGT Uninstalling XR Package.";
+        const string k_CachedMDStoreKey = "XR Metadata Store";
+
+        const float k_TimeOutDelta = 30f;
+        const string k_DefaultSessionStateString = "DEADBEEF";
+
+        static CachedMDStoreInformation s_CachedMDStoreInformation = new()
+        {
+            hasAlreadyRequestedData = false,
+        };
+
+        static void LoadCachedMDStoreInformation()
+        {
+            string data = SessionState.GetString(k_CachedMDStoreKey, "{}");
+            s_CachedMDStoreInformation = JsonUtility.FromJson<CachedMDStoreInformation>(data);
+        }
+
+        static void StoreCachedMDStoreInformation()
+        {
+            SessionState.EraseString(k_CachedMDStoreKey);
+            string data = JsonUtility.ToJson(s_CachedMDStoreInformation, true);
+            SessionState.SetString(k_CachedMDStoreKey, data);
+        }
+
+        static Dictionary<string, IXRPackage> s_Packages;
+        static SearchRequest s_SearchRequest;
 
         static Dictionary<string, IXRPackage> packages
         {
@@ -140,27 +181,25 @@ namespace UnityEditor.XR.Management.Metadata
             }
         }
 
-        const string k_DefaultSessionStateString = "DEADBEEF";
         static bool SessionStateHasStoredData(string queueName)
         {
             return SessionState.GetString(queueName, k_DefaultSessionStateString) != XRPackageMetadataStore.k_DefaultSessionStateString;
         }
 
-        internal static bool isCheckingInstallationRequirements => XRPackageMetadataStore.SessionStateHasStoredData(k_WaitingPackmanQuery);
-        internal static bool isRebuildingCache => XRPackageMetadataStore.SessionStateHasStoredData(k_RebuildCache);
-        internal static bool isInstallingPackages => XRPackageMetadataStore.SessionStateHasStoredData(k_InstallingPackage);
-        internal static bool isUninstallingPackages => XRPackageMetadataStore.SessionStateHasStoredData(k_UninstallingPackage);
-        internal static bool isAssigningLoaders => XRPackageMetadataStore.SessionStateHasStoredData(k_AssigningPackage);
+        internal static bool isCheckingInstallationRequirements => SessionStateHasStoredData(k_WaitingPackmanQuery);
+        internal static bool isRebuildingCache => SessionStateHasStoredData(k_RebuildCache);
+        internal static bool isInstallingPackages => SessionStateHasStoredData(k_InstallingPackage);
+        internal static bool isUninstallingPackages => SessionStateHasStoredData(k_UninstallingPackage);
+        internal static bool isAssigningLoaders => SessionStateHasStoredData(k_AssigningPackage);
 
         internal static bool isDoingQueueProcessing
-        {
-            get
-            {
-                return isCheckingInstallationRequirements || isRebuildingCache || isInstallingPackages || isUninstallingPackages || isAssigningLoaders;
-            }
-        }
+            => isCheckingInstallationRequirements
+                || isRebuildingCache
+                || isInstallingPackages
+                || isUninstallingPackages
+                || isAssigningLoaders;
 
-        internal struct LoaderBuildTargetQueryResult
+        internal struct LoaderBuildTargetQueryResult : IEquatable<LoaderBuildTargetQueryResult>
         {
             public string packageName;
             public string packageId;
@@ -178,11 +217,30 @@ namespace UnityEditor.XR.Management.Metadata
                 if (pm is KnownPackages.KnownPackageMetadata knownMetadata)
                     disabled = knownMetadata.disabled;
             }
+
+            public bool Equals(LoaderBuildTargetQueryResult other)
+            {
+                return packageName == other.packageName
+                    && packageId == other.packageId
+                    && loaderName == other.loaderName
+                    && loaderType == other.loaderType
+                    && disabled == other.disabled;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is LoaderBuildTargetQueryResult other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(packageName, packageId, loaderName, loaderType, disabled);
+            }
         }
 
         internal static void MoveMockInListToEnd(List<LoaderBuildTargetQueryResult> loaderList)
         {
-            int index = loaderList.FindIndex((x) => { return String.Compare(x.loaderType, KnownPackages.k_KnownPackageMockHMDLoader) == 0; });
+            int index = loaderList.FindIndex(x => string.Compare(x.loaderType, KnownPackages.k_KnownPackageMockHmdLoader) == 0);
             if (index >= 0)
             {
                 var mock = loaderList[index];
@@ -193,12 +251,12 @@ namespace UnityEditor.XR.Management.Metadata
 
         internal static List<LoaderBuildTargetQueryResult> GetAllLoadersForBuildTarget(BuildTargetGroup buildTarget)
         {
-            var ret = from pm in (from p in packages.Values select p.metadata)
+            var ret = from pm in from p in packages.Values select p.metadata
                       from lm in pm.loaderMetadata
                       where lm.supportedBuildTargets.Contains(buildTarget)
                       orderby lm.loaderName
                       select new LoaderBuildTargetQueryResult(pm, lm);
-            var retList = ret.Distinct().ToList<LoaderBuildTargetQueryResult>();
+            var retList = ret.Distinct().ToList();
             MoveMockInListToEnd(retList);
             return retList;
         }
@@ -206,12 +264,12 @@ namespace UnityEditor.XR.Management.Metadata
 
         internal static List<LoaderBuildTargetQueryResult> GetLoadersForBuildTarget(BuildTargetGroup buildTargetGroup)
         {
-            var ret = from pm in (from p in packages.Values select p.metadata)
+            var ret = from pm in from p in packages.Values select p.metadata
                       from lm in pm.loaderMetadata
                       where lm.supportedBuildTargets.Contains(buildTargetGroup)
                       orderby lm.loaderName
                       select new LoaderBuildTargetQueryResult(pm, lm);
-            var retList = ret.ToList<LoaderBuildTargetQueryResult>();
+            var retList = ret.ToList();
             MoveMockInListToEnd(retList);
             return retList;
         }
@@ -234,8 +292,7 @@ namespace UnityEditor.XR.Management.Metadata
         /// <returns>Read only list of <see cref="IXRPackage" />.</returns>
         public static IReadOnlyList<IXRPackage> GetAllPackageMetadataForBuildTarget(BuildTargetGroup buildTargetGroup)
         {
-            HashSet<IXRPackage> ret = new HashSet<IXRPackage>();
-
+            var ret = new HashSet<IXRPackage>();
             foreach (var p in packages.Values)
             {
                 foreach (var lm in p.metadata.loaderMetadata)
@@ -293,7 +350,7 @@ namespace UnityEditor.XR.Management.Metadata
             if (settings == null)
                 return false;
 
-            foreach (var loader in settings.AssignedSettings.activeLoaders)
+            foreach (var loader in settings.Manager.activeLoaders)
             {
                 if (loader != null && String.Compare(loader.GetType().FullName, loaderTypeName) == 0)
                     return true;
@@ -308,13 +365,14 @@ namespace UnityEditor.XR.Management.Metadata
 
             foreach (var l in settings.activeLoaders)
             {
-                if (l != null && String.Compare(l.GetType().FullName, loaderTypeName) == 0)
+                if (l != null && string.Compare(l.GetType().FullName, loaderTypeName) == 0)
                     return true;
             }
             return false;
         }
 
-        internal static void InstallPackageAndAssignLoaderForBuildTarget(string package, string loaderType, BuildTargetGroup buildTargetGroup)
+        internal static void InstallPackageAndAssignLoaderForBuildTarget(
+            string package, string loaderType, BuildTargetGroup buildTargetGroup)
         {
             var req = new LoaderAssignmentRequest();
             req.packageId = package;
@@ -323,7 +381,6 @@ namespace UnityEditor.XR.Management.Metadata
             req.installationState = InstallationState.New;
             QueueLoaderRequest(req);
         }
-
 
         /// <summary>
         /// Assigns a loader of type loaderTypeName to the settings instance. Will instantiate an
@@ -341,7 +398,8 @@ namespace UnityEditor.XR.Management.Metadata
 
             if (EditorApplication.isPlaying || EditorApplication.isPaused)
             {
-                Debug.LogError($"Attempt to add {loaderTypeName} for {buildTargetGroup} while in Play mode. XR Plug-in Management can not make changes to the loader list when running.");
+                Debug.LogError(
+                    $"Attempt to add {loaderTypeName} for {buildTargetGroup} while in Play mode. XR Plug-in Management can not make changes to the loader list when running.");
                 return false;
             }
 
@@ -349,12 +407,12 @@ namespace UnityEditor.XR.Management.Metadata
             if (instance == null || !(instance is XRLoader))
             {
                 instance = EditorUtilities.CreateScriptableObjectInstance(loaderTypeName,
-                    EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultLoaderPath));
+                    EditorUtilities.GetAssetPathForComponents(EditorUtilities.k_DefaultLoaderPath));
                 if (instance == null)
                     return false;
             }
 
-            XRLoader newLoader = instance as XRLoader;
+            var newLoader = instance as XRLoader;
             if (settings.TryAddLoader(newLoader))
             {
                 var assignedLoaders = settings.activeLoaders;
@@ -404,7 +462,7 @@ namespace UnityEditor.XR.Management.Metadata
             if (instance == null || !(instance is XRLoader))
                 return false;
 
-            XRLoader loader = instance as XRLoader;
+            var loader = instance as XRLoader;
 
             if (settings.TryRemoveLoader(loader))
             {
@@ -421,43 +479,38 @@ namespace UnityEditor.XR.Management.Metadata
         internal static IXRPackage GetPackageForSettingsTypeNamed(string settingsTypeName)
         {
             var ret = packages.Values.
-                Where((p => String.Compare(p.metadata.settingsType, settingsTypeName, true) == 0)).
-                Select((p) => p);
+                Where(p => String.Compare(p.metadata.settingsType, settingsTypeName, true) == 0).
+                Select(p => p);
             return ret.Any() ? ret.First() : null;
 
         }
 
         internal static string GetCurrentStatusDisplayText()
         {
-            if (XRPackageMetadataStore.isCheckingInstallationRequirements)
-            {
+            if (isCheckingInstallationRequirements)
                 return "Checking installation requirements for packages...";
-            }
-            else if (XRPackageMetadataStore.isRebuildingCache)
-            {
+
+            if (isRebuildingCache)
                 return "Querying Package Manager for currently installed packages...";
-            }
-            else if (XRPackageMetadataStore.isInstallingPackages)
-            {
+
+            if (isInstallingPackages)
                 return "Installing packages...";
-            }
-            else if (XRPackageMetadataStore.isUninstallingPackages)
-            {
+
+            if (isUninstallingPackages)
                 return "Uninstalling packages...";
-            }
-            else if (XRPackageMetadataStore.isAssigningLoaders)
-            {
+
+            if (isAssigningLoaders)
                 return "Assigning all requested loaders...";
-            }
 
             return "";
         }
 
         internal static void AddPluginPackage(IXRPackage package)
         {
-            if (s_CachedMDStoreInformation.installedPackages != null && !s_CachedMDStoreInformation.installedPackages.Contains(package.metadata.packageId))
+            if (s_CachedMDStoreInformation.installedPackages != null
+                && !s_CachedMDStoreInformation.installedPackages.Contains(package.metadata.packageId))
             {
-                List<string> installedPackages = s_CachedMDStoreInformation.installedPackages.ToList<string>();
+                var installedPackages = s_CachedMDStoreInformation.installedPackages.ToList();
                 installedPackages.Add(package.metadata.packageId);
                 s_CachedMDStoreInformation.installedPackages = installedPackages.ToArray();
                 StoreCachedMDStoreInformation();
@@ -532,8 +585,6 @@ namespace UnityEditor.XR.Management.Metadata
             }
         }
 
-
-
         static void StopAllQueues()
         {
             EditorApplication.update -= UpdateInstallablePackages;
@@ -606,28 +657,28 @@ namespace UnityEditor.XR.Management.Metadata
 
         static void AddRequestToQueue(LoaderAssignmentRequest request, string queueName)
         {
-            LoaderAssignmentRequests reqs;
+            LoaderAssignmentRequests requests;
 
-            if (XRPackageMetadataStore.SessionStateHasStoredData(queueName))
+            if (SessionStateHasStoredData(queueName))
             {
                 string fromJson = SessionState.GetString(queueName, k_DefaultSessionStateString);
-                reqs = JsonUtility.FromJson<LoaderAssignmentRequests>(fromJson);
+                requests = JsonUtility.FromJson<LoaderAssignmentRequests>(fromJson);
             }
             else
             {
-                reqs = new LoaderAssignmentRequests();
-                reqs.activeRequests = new List<LoaderAssignmentRequest>();
+                requests = new LoaderAssignmentRequests();
+                requests.activeRequests = new List<LoaderAssignmentRequest>();
             }
 
-            reqs.activeRequests.Add(request);
-            string json = JsonUtility.ToJson(reqs);
+            requests.activeRequests.Add(request);
+            string json = JsonUtility.ToJson(requests);
             SessionState.SetString(queueName, json);
 
         }
 
-        static void SetRequestsInQueue(LoaderAssignmentRequests reqs, string queueName)
+        static void SetRequestsInQueue(LoaderAssignmentRequests requests, string queueName)
         {
-            string json = JsonUtility.ToJson(reqs);
+            string json = JsonUtility.ToJson(requests);
             SessionState.SetString(queueName, json);
         }
 
@@ -636,7 +687,7 @@ namespace UnityEditor.XR.Management.Metadata
             var reqs = new LoaderAssignmentRequests();
             reqs.activeRequests = new List<LoaderAssignmentRequest>();
 
-            if (XRPackageMetadataStore.SessionStateHasStoredData(queueName))
+            if (SessionStateHasStoredData(queueName))
             {
                 string fromJson = SessionState.GetString(queueName, k_DefaultSessionStateString);
                 reqs = JsonUtility.FromJson<LoaderAssignmentRequests>(fromJson);
@@ -696,8 +747,8 @@ namespace UnityEditor.XR.Management.Metadata
                     }
 
                     var packageIds = packages.Values.
-                        Where((p) => installedPackages.Contains(p.metadata.packageId)).
-                        Select((p) => p.metadata.packageId);
+                        Where(p => installedPackages.Contains(p.metadata.packageId)).
+                        Select(p => p.metadata.packageId);
                     s_CachedMDStoreInformation.installedPackages = packageIds.ToArray();
                 }
 
@@ -731,29 +782,29 @@ namespace UnityEditor.XR.Management.Metadata
         {
             EditorApplication.update -= AssignAnyRequestedLoadersUpdate;
 
-            LoaderAssignmentRequests reqs = GetAllRequestsInQueue(k_AssigningPackage);
+            var requests = GetAllRequestsInQueue(k_AssigningPackage);
 
-            if (reqs.activeRequests == null || reqs.activeRequests.Count == 0)
+            if (requests.activeRequests == null || requests.activeRequests.Count == 0)
                 return;
 
-            while (reqs.activeRequests.Count > 0)
+            while (requests.activeRequests.Count > 0)
             {
-                var req = reqs.activeRequests[0];
-                reqs.activeRequests.RemoveAt(0);
+                var req = requests.activeRequests[0];
+                requests.activeRequests.RemoveAt(0);
 
                 var settings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(req.buildTargetGroup);
 
                 if (settings == null)
                     continue;
 
-                if (settings.AssignedSettings == null)
+                if (settings.Manager == null)
                 {
-                    var assignedSettings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
-                    settings.AssignedSettings = assignedSettings;
+                    var manager = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
+                    settings.Manager = manager;
                     EditorUtility.SetDirty(settings);
                 }
 
-                if (!XRPackageMetadataStore.AssignLoader(settings.AssignedSettings, req.loaderType, req.buildTargetGroup))
+                if (!AssignLoader(settings.Manager, req.loaderType, req.buildTargetGroup))
                 {
                     req.installationState = InstallationState.Log;
                     req.logMessage = $"Unable to assign {req.packageId} for build target {req.buildTargetGroup}.";
@@ -765,22 +816,15 @@ namespace UnityEditor.XR.Management.Metadata
             ResetManagerUiIfAvailable();
         }
 
-        internal static void AssignAnyRequestedLoaders()
-        {
-            EditorApplication.update += AssignAnyRequestedLoadersUpdate;
-        }
-
-
-
         static void MonitorPackageInstallation()
         {
             EditorApplication.update -= MonitorPackageInstallation;
-            LoaderAssignmentRequests reqs = GetAllRequestsInQueue(k_InstallingPackage);
+            var requests = GetAllRequestsInQueue(k_InstallingPackage);
 
-            if (reqs.activeRequests.Count > 0)
+            if (requests.activeRequests.Count > 0)
             {
-                var request = reqs.activeRequests[0];
-                reqs.activeRequests.RemoveAt(0);
+                var request = requests.activeRequests[0];
+                requests.activeRequests.RemoveAt(0);
 
                 if (request.needsAddRequest)
                 {
@@ -789,13 +833,12 @@ namespace UnityEditor.XR.Management.Metadata
                         request.logMessage = $"No package information to query against. Unable to load package {request.packageId}.";
                         request.logLevel = LogLevel.Error;
                         request.installationState = InstallationState.Log;
-                        QueueLoaderRequest(request);
                     }
                     else
                     {
                         var versionToInstallQ = s_CachedMDStoreInformation.knownPackageInfos.
-                            Where((kpi) => String.Compare(request.packageId, kpi.packageId) == 0).
-                            Select((kpi) => kpi.verifiedVersion);
+                            Where(kpi => String.Compare(request.packageId, kpi.packageId) == 0).
+                            Select(kpi => kpi.verifiedVersion);
                         var versionToInstall = versionToInstallQ.FirstOrDefault();
                         var packageToInstall = String.IsNullOrEmpty(versionToInstall) ?
                             request.packageId :
@@ -806,68 +849,62 @@ namespace UnityEditor.XR.Management.Metadata
 
                         s_CachedMDStoreInformation.hasAlreadyRequestedData = true;
                         StoreCachedMDStoreInformation();
-
-                        QueueLoaderRequest(request);
                     }
+
+                    QueueLoaderRequest(request);
                 }
-                else if (request.packageAddRequest.IsCompleted && File.Exists($"Packages/{request.packageId}/package.json"))
+                else switch (request.packageAddRequest.IsCompleted)
                 {
-                    if (request.packageAddRequest.Status == StatusCode.Success)
+                    case true when File.Exists($"Packages/{request.packageId}/package.json")
+                        && request.packageAddRequest.Status == StatusCode.Success:
                     {
-                        if (!String.IsNullOrEmpty(request.loaderType))
+                        if (!string.IsNullOrEmpty(request.loaderType))
                         {
                             request.packageAddRequest = null;
                             request.installationState = InstallationState.Assigning;
-                            QueueLoaderRequest(request);
                         }
                         else
                         {
                             request.logMessage = $"Missing loader type. Unable to assign loader.";
                             request.logLevel = LogLevel.Error;
                             request.installationState = InstallationState.Log;
-                            QueueLoaderRequest(request);
                         }
-                    }
-                }
-                else if (request.packageAddRequest.IsCompleted && request.packageAddRequest.Status != StatusCode.Success)
-                {
-                    if (String.IsNullOrEmpty(request.packageId))
-                    {
-                        request.logMessage = $"Error installing package with no package id.";
-                    }
-                    else
-                    {
-                        request.logMessage = $"Error Message: {request.packageAddRequest?.Error?.message ?? "UNKNOWN" }.\nError installing package {request.packageId ?? "UNKNOWN PACKAGE ID" }.";
-                    }
 
-                    request.logLevel = LogLevel.Error;
-                    request.installationState = InstallationState.Log;
-                    QueueLoaderRequest(request);
-                }
-                else if (request.timeOut < Time.realtimeSinceStartup)
-                {
-                    if (String.IsNullOrEmpty(request.packageId))
-                    {
-                        request.logMessage = $"Time out while installing pacakge with no package id.";
+                        QueueLoaderRequest(request);
+                        break;
                     }
-                    else
+                    case true when request.packageAddRequest.Status != StatusCode.Success:
                     {
-                        request.logMessage = $"Error installing package {request.packageId}. Package installation timed out. Check Package Manager UI to see if the package is installed and/or retry your operation.";
+                        request.logMessage = string.IsNullOrEmpty(request.packageId)
+                            ? "Error installing package with no package id."
+                            : $"Error Message: {request.packageAddRequest.Error?.message ?? "UNKNOWN" }.\nError installing package {request.packageId }.";
+
+                        request.logLevel = LogLevel.Error;
+                        request.installationState = InstallationState.Log;
+                        QueueLoaderRequest(request);
+                        break;
                     }
-
-                    request.logLevel = LogLevel.Error;
-
-                    if (request.packageAddRequest.IsCompleted)
+                    default:
                     {
-                        request.logMessage += $" Error message: {request.packageAddRequest.Error.message}";
-                    }
+                        if (request.timeOut < Time.realtimeSinceStartup)
+                        {
+                            request.logMessage = String.IsNullOrEmpty(request.packageId)
+                                ? "Time out while installing package with no package id."
+                                : $"Error installing package {request.packageId}. Package installation timed out. Check Package Manager UI to see if the package is installed and/or retry your operation.";
 
-                    request.installationState = InstallationState.Log;
-                    QueueLoaderRequest(request);
-                }
-                else
-                {
-                    QueueLoaderRequest(request);
+                            request.logLevel = LogLevel.Error;
+
+                            if (request.packageAddRequest.IsCompleted)
+                            {
+                                request.logMessage += $" Error message: {request.packageAddRequest.Error.message}";
+                            }
+
+                            request.installationState = InstallationState.Log;
+                        }
+
+                        QueueLoaderRequest(request);
+                        break;
+                    }
                 }
             }
         }
@@ -884,13 +921,15 @@ namespace UnityEditor.XR.Management.Metadata
                 return;
             }
 
-            LoaderAssignmentRequests reqs = GetAllRequestsInQueue(k_WaitingPackmanQuery);
-            if (reqs.activeRequests.Count > 0)
+            var requests = GetAllRequestsInQueue(k_WaitingPackmanQuery);
+            if (requests.activeRequests.Count > 0)
             {
-                for (int i = 0; i < reqs.activeRequests.Count; i++)
+                foreach (var request in requests.activeRequests)
                 {
-                    var req = reqs.activeRequests[i];
-                    req.installationState = IsPackageInstalled(req.packageId) ? InstallationState.Assigning : InstallationState.StartInstallation;
+                    var req = request;
+                    req.installationState = IsPackageInstalled(req.packageId)
+                        ? InstallationState.Assigning
+                        : InstallationState.StartInstallation;
                     req.timeOut = Time.realtimeSinceStartup + k_TimeOutDelta;
                     QueueLoaderRequest(req);
                 }
@@ -900,12 +939,12 @@ namespace UnityEditor.XR.Management.Metadata
         static void MonitorPackageUninstall()
         {
             EditorApplication.update -= MonitorPackageUninstall;
-            LoaderAssignmentRequests reqs = GetAllRequestsInQueue(k_UninstallingPackage);
-            if (reqs.activeRequests.Count > 0)
+            var requests = GetAllRequestsInQueue(k_UninstallingPackage);
+            if (requests.activeRequests.Count > 0)
             {
-                for (int i = 0; i < reqs.activeRequests.Count; i++)
+                for (int i = 0; i < requests.activeRequests.Count; i++)
                 {
-                    var req = reqs.activeRequests[i];
+                    var req = requests.activeRequests[i];
                     if (!req.packageRemoveRequest.IsCompleted)
                         QueueLoaderRequest(req);
 
@@ -925,7 +964,8 @@ namespace UnityEditor.XR.Management.Metadata
             switch (req.installationState)
             {
                 case InstallationState.New:
-                    if (!s_CachedMDStoreInformation.hasAlreadyRequestedData && !HasInstallablePackageData() && s_SearchRequest == null)
+                    if (!s_CachedMDStoreInformation.hasAlreadyRequestedData
+                        && !HasInstallablePackageData() && s_SearchRequest == null)
                     {
                         s_SearchRequest = Client.SearchAll(false);
                         EditorApplication.update += UpdateInstallablePackages;
@@ -982,7 +1022,5 @@ namespace UnityEditor.XR.Management.Metadata
                     break;
             }
         }
-
-
     }
 }

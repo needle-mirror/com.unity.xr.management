@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.6.0",
+  "version": "4.7.0",
   "unity": "2022.3",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
   "keywords": [
@@ -22,20 +22,13 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "7e09bb3111da77539cdd80eca684c3abdb059158"
+    "revision": "924815658ae35e3b28c9703786e0b9604811b135"
   },
   "_upm": {
-    "changelog": "### Changed\n\n- Changed help box stlye for the XR Plug-in Management view for improved readability.\n- The following methods of `XRLoaderHelper` have been changed from `protected` to `public`:\n  - `StartSubsystem<T>`\n  - `StopSubsystem<T>`\n  - `DestroySubsystem<T>`\n  - `CreateSubsystem<T>`\n\n### Fixed\n\n- Fixed an issue where we now use a manual for loop instead of a foreach loop to avoid exceptions if the list of loaders is modified.\n- Fixed an issue to show the correct name for Mock HMD loader when the package is not installed. ([XRMB-152](https://issuetracker.unity3d.com/product/unity/issues/guid/XRMB-152))\n- Fixed an issue to show the correct name for OpenXR loader when the package is not installed. ([UUM-137703](https://issuetracker.unity3d.com/issues/xr-plug-in-management-inconsistant-openxr-wording))\n\n\n### Removed\n\n- Removed Oculus XR plugin from known packages due to Oculus XR plugin deprecation."
+    "changelog": "### Deprecated\n\n- Deprecated and replaced the following APIs:\n  - `XRGeneralSettings.k_SettingsKey` with `XRGeneralSettings.settingsKey`\n  - `XRGeneralSettings.AssignedSettings` with `XRGeneralSettings.Manager`\n\n### Fixed\n\n- Fixed an issue so XR General Settings Per Build Target assets can now add build target settings from the inspector. The `BuildTargetProfile` and `XRGeneralSettings` serialized lists have been migrating to a new list that combines both values in a single struct.\n- Fixed static variables and delegates to reload to support Fast Enter Play Mode.\n- Fixed the merge behavior of [ManifestRequirement.OverrideElements](xref:Unity.XR.Management.AndroidManifest.Editor.ManifestRequirement.OverrideElements), as used by `IAndroidManifestRequirementProvider`:\n  - Elements with a `\"name\"` key only overwrite elements with a matching `\"name\"` key.\n  - Elements with conflicting true/false values for the `\"required\"` key resolve to `\"true\"`.\n  - Elements with conflicting values for the `\"version\"` key resolve to the highest provided version number.\n- Fixed usage of XRManagementAnalytics.s_Initialized outside of Editor."
   },
   "upmCi": {
-    "footprint": "9d2b1e59dee03e6e7304523bfe3dcb416885b3f9"
+    "footprint": "5050fcf3040578e30057c2cd24afb9a3e662b926"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.6/manual/index.html",
-  "samples": [
-    {
-      "displayName": "Example XR Management implementation",
-      "description": "Example code showing how to implement various portions of the XR Management API.",
-      "path": "Samples~"
-    }
-  ]
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.7/manual/index.html"
 }

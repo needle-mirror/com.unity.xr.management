@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace UnityEditor.XR.Management.Metadata
 {
-    internal class KnownPackages
+    class KnownPackages
     {
 #if UNITY_XR_VISIONOS_SUPPORTED
         [XRCustomLoaderUI(k_VisionOSLoaderTypeName, BuildTargetGroup.VisionOS)]
@@ -40,7 +39,7 @@ namespace UnityEditor.XR.Management.Metadata
         }
 #endif
 
-        internal static string k_KnownPackageMockHMDLoader = "Unity.XR.MockHMD.MockHMDLoader";
+        internal const string k_KnownPackageMockHmdLoader = "Unity.XR.MockHMD.MockHMDLoader";
 
 #if UNITY_XR_VISIONOS_SUPPORTED
         const string k_VisionOSLoaderTypeName = "UnityEngine.XR.VisionOS.VisionOSLoader";
@@ -71,24 +70,29 @@ namespace UnityEditor.XR.Management.Metadata
             public bool PopulateNewSettingsInstance(ScriptableObject obj) { return true; }
         }
 
-        private static Lazy<List<IXRPackage>> s_KnownPackages = new Lazy<List<IXRPackage>>(InitKnownPackages);
+        static Lazy<List<IXRPackage>> s_KnownPackages = new(InitKnownPackages);
 
         internal static List<IXRPackage> Packages => s_KnownPackages.Value;
 
         static List<IXRPackage> InitKnownPackages()
         {
-            List<IXRPackage> packages = new List<IXRPackage>();
+            var packages = new List<IXRPackage>();
 
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata(){
+            packages.Add(new KnownPackage
+            {
+                metadata = new KnownPackageMetadata
+                {
                     packageName = "OpenXR Plugin",
                     packageId = "com.unity.xr.openxr",
                     settingsType = "UnityEditor.XR.OpenXR.OpenXRPackageSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
+                    loaderMetadata = new List<IXRLoaderMetadata>
+                    {
+                        new KnownLoaderMetadata
+                        {
                             loaderName = "OpenXR",
                             loaderType = "UnityEngine.XR.OpenXR.OpenXRLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
+                            supportedBuildTargets = new List<BuildTargetGroup>
+                            {
                                 BuildTargetGroup.Standalone,
 #if !UNITY_6000_4_OR_NEWER
                                 BuildTargetGroup.WSA,
@@ -100,16 +104,20 @@ namespace UnityEditor.XR.Management.Metadata
                 }
             });
 
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata(){
+            packages.Add(new KnownPackage
+            {
+                metadata = new KnownPackageMetadata
+                {
                     packageName = "Google ARCore XR Plugin",
                     packageId = "com.unity.xr.arcore",
                     settingsType = "UnityEditor.XR.ARCore.ARCoreSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
+                    loaderMetadata = new List<IXRLoaderMetadata>
+                    {
+                        new KnownLoaderMetadata
+                        {
                             loaderName = "Google ARCore",
                             loaderType = "UnityEngine.XR.ARCore.ARCoreLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
+                            supportedBuildTargets = new List<BuildTargetGroup> {
                                 BuildTargetGroup.Android,
                             }
                         },
@@ -117,17 +125,21 @@ namespace UnityEditor.XR.Management.Metadata
                 }
             });
 
-
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata(){
+            packages.Add(new KnownPackage
+            {
+                metadata = new KnownPackageMetadata
+                {
                     packageName = "Apple ARKit XR Plugin",
                     packageId = "com.unity.xr.arkit",
                     settingsType = "UnityEditor.XR.ARKit.ARKitSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
+                    loaderMetadata = new List<IXRLoaderMetadata>
+                    {
+                        new KnownLoaderMetadata
+                        {
                             loaderName = "Apple ARKit",
                             loaderType = "UnityEngine.XR.ARKit.ARKitLoader",
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
+                            supportedBuildTargets = new List<BuildTargetGroup>
+                            {
                                 BuildTargetGroup.iOS,
                             }
                         },
@@ -135,17 +147,20 @@ namespace UnityEditor.XR.Management.Metadata
                 }
             });
 
-
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata() {
+            packages.Add(new KnownPackage
+            {
+                metadata = new KnownPackageMetadata
+                {
                     packageName = "MockHMD XR Plugin",
                     packageId = "com.unity.xr.mock-hmd",
                     settingsType = "Unity.XR.MockHMD.MockHMDBuildSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                    new KnownLoaderMetadata() {
+                    loaderMetadata = new List<IXRLoaderMetadata>
+                    {
+                        new KnownLoaderMetadata {
                             loaderName = "Mock HMD",
-                            loaderType = k_KnownPackageMockHMDLoader,
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
+                            loaderType = k_KnownPackageMockHmdLoader,
+                            supportedBuildTargets = new List<BuildTargetGroup>
+                            {
                                 BuildTargetGroup.Standalone,
                                 BuildTargetGroup.Android
                             }
@@ -155,23 +170,29 @@ namespace UnityEditor.XR.Management.Metadata
             });
 
 #if UNITY_XR_VISIONOS_SUPPORTED
-            packages.Add(new KnownPackage() {
-                metadata = new KnownPackageMetadata() {
-                    packageName = "Apple visionOS XR Plugin",
-                    packageId = "com.unity.xr.visionos",
-                    settingsType = "UnityEditor.XR.VisionOS.VisionOSSettings",
-                    loaderMetadata = new List<IXRLoaderMetadata>() {
-                        new KnownLoaderMetadata() {
-                            loaderName = k_VisionOSLoaderName,
-                            loaderType = k_VisionOSLoaderTypeName,
-                            supportedBuildTargets = new List<BuildTargetGroup>() {
-                                BuildTargetGroup.VisionOS
+            packages.Add(
+                new KnownPackage
+                {
+                    metadata = new KnownPackageMetadata
+                    {
+                        packageName = "Apple visionOS XR Plugin",
+                        packageId = "com.unity.xr.visionos",
+                        settingsType = "UnityEditor.XR.VisionOS.VisionOSSettings",
+                        loaderMetadata = new List<IXRLoaderMetadata>
+                        {
+                            new KnownLoaderMetadata
+                            {
+                                loaderName = k_VisionOSLoaderName,
+                                loaderType = k_VisionOSLoaderTypeName,
+                                supportedBuildTargets = new List<BuildTargetGroup>
+                                {
+                                    BuildTargetGroup.VisionOS
+                                },
                             },
                         },
-                    },
                     disabled = !UnityEditorInternal.InternalEditorUtility.HasPro()
-                }
-            });
+                    }
+                });
 #endif
             return packages;
         }

@@ -11,7 +11,7 @@ using UnityEditor.XR.Management;
 namespace Samples
 {
     /// <summary>
-    /// Sample loader implentation showing how to create simple loader.
+    /// Sample loader implementation showing how to create simple loader.
     /// NOTE: You have to rename this class to make it appear in the loader list for
     /// XRManager.
     /// </summary>
@@ -24,7 +24,7 @@ namespace Samples
         static List<XRInputSubsystemDescriptor> s_InputSubsystemDescriptors =
             new List<XRInputSubsystemDescriptor>();
 
-        /// <summary>Return the currently active Input Subsystem intance, if any.</summary>
+        /// <summary>Return the currently active Input Subsystem instance, if any.</summary>
         public XRInputSubsystem inputSubsystem
         {
             get { return GetLoadedSubsystem<XRInputSubsystem>(); }

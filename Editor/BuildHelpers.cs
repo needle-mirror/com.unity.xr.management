@@ -2,11 +2,11 @@ using System.Linq;
 
 namespace UnityEditor.XR.Management
 {
-    internal static class BuildHelpers
+    static class BuildHelpers
     {
         internal static void CleanOldSettings<T>()
         {
-            UnityEngine.Object[] preloadedAssets = PlayerSettings.GetPreloadedAssets();
+            var preloadedAssets = PlayerSettings.GetPreloadedAssets();
             if (preloadedAssets == null)
                 return;
 
@@ -14,16 +14,16 @@ namespace UnityEditor.XR.Management
                 where s != null && s.GetType() == typeof(T)
                 select s;
 
-            if (oldSettings != null && oldSettings.Any())
-            {
-                var assets = preloadedAssets.ToList();
-                foreach (var s in oldSettings)
-                {
-                    assets.Remove(s);
-                }
+            if (!oldSettings.Any())
+                return;
 
-                PlayerSettings.SetPreloadedAssets(assets.ToArray());
+            var assets = preloadedAssets.ToList();
+            foreach (var s in oldSettings)
+            {
+                assets.Remove(s);
             }
+
+            PlayerSettings.SetPreloadedAssets(assets.ToArray());
         }
     }
 }

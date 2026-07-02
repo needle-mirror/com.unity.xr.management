@@ -1,8 +1,31 @@
+---
+uid: xr-plug-in-management-changelog
+---
+
 # Changelog
+
 All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [4.7.0] - 2026-07-02
+
+### Deprecated
+
+- Deprecated and replaced the following APIs:
+  - `XRGeneralSettings.k_SettingsKey` with `XRGeneralSettings.settingsKey`
+  - `XRGeneralSettings.AssignedSettings` with `XRGeneralSettings.Manager`
+
+### Fixed
+
+- Fixed an issue so XR General Settings Per Build Target assets can now add build target settings from the inspector. The `BuildTargetProfile` and `XRGeneralSettings` serialized lists have been migrating to a new list that combines both values in a single struct.
+- Fixed static variables and delegates to reload to support Fast Enter Play Mode.
+- Fixed the merge behavior of [ManifestRequirement.OverrideElements](xref:Unity.XR.Management.AndroidManifest.Editor.ManifestRequirement.OverrideElements), as used by `IAndroidManifestRequirementProvider`:
+  - Elements with a `"name"` key only overwrite elements with a matching `"name"` key.
+  - Elements with conflicting true/false values for the `"required"` key resolve to `"true"`.
+  - Elements with conflicting values for the `"version"` key resolve to the highest provided version number.
+- Fixed usage of XRManagementAnalytics.s_Initialized outside of Editor.
 
 ## [4.6.0] - 2026-03-26
 
@@ -20,7 +43,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an issue where we now use a manual for loop instead of a foreach loop to avoid exceptions if the list of loaders is modified.
 - Fixed an issue to show the correct name for Mock HMD loader when the package is not installed. ([XRMB-152](https://issuetracker.unity3d.com/product/unity/issues/guid/XRMB-152))
 - Fixed an issue to show the correct name for OpenXR loader when the package is not installed. ([UUM-137703](https://issuetracker.unity3d.com/issues/xr-plug-in-management-inconsistant-openxr-wording))
-
 
 ### Removed
 

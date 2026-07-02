@@ -6,8 +6,6 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.XR.Management;
 
-using UnityEditor.XR.Management.Metadata;
-
 namespace UnityEditor.XR.Management
 {
     /// <summary>
@@ -16,12 +14,23 @@ namespace UnityEditor.XR.Management
     [InitializeOnLoad]
     public class XRGeneralSettingsPerBuildTarget : ScriptableObject, ISerializationCallbackReceiver
     {
-        [SerializeField]
-        List<BuildTargetGroup> Keys = new List<BuildTargetGroup>();
+        [Serializable]
+        internal struct BuildTargetSettings
+        {
+            public BuildTargetGroup buildTarget;
+            public XRGeneralSettings settings;
+        }
+
+        [SerializeField, HideInInspector, Obsolete("Deprecated in 4.6.0-pre.1. Use m_SettingsPerBuildTarget instead.")]
+        List<BuildTargetGroup> Keys = new();
+
+        [SerializeField, HideInInspector, Obsolete("Deprecated in 4.6.0-pre.1. Use m_SettingsPerBuildTarget instead.")]
+        List<XRGeneralSettings> Values = new();
 
         [SerializeField]
-        List<XRGeneralSettings> Values = new List<XRGeneralSettings>();
-        Dictionary<BuildTargetGroup, XRGeneralSettings> Settings = new Dictionary<BuildTargetGroup, XRGeneralSettings>();
+        List<BuildTargetSettings> m_SettingsPerBuildTarget = new();
+
+        Dictionary<BuildTargetGroup, XRGeneralSettings> m_Settings = new();
 
         static XRGeneralSettingsPerBuildTarget()
         {
@@ -32,7 +41,7 @@ namespace UnityEditor.XR.Management
         [MethodImpl(MethodImplOptions.Synchronized)]
         internal static bool TryFindSettingsAsset(out XRGeneralSettingsPerBuildTarget generalSettings)
         {
-            EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out generalSettings);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out generalSettings);
             if (generalSettings == null)
             {
                 var assets = AssetDatabase.FindAssets("t:XRGeneralSettingsPerBuildTarget");
@@ -43,7 +52,7 @@ namespace UnityEditor.XR.Management
 
                     // If we found the settings asset, make sure it gets cached in the EditorBuildSettings, since it wasn't found initially
                     if (generalSettings != null)
-                        EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
+                        EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, generalSettings, true);
                 }
             }
             return generalSettings != null;
@@ -53,14 +62,14 @@ namespace UnityEditor.XR.Management
         static XRGeneralSettingsPerBuildTarget CreateAssetSynchronized()
         {
             var generalSettings = CreateInstance(typeof(XRGeneralSettingsPerBuildTarget)) as XRGeneralSettingsPerBuildTarget;
-            string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.s_DefaultGeneralSettingsPath);
+            string assetPath = EditorUtilities.GetAssetPathForComponents(EditorUtilities.k_DefaultGeneralSettingsPath);
             if (!string.IsNullOrEmpty(assetPath))
             {
                 assetPath = Path.Combine(assetPath, "XRGeneralSettingsPerBuildTarget.asset");
                 AssetDatabase.CreateAsset(generalSettings, assetPath);
                 AssetDatabase.SaveAssets();
             }
-            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, generalSettings, true);
             return generalSettings;
         }
 
@@ -70,12 +79,12 @@ namespace UnityEditor.XR.Management
         // Simple class to give us updates when the asset database changes.
         class AssetCallbacks : AssetPostprocessor
         {
-            static bool m_Upgrade = true;
+            static bool s_Upgrade = true;
             static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
             {
-                if (m_Upgrade)
+                if (s_Upgrade)
                 {
-                    m_Upgrade = false;
+                    s_Upgrade = false;
                     BeginUpgradeSettings();
                 }
             }
@@ -94,14 +103,14 @@ namespace UnityEditor.XR.Management
 
         void OnEnable()
         {
-            foreach (var setting in Settings.Values)
+            foreach (var setting in m_Settings.Values)
             {
-                var assignedSettings = setting.AssignedSettings;
-                if (assignedSettings == null)
+                var manager = setting.Manager;
+                if (manager == null)
                     continue;
 
-                var filteredLoaders = from ldr in assignedSettings.activeLoaders where ldr != null select ldr;
-                assignedSettings.TrySetLoaders(filteredLoaders.ToList<XRLoader>());
+                var filteredLoaders = from ldr in manager.activeLoaders where ldr != null select ldr;
+                manager.TrySetLoaders(filteredLoaders.ToList());
             }
             XRGeneralSettings.Instance = XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
         }
@@ -109,32 +118,15 @@ namespace UnityEditor.XR.Management
         static void PlayModeStateChanged(PlayModeStateChange state)
         {
             XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out buildTargetSettings);
             if (buildTargetSettings == null)
                 return;
 
-            XRGeneralSettings instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
+            var instance = buildTargetSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
             if (instance == null || !instance.InitManagerOnStart)
                 return;
 
             instance.InternalPlayModeStateChanged(state);
-        }
-
-        internal static bool ContainsLoaderForAnyBuildTarget(string loaderTypeName)
-        {
-
-            XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
-            if (buildTargetSettings == null)
-                return false;
-
-            foreach (var settings in buildTargetSettings.Settings.Values)
-            {
-                if (XRPackageMetadataStore.IsLoaderAssigned(settings.Manager, loaderTypeName))
-                    return true;
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -155,32 +147,52 @@ namespace UnityEditor.XR.Management
         /// <param name="buildTargetGroup">Build target to create default settings for.</param>
         public void CreateDefaultSettingsForBuildTarget(BuildTargetGroup buildTargetGroup)
         {
-            var settings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
+            var settings = CreateInstance<XRGeneralSettings>();
             SetSettingsForBuildTarget(buildTargetGroup, settings);
             settings.name = $"{buildTargetGroup.ToString()} Settings";
             AssetDatabase.AddObjectToAsset(settings, AssetDatabase.GetAssetOrScenePath(this));
             AssetDatabase.SaveAssets();
         }
 
-        /// <summary>Set specific settings for a given build target.</summary>
-        ///
+        /// <summary>
+        /// Set specific settings for a given build target.
+        /// </summary>
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
         /// <param name="settings">An instance of <see cref="XRGeneralSettings"/> to assign for the given key.</param>
         public void SetSettingsForBuildTarget(BuildTargetGroup targetGroup, XRGeneralSettings settings)
         {
-            // Ensures the editor's "runtime instance" is the most current for standalone settings
             if (targetGroup == BuildTargetGroup.Standalone)
                 XRGeneralSettings.Instance = settings;
-            Settings[targetGroup] = settings;
+            m_Settings[targetGroup] = settings;
+            UpdateSerializedSettings(targetGroup, settings);
         }
 
-        /// <summary>Get specific settings for a given build target.</summary>
+        void UpdateSerializedSettings(BuildTargetGroup targetGroup, XRGeneralSettings settings)
+        {
+            var buildTargetSettings = new BuildTargetSettings
+            {
+                buildTarget = targetGroup,
+                settings = settings
+            };
+
+            var existingIndex = m_SettingsPerBuildTarget.FindIndex(x => x.buildTarget == targetGroup);
+
+            if (existingIndex >= 0)
+                m_SettingsPerBuildTarget[existingIndex] = buildTargetSettings;
+            else
+                m_SettingsPerBuildTarget.Add(buildTargetSettings);
+
+            EditorUtility.SetDirty(this);
+        }
+
+        /// <summary>
+        /// Get specific settings for a given build target.
+        /// </summary>
         /// <param name="targetGroup">An enum specifying which platform group this build is for.</param>
         /// <returns>The instance of <see cref="XRGeneralSettings"/> assigned to the key, or null if not.</returns>
         public XRGeneralSettings SettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
-            XRGeneralSettings ret = null;
-            Settings.TryGetValue(targetGroup, out ret);
+            m_Settings.TryGetValue(targetGroup, out var ret);
             return ret;
         }
 
@@ -191,7 +203,11 @@ namespace UnityEditor.XR.Management
         /// <returns>True if it exists, false otherwise.</returns>
         public bool HasManagerSettingsForBuildTarget(BuildTargetGroup targetGroup)
         {
-            return (SettingsForBuildTarget(targetGroup)?.Manager ?? null) != null;
+            var settings = SettingsForBuildTarget(targetGroup);
+            if (settings == null)
+                return false;
+
+            return settings.Manager != null;
         }
 
         /// <summary>
@@ -205,7 +221,7 @@ namespace UnityEditor.XR.Management
         {
             if (!HasSettingsForBuildTarget(targetGroup))
                 CreateDefaultSettingsForBuildTarget(targetGroup);
-            var xrManagerSettings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
+            var xrManagerSettings = CreateInstance<XRManagerSettings>();
             xrManagerSettings.name = $"{targetGroup.ToString()} Providers";
             SettingsForBuildTarget(targetGroup).Manager = xrManagerSettings;
             AssetDatabase.AddObjectToAsset(xrManagerSettings, AssetDatabase.GetAssetOrScenePath(this));
@@ -222,26 +238,56 @@ namespace UnityEditor.XR.Management
             return SettingsForBuildTarget(targetGroup)?.Manager ?? null;
         }
 
-        /// <summary>Serialization override.</summary>
+        /// <summary>
+        /// Serialization override.
+        /// </summary>
         public void OnBeforeSerialize()
         {
+        }
+
+        /// <summary>
+        /// Serialization override.
+        /// </summary>
+        public void OnAfterDeserialize()
+        {
+            m_Settings.Clear();
+            MigrateObsoleteSerializedData();
+            UpdateRuntimeMapFromSerializedData();
+        }
+
+        void MigrateObsoleteSerializedData()
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (m_SettingsPerBuildTarget.Count > 0 || Keys == null || Values == null || Keys.Count == 0)
+                return;
+
+            for (var i = 0; i < Math.Min(Keys.Count, Values.Count); i++)
+            {
+                m_SettingsPerBuildTarget.Add(new BuildTargetSettings
+                {
+                    buildTarget = Keys[i],
+                    settings = Values[i]
+                });
+            }
+
             Keys.Clear();
             Values.Clear();
 
-            foreach (var kv in Settings)
+            EditorApplication.delayCall += () =>
             {
-                Keys.Add(kv.Key);
-                Values.Add(kv.Value);
-            }
+                // Ensure the scriptable object hasn't been destroyed after serialization finishes
+                if (this != null)
+                    EditorUtility.SetDirty(this);
+            };
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
-        /// <summary>Serialization override.</summary>
-        public void OnAfterDeserialize()
+        void UpdateRuntimeMapFromSerializedData()
         {
-            Settings = new Dictionary<BuildTargetGroup, XRGeneralSettings>();
-            for (int i = 0; i < Math.Min(Keys.Count, Values.Count); i++)
+            foreach (var item in m_SettingsPerBuildTarget)
             {
-                Settings.Add(Keys[i], Values[i]);
+                if (item.settings != null)
+                    m_Settings[item.buildTarget] = item.settings;
             }
         }
 

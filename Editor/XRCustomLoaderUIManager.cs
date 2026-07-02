@@ -1,10 +1,9 @@
 using System;
-
 using UnityEngine;
 
 namespace UnityEditor.XR.Management
 {
-    internal class XRCustomLoaderUIManager
+    class XRCustomLoaderUIManager
     {
         public static IXRCustomLoaderUI GetCustomLoaderUI(string loaderTypeName, BuildTargetGroup buildTargetGroup)
         {
@@ -13,14 +12,13 @@ namespace UnityEditor.XR.Management
             var customLoaderTypes = TypeCache.GetTypesDerivedFrom(typeof(IXRCustomLoaderUI));
             foreach (var customLoader in customLoaderTypes)
             {
-                var attribs = customLoader.GetCustomAttributes(typeof(XRCustomLoaderUIAttribute), true);
-                foreach (var attrib in attribs)
+                var attributes = customLoader.GetCustomAttributes(typeof(XRCustomLoaderUIAttribute), true);
+                foreach (var attribute in attributes)
                 {
-                    if (attrib is XRCustomLoaderUIAttribute)
+                    if (attribute is XRCustomLoaderUIAttribute customUiAttribute)
                     {
-                        var customUiAttrib = attrib as XRCustomLoaderUIAttribute;
-                        if (String.Compare(loaderTypeName, customUiAttrib.loaderTypeName, true) == 0 &&
-                            buildTargetGroup == customUiAttrib.buildTargetGroup)
+                        if (string.Compare(loaderTypeName, customUiAttribute.loaderTypeName, true) == 0 &&
+                            buildTargetGroup == customUiAttribute.buildTargetGroup)
                         {
                             if (ret != null)
                             {

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,11 +12,21 @@ namespace UnityEngine.XR.Management
     /// </summary>
     public class XRGeneralSettings : ScriptableObject
     {
-        /// <summary>The key used to query to get the current loader settings.</summary>
+        /// <summary>
+        /// The key used to query to get the current loader settings.
+        /// </summary>
+        public const string settingsKey = "com.unity.xr.management.loader_settings";
+
+        /// <summary>
+        /// The key used to query to get the current loader settings.
+        /// </summary>
+        [Obsolete("k_SettingsKey is deprecated in XR Plug-in Management 4.7. Use settingsKey instead.")]
         public static string k_SettingsKey = "com.unity.xr.management.loader_settings";
 
         internal static XRGeneralSettings s_Instance;
-
+#if UNITY_EDITOR
+        private static bool s_OneTimeInitialized = false;
+#endif
         /// <summary>
         /// The current settings instance.
         /// </summary>
@@ -28,25 +39,27 @@ namespace UnityEngine.XR.Management
         }
 
         [SerializeField]
-        internal XRManagerSettings m_LoaderManagerInstance;
+        [FormerlySerializedAs("m_LoaderManagerInstance")]
+        internal XRManagerSettings m_Manager;
 
         /// <summary>
         /// The current active manager used to manage XR lifetime.
         /// </summary>
         public XRManagerSettings Manager
         {
-            get => m_LoaderManagerInstance;
-            set => m_LoaderManagerInstance = value;
+            get => m_Manager;
+            set => m_Manager = value;
         }
 
         /// <summary>
         /// The current active manager used to manage XR lifetime.
         /// </summary>
+        [Obsolete("AssignedSettings is deprecated in XR Plug-in Management 4.7. Use Manager instead.")]
         public XRManagerSettings AssignedSettings
         {
-            get => m_LoaderManagerInstance;
+            get => m_Manager;
 #if UNITY_EDITOR
-            set => m_LoaderManagerInstance = value;
+            set => m_Manager = value;
 #endif
         }
 
@@ -109,19 +122,27 @@ namespace UnityEngine.XR.Management
         }
 
 #if UNITY_EDITOR
+
         [InitializeOnLoadMethod]
-        static void SubscribeToEditorQuit()
+        static void Initialize()
         {
+            if(s_OneTimeInitialized)
+            {
+                return;
+            }
+
+            s_OneTimeInitialized = true;
+
             // This is a static delegate that is reset on domain reload.
             EditorApplication.quitting += Quit;
         }
 #endif
         void InitXRSDK()
         {
-            if (Instance == null || Instance.m_LoaderManagerInstance == null || !Instance.m_InitManagerOnStart)
+            if (Instance == null || Instance.m_Manager == null || !Instance.m_InitManagerOnStart)
                 return;
 
-            m_XRManager = Instance.m_LoaderManagerInstance;
+            m_XRManager = Instance.m_Manager;
             if (m_XRManager == null)
             {
                 Debug.LogError("Assigned GameObject for XR Management loading is invalid. No XR Providers will be automatically loaded.");

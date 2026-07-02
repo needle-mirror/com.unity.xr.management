@@ -869,6 +869,449 @@ public class AndroidManifestTests
 
     }
 
+    [Test]
+    public void AndroidManifestProcessor_OverrideElementsWithDifferentNamesAreNotCollapsed()
+    {
+        var processor = CreateProcessor();
+
+        var elementPath = new List<string> { "manifest", "application", "meta-data" };
+        var firstAttributes = new Dictionary<string, string>()
+        {
+            { "name", "com.example.first" },
+            { "value", "first-value" },
+        };
+        var secondAttributes = new Dictionary<string, string>()
+        {
+            { "name", "com.example.second" },
+            { "value", "second-value" },
+        };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement() { ElementPath = elementPath, Attributes = firstAttributes },
+                    new ManifestElement() { ElementPath = elementPath, Attributes = secondAttributes }
+                }
+            })
+        };
+
+        // Execute
+        processor.ProcessManifestRequirements(providers);
+
+        // Validate
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            2,
+            nodes.Count,
+            "Expected 2 distinct elements with different names");
+
+        bool foundFirst = false;
+        bool foundSecond = false;
+        foreach (XmlElement node in nodes)
+        {
+            var nameValue = node.GetAttribute("name", k_androidXmlNamespace);
+            foundFirst |= "com.example.first".Equals(nameValue);
+            foundSecond |= "com.example.second".Equals(nameValue);
+        }
+        Assert.IsTrue(foundFirst, "First named element not found");
+        Assert.IsTrue(foundSecond, "Second named element not found");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_MergeOverrideElementsResolvesRequiredToTrue()
+    {
+        var processor = CreateProcessor();
+
+        var elementPath = new List<string> { "manifest", "uses-feature" };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.x" },
+                            { "required", "false" },
+                        }
+                    },
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.x" },
+                            { "required", "true" },
+                        }
+                    }
+                }
+            })
+        };
+
+        // Execute
+        processor.ProcessManifestRequirements(providers);
+
+        // Validate
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            1,
+            nodes.Count,
+            "Expected same-named elements to be merged into 1");
+        Assert.AreEqual(
+            "true",
+            ((XmlElement)nodes[0]).GetAttribute("required", k_androidXmlNamespace),
+            "Expected required attribute to resolve to true");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_MergeOverrideElementsKeepsHighestVersion()
+    {
+        var processor = CreateProcessor();
+
+        var elementPath = new List<string> { "manifest", "uses-feature" };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.y" },
+                            { "version", "1.2.0" },
+                        }
+                    },
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.y" },
+                            { "version", "1.10.0" },
+                        }
+                    },
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.y" },
+                            { "version", "1.9.0" },
+                        }
+                    }
+                }
+            })
+        };
+
+        // Execute
+        processor.ProcessManifestRequirements(providers);
+
+        // Validate
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            1,
+            nodes.Count,
+            "Expected same-named elements to be merged into 1");
+        Assert.AreEqual(
+            "1.10.0",
+            ((XmlElement)nodes[0]).GetAttribute("version", k_androidXmlNamespace),
+            "Expected the highest version to be kept");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_OverrideElementWithMatchingNameUpdatesExistingNodeInPlace()
+    {
+        var processor = CreateProcessor();
+
+        var elementPath = new List<string> { "manifest", "application", "meta-data" };
+        var existingElementAttributes = new Dictionary<string, string>()
+        {
+            { "name", "com.example.config" },
+            { "value", "old-value" },
+        };
+        var overrideElementAttributes = new Dictionary<string, string>()
+        {
+            { "name", "com.example.config" },
+            { "value", "new-value" },
+            { "extra", "added" },
+        };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement() { ElementPath = elementPath, Attributes = overrideElementAttributes }
+                }
+            })
+        };
+
+        // Prepare test document with an existing element sharing the override's name
+        var libManifest = GetXrLibraryManifest();
+        libManifest.CreateNewElement(elementPath, existingElementAttributes);
+        libManifest.Save();
+
+        processor.ProcessManifestRequirements(providers);
+
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            1,
+            nodes.Count,
+            "Expected the named element to be updated in place, not duplicated into a new sibling");
+
+        var node = (XmlElement)nodes[0];
+        Assert.AreEqual(
+            "com.example.config",
+            node.GetAttribute("name", k_androidXmlNamespace),
+            "Expected the element name to be preserved");
+        Assert.AreEqual(
+            "new-value",
+            node.GetAttribute("value", k_androidXmlNamespace),
+            "Expected the existing attribute to be overridden in place");
+        Assert.AreEqual(
+            "added",
+            node.GetAttribute("extra", k_androidXmlNamespace),
+            "Expected the new attribute to be added to the existing element");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_UnnamedOverrideElementAppliesToAllSiblingsIncludingNamedOnes()
+    {
+        var processor = CreateProcessor();
+
+        var elementPath = new List<string> { "manifest", "application", "meta-data" };
+        var alphaAttributes = new Dictionary<string, string>()
+        {
+            { "name", "com.example.alpha" },
+            { "value", "alpha" },
+        };
+        var betaAttributes = new Dictionary<string, string>()
+        {
+            { "name", "com.example.beta" },
+            { "value", "beta" },
+        };
+        var unnamedAttributes = new Dictionary<string, string>()
+        {
+            { "shared", "shared-value" },
+        };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                // Order matters: the named elements are created first as distinct siblings, then the unnamed
+                // override (which has no name attribute) falls into the branch that overrides every matching
+                // sibling at this path, including the named ones.
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement() { ElementPath = elementPath, Attributes = alphaAttributes },
+                    new ManifestElement() { ElementPath = elementPath, Attributes = betaAttributes },
+                    new ManifestElement() { ElementPath = elementPath, Attributes = unnamedAttributes },
+                }
+            })
+        };
+
+        processor.ProcessManifestRequirements(providers);
+
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            2,
+            nodes.Count,
+            "Expected the two distinct named elements to remain separate siblings");
+
+        bool foundAlpha = false;
+        bool foundBeta = false;
+        foreach (XmlElement node in nodes)
+        {
+            var nameValue = node.GetAttribute("name", k_androidXmlNamespace);
+            foundAlpha |= "com.example.alpha".Equals(nameValue);
+            foundBeta |= "com.example.beta".Equals(nameValue);
+
+            Assert.AreEqual(
+                "shared-value",
+                node.GetAttribute("shared", k_androidXmlNamespace),
+                $"Expected the unnamed override to apply to the named sibling \"{nameValue}\"");
+        }
+        Assert.IsTrue(foundAlpha, "Named element \"com.example.alpha\" not found");
+        Assert.IsTrue(foundBeta, "Named element \"com.example.beta\" not found");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_OverrideDoesNotResolveRequiredOrVersionAgainstExistingAttributes()
+    {
+        var processor = CreateProcessor();
+
+        // The required/version conflict resolution only applies while merging the elements provided by requirement
+        // providers; it is not applied against attributes already present in the manifest. OverrideNodeAttributes
+        // raw-sets the override values, so the override wins even when it lowers the value.
+        var elementPath = new List<string> { "manifest", "uses-feature" };
+        var existingElementAttributes = new Dictionary<string, string>()
+        {
+            { "name", "feature.z" },
+            { "required", "true" },
+            { "version", "2.0.0" },
+        };
+        var overrideElementAttributes = new Dictionary<string, string>()
+        {
+            { "name", "feature.z" },
+            { "required", "false" },
+            { "version", "1.0.0" },
+        };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement() { ElementPath = elementPath, Attributes = overrideElementAttributes }
+                }
+            })
+        };
+
+        // Prepare test document with an existing element sharing the override's name
+        var libManifest = GetXrLibraryManifest();
+        libManifest.CreateNewElement(elementPath, existingElementAttributes);
+        libManifest.Save();
+
+        processor.ProcessManifestRequirements(providers);
+
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            1,
+            nodes.Count,
+            "Expected the named element to be updated in place");
+
+        var node = (XmlElement)nodes[0];
+        Assert.AreEqual(
+            "false",
+            node.GetAttribute("required", k_androidXmlNamespace),
+            "Expected the override to win over the pre-existing required attribute (no true-wins resolution)");
+        Assert.AreEqual(
+            "1.0.0",
+            node.GetAttribute("version", k_androidXmlNamespace),
+            "Expected the override to win over the pre-existing version attribute (no highest-version resolution)");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_MergeOverrideElementsNormalizesSingleIntegerVersion()
+    {
+        var processor = CreateProcessor();
+
+        // "5" has no minor component, so it is normalized to "5.0" before parsing, which is higher than "4.5.0".
+        var elementPath = new List<string> { "manifest", "uses-feature" };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.single" },
+                            { "version", "4.5.0" },
+                        }
+                    },
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.single" },
+                            { "version", "5" },
+                        }
+                    }
+                }
+            })
+        };
+
+        processor.ProcessManifestRequirements(providers);
+
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            1,
+            nodes.Count,
+            "Expected same-named elements to be merged into 1");
+        Assert.AreEqual(
+            "5",
+            ((XmlElement)nodes[0]).GetAttribute("version", k_androidXmlNamespace),
+            "Expected single-integer \"5\" to normalize to \"5.0\" and be kept as the highest version");
+    }
+
+    [Test]
+    public void AndroidManifestProcessor_MergeOverrideElementsTreatsSingleIntegerVersionAsLessThanThreeComponentVersion()
+    {
+        var processor = CreateProcessor();
+
+        // "5" normalizes to "5.0", whose build/revision components are unset (-1). System.Version treats those as
+        // lower than the explicit "0" components in "5.0.0", so "5.0.0" is considered the higher version.
+        var elementPath = new List<string> { "manifest", "uses-feature" };
+        var providers = new List<IAndroidManifestRequirementProvider>()
+        {
+            new MockManifestRequirementProvider(new ManifestRequirement
+            {
+                SupportedXRLoaders = new HashSet<Type> { supportedLoaderType },
+                OverrideElements = new List<ManifestElement>()
+                {
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.threeComponent" },
+                            { "version", "5" },
+                        }
+                    },
+                    new ManifestElement()
+                    {
+                        ElementPath = elementPath,
+                        Attributes = new Dictionary<string, string>()
+                        {
+                            { "name", "feature.threeComponent" },
+                            { "version", "5.0.0" },
+                        }
+                    }
+                }
+            })
+        };
+
+        processor.ProcessManifestRequirements(providers);
+
+        var updatedLibraryManifest = GetXrLibraryManifest();
+        var nodes = updatedLibraryManifest.SelectNodes(string.Join("/", elementPath));
+        Assert.AreEqual(
+            1,
+            nodes.Count,
+            "Expected same-named elements to be merged into 1");
+        Assert.AreEqual(
+            "5.0.0",
+            ((XmlElement)nodes[0]).GetAttribute("version", k_androidXmlNamespace),
+            "Expected \"5.0.0\" to be kept since \"5\" (5.0) compares as less than \"5.0.0\"");
+    }
+
     private AndroidManifestDocument GetXrLibraryManifest()
     {
         return new AndroidManifestDocument(xrLibraryManifestFilePath);

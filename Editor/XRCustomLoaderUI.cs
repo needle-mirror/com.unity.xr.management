@@ -1,5 +1,4 @@
 using System;
-
 using UnityEngine;
 
 namespace UnityEditor.XR.Management
@@ -27,8 +26,6 @@ namespace UnityEditor.XR.Management
         /// </summary>
         /// <value>Supported loader type.</value>
         public string loaderTypeName { get; set; }
-
-        private  XRCustomLoaderUIAttribute() {}
 
         /// <summary>
         /// Constructor for this attribute.

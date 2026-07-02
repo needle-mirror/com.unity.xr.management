@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-
 using UnityEditor.XR.Management.Metadata;
-
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.XR.Management;
@@ -14,21 +12,21 @@ namespace UnityEditor.XR.Management
     {
         internal static class Styles
         {
-            public static readonly GUIStyle k_UrlLabelPersonal = new GUIStyle(EditorStyles.label)
+            public static readonly GUIStyle k_UrlLabelPersonal = new(EditorStyles.label)
             {
                 name = "url-label",
                 richText = true,
                 normal = new GUIStyleState { textColor = new Color(8 / 255f, 8 / 255f, 252 / 255f) },
             };
 
-            public static readonly GUIStyle k_UrlLabelProfessional = new GUIStyle(EditorStyles.label)
+            public static readonly GUIStyle k_UrlLabelProfessional = new(EditorStyles.label)
             {
                 name = "url-label",
                 richText = true,
                 normal = new GUIStyleState { textColor = new Color(79 / 255f, 128 / 255f, 248 / 255f) },
             };
 
-            public static readonly GUIStyle k_LabelWordWrap = new GUIStyle(EditorStyles.label) { wordWrap = true };
+            public static readonly GUIStyle k_LabelWordWrap = new(EditorStyles.label) { wordWrap = true };
 
             public static readonly GUIStyle k_HelpBox = new(EditorStyles.helpBox)
             {
@@ -57,17 +55,18 @@ namespace UnityEditor.XR.Management
 
         struct Content
         {
-            public static readonly GUIContent k_InitializeOnStart = new GUIContent("Initialize XR on Startup");
-            public static readonly GUIContent k_XRConfigurationText = new GUIContent("Information about configuration, tracking and migration can be found below.");
-            public static readonly GUIContent k_XRConfigurationDocUriText = new GUIContent("View Documentation");
-            public static readonly Uri k_XRConfigurationUri = new Uri(string.Format("https://docs.unity3d.com/{0}/Documentation/Manual/configuring-project-for-xr.html", Application.unityVersion.Substring(0, Application.unityVersion.LastIndexOf("."))));
-            public static readonly GUIContent k_EditorTargetPlatform = new GUIContent("Editor Play mode uses Desktop Platform Settings regardless of Active Build Target.");
+            public static readonly GUIContent k_InitializeOnStart = new("Initialize XR on Startup");
+            public static readonly GUIContent k_XRConfigurationText = new("Information about configuration and tracking can be found below.");
+            public static readonly GUIContent k_XRConfigurationDocUriText = new("View Documentation");
+            public static readonly Uri k_XRConfigurationUri = new(
+                $"https://docs.unity3d.com/{Application.unityVersion[..Application.unityVersion.LastIndexOf(".")]}/Documentation/Manual/configuring-project-for-xr.html");
+            public static readonly GUIContent k_EditorTargetPlatform = new("Editor Play mode uses Desktop Platform Settings regardless of Active Build Target.");
             public static readonly GUIContent k_InfoIcon = EditorGUIUtility.IconContent("d_console.infoicon");
         }
 
         internal static GUIStyle GetStyle(string styleName)
         {
-            GUIStyle s = GUI.skin.FindStyle(styleName) ?? EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).FindStyle(styleName);
+            var s = GUI.skin.FindStyle(styleName) ?? EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).FindStyle(styleName);
             if (s == null)
             {
                 Debug.LogError("Missing built-in guistyle " + styleName);
@@ -81,44 +80,35 @@ namespace UnityEditor.XR.Management
 
         internal static XRSettingsManager Instance => s_SettingsManager;
 
-        private bool resetUi = false;
+        bool m_ResetUi;
         internal bool ResetUi
         {
-            get
-            {
-                return resetUi;
-            }
+            get => m_ResetUi;
             set
             {
-                resetUi = value;
-                if (resetUi)
+                m_ResetUi = value;
+                if (m_ResetUi)
                     Repaint();
             }
         }
 
         SerializedObject m_SettingsWrapper;
 
-        private Dictionary<BuildTargetGroup, XRManagerSettingsEditor> CachedSettingsEditor = new Dictionary<BuildTargetGroup, XRManagerSettingsEditor>();
+        Dictionary<BuildTargetGroup, XRManagerSettingsEditor> m_CachedSettingsEditor = new();
 
-
-        private BuildTargetGroup m_LastBuildTargetGroup = BuildTargetGroup.Unknown;
+        BuildTargetGroup m_LastBuildTargetGroup = BuildTargetGroup.Unknown;
 
         static XRGeneralSettingsPerBuildTarget currentSettings => XRGeneralSettingsPerBuildTarget.GetOrCreate();
 
         [UnityEngine.Internal.ExcludeFromDocs]
         XRSettingsManager(string path, SettingsScope scopes = SettingsScope.Project) : base(path, scopes)
-        {
-        }
+        { }
 
         [SettingsProvider]
         [UnityEngine.Internal.ExcludeFromDocs]
         static SettingsProvider Create()
         {
-            if (s_SettingsManager == null)
-            {
-                s_SettingsManager = new XRSettingsManager(s_SettingsRootTitle);
-            }
-
+            s_SettingsManager ??= new XRSettingsManager(s_SettingsRootTitle);
             return s_SettingsManager;
         }
 
@@ -126,19 +116,21 @@ namespace UnityEditor.XR.Management
         [UnityEngine.Internal.ExcludeFromDocs]
         static SettingsProvider[] CreateAllChildSettingsProviders()
         {
-            List<SettingsProvider> ret = new List<SettingsProvider>();
+            var ret = new List<SettingsProvider>();
             if (s_SettingsManager != null)
             {
-                var ats = TypeLoaderExtensions.GetAllTypesWithAttribute<XRConfigurationDataAttribute>();
-                foreach (var at in ats)
+                var types = TypeLoaderExtensions.GetAllTypesWithAttribute<XRConfigurationDataAttribute>();
+                foreach (var type in types)
                 {
-                    if (at.FullName.Contains("Unity.XR.Management.TestPackage"))
+                    if (type.FullName != null && type.FullName.Contains("Unity.XR.Management.TestPackage"))
                         continue;
 
-                    XRConfigurationDataAttribute xrbda = at.GetCustomAttributes(typeof(XRConfigurationDataAttribute), true)[0] as XRConfigurationDataAttribute;
-                    string settingsPath = String.Format("{1}/{0}", xrbda.displayName, s_SettingsRootTitle);
-                    var resProv = new XRConfigurationProvider(settingsPath, xrbda.buildSettingsKey, at);
-                    ret.Add(resProv);
+                    if (type.GetCustomAttributes(typeof(XRConfigurationDataAttribute), true)[0] is XRConfigurationDataAttribute attr)
+                    {
+                        string settingsPath = String.Format("{1}/{0}", attr.displayName, s_SettingsRootTitle);
+                        var resProv = new XRConfigurationProvider(settingsPath, attr.buildSettingsKey, type);
+                        ret.Add(resProv);
+                    }
                 }
             }
 
@@ -153,22 +145,26 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
+        /// <summary>
+        /// See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.
+        /// </summary>
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             InitEditorData(currentSettings);
         }
 
-        /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
+        /// <summary>
+        /// See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.
+        /// </summary>
         public override void OnDeactivate()
         {
             m_SettingsWrapper = null;
-            CachedSettingsEditor.Clear();
+            m_CachedSettingsEditor.Clear();
         }
 
-        private void DisplayLoaderSelectionUI()
+        void DisplayLoaderSelectionUI()
         {
-            BuildTargetGroup buildTargetGroup = EditorGUILayout.BeginBuildTargetSelectionGrouping();
+            var buildTargetGroup = EditorGUILayout.BeginBuildTargetSelectionGrouping();
 
             try
             {
@@ -185,7 +181,7 @@ namespace UnityEditor.XR.Management
                 var serializedSettingsObject = new SerializedObject(settings);
                 serializedSettingsObject.Update();
 
-                SerializedProperty initOnStart = serializedSettingsObject.FindProperty("m_InitManagerOnStart");
+                var initOnStart = serializedSettingsObject.FindProperty(nameof(settings.m_InitManagerOnStart));
                 EditorGUILayout.PropertyField(initOnStart, Content.k_InitializeOnStart);
                 EditorGUILayout.Space();
 
@@ -195,44 +191,40 @@ namespace UnityEditor.XR.Management
                     EditorGUILayout.Space();
                 }
 
-
-                SerializedProperty loaderProp = serializedSettingsObject.FindProperty("m_LoaderManagerInstance");
+                var loaderProp = serializedSettingsObject.FindProperty(nameof(settings.m_Manager));
                 var obj = loaderProp.objectReferenceValue;
 
                 if (obj != null)
                 {
                     loaderProp.objectReferenceValue = obj;
 
-                    if (!CachedSettingsEditor.ContainsKey(buildTargetGroup))
-                    {
-                        CachedSettingsEditor.Add(buildTargetGroup, null);
-                    }
+                    m_CachedSettingsEditor.TryAdd(buildTargetGroup, null);
 
-                    if (CachedSettingsEditor[buildTargetGroup] == null)
+                    if (m_CachedSettingsEditor[buildTargetGroup] == null)
                     {
-                        CachedSettingsEditor[buildTargetGroup] = Editor.CreateEditor(obj) as XRManagerSettingsEditor;
+                        m_CachedSettingsEditor[buildTargetGroup] = Editor.CreateEditor(obj) as XRManagerSettingsEditor;
 
-                        if (CachedSettingsEditor[buildTargetGroup] == null)
+                        if (m_CachedSettingsEditor[buildTargetGroup] == null)
                         {
                             Debug.LogError("Failed to create a view for XR Manager Settings Instance");
                         }
                     }
 
-                    if (CachedSettingsEditor[buildTargetGroup] != null)
+                    if (m_CachedSettingsEditor[buildTargetGroup] != null)
                     {
                         if (ResetUi)
                         {
                             ResetUi = false;
-                            CachedSettingsEditor[buildTargetGroup].Reload();
+                            m_CachedSettingsEditor[buildTargetGroup].Reload();
                         }
 
-                        CachedSettingsEditor[buildTargetGroup].BuildTarget = buildTargetGroup;
-                        CachedSettingsEditor[buildTargetGroup].OnInspectorGUI();
+                        m_CachedSettingsEditor[buildTargetGroup].BuildTarget = buildTargetGroup;
+                        m_CachedSettingsEditor[buildTargetGroup].OnInspectorGUI();
                     }
                 }
                 else if (obj == null)
                 {
-                    settings.AssignedSettings = null;
+                    settings.Manager = null;
                     loaderProp.objectReferenceValue = null;
                 }
 
@@ -246,7 +238,7 @@ namespace UnityEditor.XR.Management
             EditorGUILayout.EndBuildTargetSelectionGrouping();
         }
 
-        private void DisplayLink(GUIContent text, Uri link, int leftMargin)
+        static void DisplayLink(GUIContent text, Uri link, int leftMargin)
         {
             var labelStyle = EditorGUIUtility.isProSkin ? Styles.k_UrlLabelProfessional : Styles.k_UrlLabelPersonal;
             var size = labelStyle.CalcSize(text);
@@ -260,9 +252,9 @@ namespace UnityEditor.XR.Management
             EditorGUIUtility.AddCursorRect(uriRect, MouseCursor.Link);
         }
 
-        private void DisplayXRTrackingDocumentationLink()
+        static void DisplayXRTrackingDocumentationLink()
         {
-            GUILayout.BeginVertical(Styles.k_HelpBox);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             {
                 GUILayout.BeginHorizontal(Styles.k_HelpBoxContent);
                 {
@@ -277,15 +269,19 @@ namespace UnityEditor.XR.Management
                 }
                 GUILayout.EndHorizontal();
             }
-            GUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
         }
 
-        private void DisplayLoadOrderUi()
+        void DisplayLoadOrderUi()
         {
             EditorGUILayout.Space();
 
-            EditorGUI.BeginDisabledGroup(XRPackageMetadataStore.isDoingQueueProcessing || EditorApplication.isPlaying || EditorApplication.isPaused);
+            EditorGUI.BeginDisabledGroup(
+                XRPackageMetadataStore.isDoingQueueProcessing
+                || EditorApplication.isPlaying
+                || EditorApplication.isPaused);
+
             if (m_SettingsWrapper != null && m_SettingsWrapper.targetObject != null)
             {
                 m_SettingsWrapper.Update();
@@ -296,12 +292,14 @@ namespace UnityEditor.XR.Management
 
                 m_SettingsWrapper.ApplyModifiedProperties();
             }
+
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.Space();
-
         }
 
-        /// <summary>See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.</summary>
+        /// <summary>
+        /// See <see href="https://docs.unity3d.com/ScriptReference/SettingsProvider.html">SettingsProvider documentation</see>.
+        /// </summary>
         public override void OnGUI(string searchContext)
         {
             EditorGUILayout.Space();
@@ -311,6 +309,5 @@ namespace UnityEditor.XR.Management
 
             base.OnGUI(searchContext);
         }
-
     }
 }

@@ -1,25 +1,13 @@
-using System.Reflection;
-
 namespace UnityEditor.XR.Management
 {
-    internal static class TypeLoaderExtensions
+    static class TypeLoaderExtensions
     {
-        public static TypeCache.TypeCollection GetTypesWithInterface<T>(this Assembly asm)
+        internal static TypeCache.TypeCollection GetAllTypesWithInterface<T>()
         {
             return TypeCache.GetTypesDerivedFrom(typeof(T));
         }
 
-        public static TypeCache.TypeCollection GetAllTypesWithInterface<T>()
-        {
-            return TypeCache.GetTypesDerivedFrom(typeof(T));
-        }
-
-        public static TypeCache.TypeCollection GetTypesWithAttribute<T>(this Assembly asm)
-        {
-            return TypeCache.GetTypesWithAttribute(typeof(T));
-        }
-
-        public static TypeCache.TypeCollection GetAllTypesWithAttribute<T>()
+        internal static TypeCache.TypeCollection GetAllTypesWithAttribute<T>()
         {
             return TypeCache.GetTypesWithAttribute(typeof(T));
         }

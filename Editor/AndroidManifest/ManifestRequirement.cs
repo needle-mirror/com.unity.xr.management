@@ -12,26 +12,26 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         /// Set of supported <see cref="UnityEngine.XR.Management.XRLoader"/> types by these requirements.
         /// If none of the listed loaders is active at the moment of building, the requirements will be ignored.
         /// </summary>
-        public HashSet<Type> SupportedXRLoaders { get; set; } = new HashSet<Type>();
+        public HashSet<Type> SupportedXRLoaders { get; set; } = new();
 
         /// <summary>
         /// List of <see cref="ManifestElement"/> elements that will be added to the Android manifest.
         /// Each entry represents a single element within its specified node path, and it won't overwrite or override any other element to be added.
         /// </summary>
-        public List<ManifestElement> NewElements { get; set; } = new List<ManifestElement>();
+        public List<ManifestElement> NewElements { get; set; } = new();
 
         /// <summary>
-        /// List of <see cref="ManifestElement"/> elements whose attirbutes will be merged or overriden with existing the Android manifest elements.
+        /// List of <see cref="ManifestElement"/> elements whose attributes will be merged or overriden with existing the Android manifest elements.
         /// If the manifest element doesn't exist in the file, it will be created.
         /// </summary>
-        public List<ManifestElement> OverrideElements { get; set; } = new List<ManifestElement>();
+        public List<ManifestElement> OverrideElements { get; set; } = new();
 
         /// <summary>
         /// List of <see cref="ManifestElement"/> elements which will be removed from the Android manifest.
         /// Entries not found will be ignored.
         /// Only entries that specify the same attributes and its respective values in the manifest will be taken in account for deletion.
         /// </summary>
-        public List<ManifestElement> RemoveElements { get; set; } = new List<ManifestElement>();
+        public List<ManifestElement> RemoveElements { get; set; } = new();
 
         /// <inheritdoc/>
         public override bool Equals(object obj)

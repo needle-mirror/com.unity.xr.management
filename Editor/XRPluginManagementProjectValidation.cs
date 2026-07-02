@@ -18,15 +18,16 @@ namespace UnityEditor.XR.Management
     {
         static readonly string k_Category = XRConstants.k_XRPluginManagement;
 
-        const string k_RunInBackgroundMessage = "Run In Background must be enabled or Input System Background Behavior changed to avoid head-locked rendering of the main camera when focus is lost, such as when the universal menu/system shell is opened.";
+        const string k_RunInBackgroundMessage =
+            "Run In Background must be enabled or Input System Background Behavior changed to avoid head-locked rendering of the main camera when focus is lost, such as when the universal menu/system shell is opened.";
 
         static readonly BuildTargetGroup[] s_BuildTargetGroups =
             ((BuildTargetGroup[])Enum.GetValues(typeof(BuildTargetGroup))).Distinct().ToArray();
 
-        static readonly List<BuildValidationRule> s_BuildValidationRules = new List<BuildValidationRule>
+        static readonly List<BuildValidationRule> s_BuildValidationRules = new()
         {
 #if INPUT_SYSTEM_1_4_OR_NEWER
-            new BuildValidationRule
+            new()
             {
                 IsRuleEnabled = () => GetPlayerSettingsProperty("runInBackground") != null && GetInputSettingsProperty("m_BackgroundBehavior") != null,
                 Category = k_Category,

@@ -2,28 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using UnityEngine.XR.Management;
 
 namespace UnityEditor.XR.Management
 {
-    internal class XRLoaderInfo : IEquatable<XRLoaderInfo>
+    class XRLoaderInfo : IEquatable<XRLoaderInfo>
     {
-        public Type loaderType;
-        public string assetName;
-        public XRLoader instance;
+        static string[] s_LoaderBlockList = { "DummyLoader", "SampleLoader", "XRLoaderHelper" };
+
+        internal Type loaderType;
+        internal string assetName;
+        internal XRLoader instance;
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is XRLoaderInfo && Equals((XRLoaderInfo)obj);
+            return obj is XRLoaderInfo info && Equals(info);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                var hashCode = (loaderType != null ? loaderType.GetHashCode() : 0);
+                var hashCode = loaderType != null ? loaderType.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (instance != null ? instance.GetHashCode() : 0);
                 return hashCode;
             }
@@ -31,27 +32,24 @@ namespace UnityEditor.XR.Management
 
         public bool Equals(XRLoaderInfo other)
         {
-            return other != null && Equals(loaderType, other.loaderType) && Equals(instance, other.instance);
+            return other != null && loaderType == other.loaderType && Equals(instance, other.instance);
         }
-
-        static string[] s_LoaderBlackList = { "DummyLoader", "SampleLoader", "XRLoaderHelper" };
 
         internal static void GetAllKnownLoaderInfos(List<XRLoaderInfo> newInfos)
         {
             var loaderTypes = TypeLoaderExtensions.GetAllTypesWithInterface<XRLoader>();
-            foreach (Type loaderType in loaderTypes)
+            foreach (var loaderType in loaderTypes)
             {
                 if (loaderType.IsAbstract)
                     continue;
 
-                if (s_LoaderBlackList.Contains(loaderType.Name))
+                if (s_LoaderBlockList.Contains(loaderType.Name))
                     continue;
 
-                var assets = AssetDatabase.FindAssets(String.Format("t:{0}", loaderType));
+                var assets = AssetDatabase.FindAssets($"t:{loaderType}");
                 if (!assets.Any())
                 {
-                    XRLoaderInfo info = new XRLoaderInfo();
-                    info.loaderType = loaderType;
+                    var info = new XRLoaderInfo { loaderType = loaderType };
                     newInfos.Add(info);
                 }
                 else
@@ -60,10 +58,12 @@ namespace UnityEditor.XR.Management
                     {
                         string path = AssetDatabase.GUIDToAssetPath(asset);
 
-                        XRLoaderInfo info = new XRLoaderInfo();
-                        info.loaderType = loaderType;
-                        info.instance = AssetDatabase.LoadAssetAtPath(path, loaderType) as XRLoader;
-                        info.assetName = Path.GetFileNameWithoutExtension(path);
+                        var info = new XRLoaderInfo
+                        {
+                            loaderType = loaderType,
+                            instance = AssetDatabase.LoadAssetAtPath(path, loaderType) as XRLoader,
+                            assetName = Path.GetFileNameWithoutExtension(path)
+                        };
                         newInfos.Add(info);
                     }
                 }

@@ -1,34 +1,22 @@
 using System;
 using System.Collections.Generic;
-
 using UnityEditorInternal;
 using UnityEngine;
-
-#if UNITY_6000_1_OR_NEWER
-using UnityEditor.Build.Profile;
-#endif
-
 using UnityEditor.XR.Management.Metadata;
-using System.Linq;
 
 namespace UnityEditor.XR.Management
 {
-
-    internal interface IXRLoaderOrderManager
+    interface IXRLoaderOrderManager
     {
         List<XRLoaderInfo> AssignedLoaders { get; }
-        List<XRLoaderInfo> UnassignedLoaders { get; }
-
         void AssignLoader(XRLoaderInfo assignedInfo);
-        void UnassignLoader(XRLoaderInfo unassignedInfo);
         void Update();
     }
 
-    internal class XRLoaderOrderUI
+    class XRLoaderOrderUI
     {
         struct LoaderInformation
         {
-            public string packageName;
             public string packageId;
             public string loaderName;
             public string loaderType;
@@ -38,22 +26,12 @@ namespace UnityEditor.XR.Management
             public IXRCustomLoaderUI customLoaderUI;
         }
 
-        const string k_AtNoLoaderInstance = "There are no XR plugins applicable to this platform.";
-        private List<LoaderInformation> m_LoaderMetadata = null;
-
-        private const string m_OpenXRLoaderType = "UnityEngine.XR.OpenXR.OpenXRLoader";
-        private const string m_OculusLoaderType = "Unity.XR.Oculus.OculusLoader";
-
-        ReorderableList m_OrderedList = null;
-
-        public BuildTargetGroup CurrentBuildTargetGroup { get; set; }
-
         struct Content
         {
             public static readonly string k_HelpUri = "https://docs.unity3d.com/Packages/com.unity.xr.management@4.0/manual/EndUser.html";
             public static readonly GUIContent k_LoaderUITitle = EditorGUIUtility.TrTextContent("Plug-in Providers");
 
-            public static readonly GUIContent k_HelpContent = new GUIContent("",
+            public static readonly GUIContent k_HelpContent = new("",
                 EditorGUIUtility.IconContent("_Help@2x").image,
                 "Selecting an XR Plug-in Provider installs and loads the corresponding package in your project. You can view and manage these packages in the Package Manager.");
         }
@@ -64,17 +42,22 @@ namespace UnityEditor.XR.Management
             public GUIContent renderContent;
         }
 
-        static Dictionary<string, DeprecationInfo> s_DeprecationInfo = new Dictionary<string, DeprecationInfo>();
-        static bool s_DidPopulateDeprecationInfo = false;
+        const string k_AtNoLoaderInstance = "There are no XR plugins applicable to this platform.";
+        const string k_DeprecatedWmrLoaderName = "Windows Mixed Reality";
+        const string k_DeprecatedLuminLoaderName = "Magic Leap - Note: Lumin Platform will be deprecated in Unity 2021.2!";
 
-        static string k_DeprecatedWMRLoaderName = "Windows Mixed Reality";
-        private static string k_DeprecatedLuminLoaderName = "Magic Leap - Note: Lumin Platform will be deprecated in Unity 2021.2!";
+        static Dictionary<string, DeprecationInfo> s_DeprecationInfo = new();
+        static bool s_DidPopulateDeprecationInfo;
+
+        List<LoaderInformation> m_LoaderMetadata;
+
+        ReorderableList m_OrderedList;
+
+        public BuildTargetGroup CurrentBuildTargetGroup { get; set; }
 
         static bool IsDeprecated(string loaderName)
         {
-            if (loaderName == k_DeprecatedWMRLoaderName || loaderName == k_DeprecatedLuminLoaderName)
-                return true;
-            return false;
+            return loaderName is k_DeprecatedWmrLoaderName or k_DeprecatedLuminLoaderName;
         }
 
         static void PopulateDeprecationInfo()
@@ -84,7 +67,7 @@ namespace UnityEditor.XR.Management
 
             s_DidPopulateDeprecationInfo = true;
 
-            s_DeprecationInfo[k_DeprecatedWMRLoaderName] =  new DeprecationInfo{
+            s_DeprecationInfo[k_DeprecatedWmrLoaderName] =  new DeprecationInfo{
                 icon = EditorGUIUtility.IconContent("console.warnicon.sml"),
                 renderContent = new GUIContent("",
                     EditorGUIUtility.IconContent("console.warnicon.sml").image,
@@ -98,10 +81,6 @@ namespace UnityEditor.XR.Management
 
 Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 LTS.")
             };
-        }
-
-        internal XRLoaderOrderUI()
-        {
         }
 
         void SetDisablesStateOnLoadersFromLoader(LoaderInformation li)
@@ -130,6 +109,9 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
         }
 
 #if UNITY_6000_1_OR_NEWER && UNITY_META_QUEST
+        const string k_OculusLoaderType = "Unity.XR.Oculus.OculusLoader";
+        const string k_OpenXRLoaderType = "UnityEngine.XR.OpenXR.OpenXRLoader";
+
         void MetaBuildProfileLoaderForce()
         {
             // Force enable OpenXR loader if a non-supported loader is currently enabled or no loader is currently enabled.
@@ -145,7 +127,7 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     var li = m_LoaderMetadata[i];
 
                     // Skip any work on OpenXR loader .
-                    if (li.loaderType == m_OpenXRLoaderType)
+                    if (li.loaderType == k_OpenXRLoaderType)
                     {
                         liOpenXR = li;
                         liOpenXRIndex = i;
@@ -153,21 +135,19 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     }
 
                     // Check if what kind of loader is enabled.
-                    if (li.toggled == true)
+                    if (li.toggled)
                     {
-                        if (li.loaderType == m_OculusLoaderType)
+                        if (li.loaderType == k_OculusLoaderType)
                         {
                             isSupportedLoaderEnabled = true;
                             continue;
                         }
-                        else
-                        {
-                            isNonSupportedLoaderEnabled = true;
-                        }
+
+                        isNonSupportedLoaderEnabled = true;
                     }
 
                     // Disable all non supported loaders.
-                    if (li.loaderType != m_OculusLoaderType)
+                    if (li.loaderType != k_OculusLoaderType)
                     {
                         li.toggled = false;
                         li.stateChanged = true;
@@ -178,6 +158,13 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                             li.customLoaderUI.ActiveBuildTargetGroup = BuildTargetGroup.Android;
                             li.customLoaderUI.IsLoaderEnabled = false;
                         }
+                        else
+                        {
+                            var generalSettings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(CurrentBuildTargetGroup);
+                            if (generalSettings != null)
+                                XRPackageMetadataStore.RemoveLoader(generalSettings.Manager, li.loaderType, CurrentBuildTargetGroup);
+                            li.stateChanged = false;
+                        }
 
                         m_LoaderMetadata[i] = li;
                     }
@@ -187,7 +174,7 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     return;
 
                 // Enable OpenXR Loader if a non-supported loader is enabled or no loader is enabled.
-                if (isNonSupportedLoaderEnabled || (!isNonSupportedLoaderEnabled && !isSupportedLoaderEnabled))
+                if (isNonSupportedLoaderEnabled || !isSupportedLoaderEnabled)
                 {
                     liOpenXR.toggled = true;
                     liOpenXR.stateChanged = true;
@@ -203,7 +190,6 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                 }
             }
         }
-
 #endif
 
         void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
@@ -225,17 +211,13 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
             else
             {
                 string name = li.loaderName;
-                if (s_DeprecationInfo.ContainsKey(name))
+                if (s_DeprecationInfo.TryGetValue(name, out var depInfo))
                 {
-                    var depInfo = s_DeprecationInfo[name];
-
                     var labelRect = rect;
                     var size = EditorStyles.label.CalcSize(depInfo.icon);
                     labelRect.width -= size.y + 1;
 
-                    var imageRect = new Rect(rect);
-                    imageRect.xMin = labelRect.xMax + 1;
-                    imageRect.width = size.y;
+                    var imageRect = new Rect(rect) { xMin = labelRect.xMax + 1, width = size.y };
 
                     li.toggled = EditorGUI.ToggleLeft(labelRect, li.loaderName, preToggledState);
                     EditorGUI.LabelField(imageRect, depInfo.renderContent);
@@ -246,7 +228,7 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                 }
             }
 
-            li.stateChanged = (li.toggled != preToggledState);
+            li.stateChanged = li.toggled != preToggledState;
             m_LoaderMetadata[index] = li;
             EditorGUI.EndDisabledGroup();
         }
@@ -282,15 +264,15 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     if (IsDeprecated(pmd.loaderName))
                         continue;
 
-                    var newLi = new LoaderInformation() {
-                        packageName = pmd.packageName,
+                    var newLi = new LoaderInformation
+                    {
                         packageId = pmd.packageId,
                         loaderName = pmd.loaderName,
                         loaderType = pmd.loaderType,
                         toggled = XRPackageMetadataStore.IsLoaderAssigned(pmd.loaderType, buildTargetGroup),
                         disabled = pmd.disabled,
                         customLoaderUI = XRCustomLoaderUIManager.GetCustomLoaderUI(pmd.loaderType, buildTargetGroup)
-                        };
+                    };
 
                     if (newLi.customLoaderUI != null)
                     {
@@ -302,13 +284,12 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
 
                 if (settings != null)
                 {
-                    List<LoaderInformation> loadersWantingToDisableOtherLoaders = new List<LoaderInformation>();
+                    var loadersWantingToDisableOtherLoaders = new List<LoaderInformation>();
 
-                    LoaderInformation li;
                     for (int i = 0; i < m_LoaderMetadata.Count; i++)
                     {
-                        li = m_LoaderMetadata[i];
-                        if (XRPackageMetadataStore.IsLoaderAssigned(settings.AssignedSettings, li.loaderType))
+                        var li = m_LoaderMetadata[i];
+                        if (XRPackageMetadataStore.IsLoaderAssigned(settings.Manager, li.loaderType))
                         {
                             li.toggled = true;
                             m_LoaderMetadata[i] = li;
@@ -330,39 +311,38 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
 #endif
                 }
 
-                m_OrderedList = new ReorderableList(m_LoaderMetadata, typeof(LoaderInformation), false, true, false, false);
-                m_OrderedList.drawHeaderCallback = (rect) =>
+                m_OrderedList = new ReorderableList(m_LoaderMetadata, typeof(LoaderInformation), false, true, false, false)
                 {
-                    var labelSize = EditorStyles.label.CalcSize(Content.k_LoaderUITitle);
-                    var labelRect = new Rect(rect);
-                    labelRect.width = labelSize.x;
-
-                    labelSize = EditorStyles.label.CalcSize(Content.k_HelpContent);
-                    var imageRect = new Rect(rect);
-                    imageRect.xMin = labelRect.xMax + 1;
-                    imageRect.width = labelSize.x;
-
-                    EditorGUI.LabelField(labelRect, Content.k_LoaderUITitle, EditorStyles.label);
-                    if (GUI.Button(imageRect, Content.k_HelpContent, EditorStyles.label))
+                    drawHeaderCallback = rect =>
                     {
-                        System.Diagnostics.Process.Start(Content.k_HelpUri);
-                    }
-                };
-                m_OrderedList.drawElementCallback = (rect, index, isActive, isFocused) => DrawElementCallback(rect, index, isActive, isFocused);
-                m_OrderedList.drawElementBackgroundCallback = (rect, index, isActive, isFocused) =>
-                {
-                    var tex = GUI.skin.label.normal.background;
-                    if (tex == null && GUI.skin.label.normal.scaledBackgrounds.Length > 0) tex = GUI.skin.label.normal.scaledBackgrounds[0];
-                    if (tex == null) return;
+                        var labelSize = EditorStyles.label.CalcSize(Content.k_LoaderUITitle);
+                        var labelRect = new Rect(rect) { width = labelSize.x };
 
-                    GUI.DrawTexture(rect, GUI.skin.label.normal.background);
+                        labelSize = EditorStyles.label.CalcSize(Content.k_HelpContent);
+                        var imageRect = new Rect(rect) { xMin = labelRect.xMax + 1, width = labelSize.x };
+
+                        EditorGUI.LabelField(labelRect, Content.k_LoaderUITitle, EditorStyles.label);
+                        if (GUI.Button(imageRect, Content.k_HelpContent, EditorStyles.label))
+                        {
+                            System.Diagnostics.Process.Start(Content.k_HelpUri);
+                        }
+                    },
+                    drawElementCallback = DrawElementCallback,
+                    drawElementBackgroundCallback = (rect, _, _, _) =>
+                    {
+                        var tex = GUI.skin.label.normal.background;
+                        if (tex == null && GUI.skin.label.normal.scaledBackgrounds.Length > 0) tex = GUI.skin.label.normal.scaledBackgrounds[0];
+                        if (tex == null) return;
+
+                        GUI.DrawTexture(rect, GUI.skin.label.normal.background);
+                    },
+                    drawFooterCallback = rect =>
+                    {
+                        var status = XRPackageMetadataStore.GetCurrentStatusDisplayText();
+                        GUI.Label(rect, EditorGUIUtility.TrTextContent(status), EditorStyles.label);
+                    },
+                    elementHeightCallback = GetElementHeight
                 };
-                m_OrderedList.drawFooterCallback = (rect) =>
-                {
-                    var status = XRPackageMetadataStore.GetCurrentStatusDisplayText();
-                    GUI.Label(rect, EditorGUIUtility.TrTextContent(status), EditorStyles.label);
-                };
-                m_OrderedList.elementHeightCallback = (index) => GetElementHeight(index);
             }
 
             if (m_LoaderMetadata == null || m_LoaderMetadata.Count == 0)
@@ -379,7 +359,7 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                     {
                         li = m_LoaderMetadata[i];
                         if (li.stateChanged && li.customLoaderUI != null)
-                                SetDisablesStateOnLoadersFromLoader(li);
+                            SetDisablesStateOnLoadersFromLoader(li);
                     }
 
                     for (int i = 0; i < m_LoaderMetadata.Count; i++)
@@ -389,11 +369,13 @@ Developers can continue to build for Magic Leap 1 using Unity 2020 LTS or 2019 L
                         {
                             if (li.toggled)
                             {
-                                XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget(li.packageId, li.loaderType, buildTargetGroup);
+                                XRPackageMetadataStore.InstallPackageAndAssignLoaderForBuildTarget(
+                                    li.packageId, li.loaderType, buildTargetGroup);
                             }
                             else
                             {
-                                XRPackageMetadataStore.RemoveLoader(settings.AssignedSettings, li.loaderType, buildTargetGroup);
+                                XRPackageMetadataStore.RemoveLoader(
+                                    settings.Manager, li.loaderType, buildTargetGroup);
                             }
                             li.stateChanged = false;
                             m_LoaderMetadata[i] = li;

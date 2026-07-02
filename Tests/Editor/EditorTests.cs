@@ -57,7 +57,7 @@ namespace UnityEditor.XR.Management.Tests
         [Test]
         public void CanCreateNewSettingsForMissingBuildTargetSettings()
         {
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
             Assert.False(buildTargetSettings == null);
 
             Assert.IsFalse(buildTargetSettings.HasSettingsForBuildTarget(BuildTargetGroup.PS5));
@@ -72,7 +72,7 @@ namespace UnityEditor.XR.Management.Tests
         [Test]
         public void CanCreateNewManagerSettingsForMissingBuildTargetSettings()
         {
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
             Assert.False(buildTargetSettings == null);
 
             Assert.IsFalse(buildTargetSettings.HasManagerSettingsForBuildTarget(BuildTargetGroup.PS5));

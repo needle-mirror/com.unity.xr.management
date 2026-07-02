@@ -27,19 +27,19 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
 
         public static void SetupTemporaryTestAssets(BuildTargetGroup buildTargetGroup, out XRGeneralSettingsPerBuildTarget previousGeneralSettingsInstance)
         {
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out previousGeneralSettingsInstance);
-            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out previousGeneralSettingsInstance);
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
 
             var emptyBuildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
             var generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
-            generalSettings.AssignedSettings = ScriptableObject.CreateInstance<XRManagerSettings>();
+            generalSettings.Manager = ScriptableObject.CreateInstance<XRManagerSettings>();
             emptyBuildTargetSettings.SetSettingsForBuildTarget(buildTargetGroup, generalSettings);
-            emptyBuildTargetSettings.SettingsForBuildTarget(buildTargetGroup).AssignedSettings.TrySetLoaders(new List<XRLoader>());
+            emptyBuildTargetSettings.SettingsForBuildTarget(buildTargetGroup).Manager.TrySetLoaders(new List<XRLoader>());
 
             Directory.CreateDirectory(k_TemporaryTestPath);
             AssetDatabase.CreateAsset(emptyBuildTargetSettings, Path.Combine(k_TemporaryTestPath, k_AssetName));
 
-            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, emptyBuildTargetSettings, true);
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, emptyBuildTargetSettings, true);
         }
 
         public static void CleanupTemporaryAssets()
@@ -56,7 +56,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         // Must match XRGeneralSettingsPerBuildTarget.TryFindSettingsAsset
         public static bool TryFindTemporarySettingsAsset(out XRGeneralSettingsPerBuildTarget buildTargetSettings)
         {
-            EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out buildTargetSettings);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out buildTargetSettings);
             if (buildTargetSettings == null)
             {
                 var assets = AssetDatabase.FindAssets(k_TempAssetSearchTerm);
@@ -86,10 +86,10 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     class GraphicsAPICompatibilityTests
     {
         XRManagerSettings m_Manager;
-        List<XRLoader> m_Loaders = new List<XRLoader>();
+        List<XRLoader> m_Loaders = new();
 
-        private GraphicsDeviceType m_PlayerSettingsDeviceType;
-        private GraphicsDeviceType[]  m_LoadersSupporteDeviceTypes;
+        GraphicsDeviceType m_PlayerSettingsDeviceType;
+        GraphicsDeviceType[]  m_LoadersSupporteDeviceTypes;
         bool m_BuildFails;
 
         public GraphicsAPICompatibilityTests(GraphicsDeviceType playerSettingsDeviceType, bool fails, GraphicsDeviceType loader0, GraphicsDeviceType? loader1)
@@ -168,7 +168,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
             m_BuildTargetGroup = group;
         }
 
-        void CleanupOldSettings() => BuildHelpers.CleanOldSettings<XRGeneralSettings>();
+        static void CleanupOldSettings() => BuildHelpers.CleanOldSettings<XRGeneralSettings>();
 
         [SetUp]
         public void SetupPlayerSettings()
@@ -180,7 +180,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         public void TearDown()
         {
             if (m_OldBuildTargetSettings != null)
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_OldBuildTargetSettings, true);
 
             BuildTestHelpers.CleanupTemporaryAssets();
         }
@@ -188,7 +188,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         [Test]
         public void CheckEmptyXRGeneralAssetWillNotGetIncludedInAssets()
         {
-            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out XRGeneralSettingsPerBuildTarget buildTargetSettings);
             Assert.False(buildTargetSettings == null);
 
             var settings = buildTargetSettings.SettingsForBuildTarget(m_BuildTargetGroup);
@@ -199,7 +199,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
 
             // Use the logic in XRGeneralBuildProcessor.OnPreprocessBuild() to determine if the XR General Settings will
             // be include or not.
-            if (!settingsIncludedInPreloadedAssets && settings.AssignedSettings.activeLoaders.Count > 0)
+            if (!settingsIncludedInPreloadedAssets && settings.Manager.activeLoaders.Count > 0)
             {
                 var assets = preloadedAssets.ToList();
                 assets.Add(settings);
@@ -217,24 +217,17 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture]
     class XRGeneralSettingsPerBuildTargetExclusionTests
     {
-        static readonly string k_DefaultAssetPathRoot = Path.GetFullPath(Path.Combine(".", "Assets", EditorUtilities.s_DefaultGeneralSettingsPath[0]));
-
         XRGeneralSettingsPerBuildTarget m_PreviousSettings;
 
         [SetUp]
         public void SetupPlayerSettings()
         {
-            if (EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out _))
+            if (EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.settingsKey, out _))
             {
-                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
             }
 
             AssetDatabase.DeleteAsset("Assets/XR");
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
         }
 
         [Test]
@@ -242,11 +235,11 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         {
             // Ensure Setup Functioned properly.
             Assert.False(
-                EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.k_SettingsKey, out var buildSettings),
+                EditorBuildSettings.TryGetConfigObject<XRGeneralSettingsPerBuildTarget>(XRGeneralSettings.settingsKey, out var buildSettings),
                 "Build Settings contains a settings config object when it should not.");
 
             Assert.False(
-                XRGeneralBuildProcessor.TryGetSettingsPerBuildTarget(out buildSettings),
+                Utils.TryGetSettingsPerBuildTarget(out buildSettings),
                 "Build Settings Configuration Object exists when it shouldn't in the current project");
         }
     }
@@ -269,18 +262,17 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         const string k_DefaultAssetPath = "Assets/XR";
         const string k_DefaultAssetName = "XRGeneralSettings.asset";
 
-        BuildTargetGroup m_BuildTargetGroup;
         XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
 
         public XRGeneralSettingsPerBuildTargetInclusionTests(BuildTargetGroup group)
         {
-            m_BuildTargetGroup = group;
+            // Parameter not used, but required for parameterized TestFixture
         }
 
         [SetUp]
         public void SetupPlayerSettings()
         {
-            if (!EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out m_OldBuildTargetSettings))
+            if (!EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out m_OldBuildTargetSettings))
             {
                 // If not then we get or create the asset and delete it in the teardown
                 XRGeneralSettingsPerBuildTarget.GetOrCreate();
@@ -288,7 +280,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
             }
             else
             {
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_OldBuildTargetSettings, true);
             }
         }
 
@@ -297,7 +289,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         {
             if (m_OldBuildTargetSettings == null)
             {
-                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
 
                 // Asset did not exists prior to test running so delete.
                 AssetDatabase.DeleteAsset(Path.Combine(k_DefaultAssetPath, k_DefaultAssetName));
@@ -314,20 +306,19 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         public void EnsureSettingsAreIncludedWhenAssetExists()
         {
             // Ensure Setup Functioned properly.
-            Assert.True(XRGeneralBuildProcessor.TryGetSettingsPerBuildTarget(out var originalSettings),
+            Assert.True(Utils.TryGetSettingsPerBuildTarget(out var originalSettings),
                 "XRGeneralSettingsPerBuildTarget should be included at the beginning of the test.");
 
             // Remove the settings to check if the code functions properly
-            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
 
-            Assert.True(XRGeneralBuildProcessor.TryGetSettingsPerBuildTarget(out var generalSettings),
+            Assert.True(Utils.TryGetSettingsPerBuildTarget(out var generalSettings),
                 "The asset should exist even if it's been removed from the editor configuration.");
-            Assert.True(EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out generalSettings),
+            Assert.True(EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out generalSettings),
                 "The configuration object was not set by the build processor!");
             Assert.NotNull(generalSettings, "Build Settings Configuration Object does not exist when it in the current project.");
         }
     }
-
 
     [TestFixture(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX)]
     [TestFixture(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64)]
@@ -336,13 +327,13 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
     [TestFixture(BuildTargetGroup.PS4, BuildTarget.PS4)]
     class XRLoaderSelection
     {
-        private readonly BuildTargetGroup m_BuildTargetGroup;
-        private readonly BuildTarget m_BuildTarget;
+        readonly BuildTargetGroup m_BuildTargetGroup;
+        readonly BuildTarget m_BuildTarget;
 
-        private DummyLoader m_Loader;
-        private string m_ExpectedConfigEntry;
+        DummyLoader m_Loader;
+        string m_ExpectedConfigEntry;
 
-        private XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
+        XRGeneralSettingsPerBuildTarget m_OldBuildTargetSettings;
 
         public XRLoaderSelection(BuildTargetGroup group, BuildTarget buildTarget)
         {
@@ -354,8 +345,6 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
             m_ExpectedConfigEntry = XRGeneralBuildProcessor.kPreInitLibraryKey + ":" + dummyLoaderLibName;
         }
 
-        void CleanupOldSettings() => BuildHelpers.CleanOldSettings<XRGeneralSettings>();
-
         [SetUp]
         public void SetupPlayerSettings()
         {
@@ -366,7 +355,7 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
         public void TearDown()
         {
             if (m_OldBuildTargetSettings != null)
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OldBuildTargetSettings, true);
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_OldBuildTargetSettings, true);
 
             BuildTestHelpers.CleanupTemporaryAssets();
         }
@@ -412,23 +401,21 @@ namespace UnityEditor.XR.Management.Tests.BuildTests
             Assert.False(xrBootSettings.Contains(m_ExpectedConfigEntry));
         }
 
-        private string GetXRBootSettings()
+        string GetXRBootSettings()
         {
             string buildTargetName = BuildPipeline.GetBuildTargetName(m_BuildTarget);
-            return UnityEditor
-                .EditorUserBuildSettings
-                    .GetPlatformSettings(buildTargetName, BootConfig.kXrBootSettingsKey);
+            return EditorUserBuildSettings.GetPlatformSettings(buildTargetName, BootConfig.kXrBootSettingsKey);
         }
 
-        private XRManagerSettings GetXRManagerSettings()
+        XRManagerSettings GetXRManagerSettings()
         {
             EditorBuildSettings
                 .TryGetConfigObject(
-                    XRGeneralSettings.k_SettingsKey,
+                    XRGeneralSettings.settingsKey,
                     out XRGeneralSettingsPerBuildTarget buildTargetSettings);
             return buildTargetSettings
                     .SettingsForBuildTarget(m_BuildTargetGroup)
-                        .AssignedSettings;
+                        .Manager;
         }
     }
 }

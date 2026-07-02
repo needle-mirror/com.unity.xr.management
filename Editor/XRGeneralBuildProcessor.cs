@@ -1,41 +1,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.Management;
 
-[assembly: InternalsVisibleTo("Unity.XR.Management.EditorTests")]
 namespace UnityEditor.XR.Management
 {
     /// <summary>
     /// Small utility class for reading, updating and writing boot config.
     /// </summary>
-    internal class BootConfig
+    class BootConfig
     {
         public static readonly string kXrBootSettingsKey = "xr-boot-settings";
-        Dictionary<string, string> bootConfigSettings;
+        Dictionary<string, string> m_BootConfigSettings;
 
-        BuildTarget m_target;
-        string bootConfigPath;
+        BuildTarget m_Target;
+        string m_BootConfigPath;
 
         internal BootConfig(BuildTarget target)
         {
-            m_target = target;
+            m_Target = target;
         }
 
         internal void ReadBootConfig()
         {
-            bootConfigSettings = new Dictionary<string, string>();
+            m_BootConfigSettings = new Dictionary<string, string>();
 
-            string buildTargetName = BuildPipeline.GetBuildTargetName(m_target);
-            string xrBootSettings = UnityEditor.EditorUserBuildSettings.GetPlatformSettings(buildTargetName, kXrBootSettingsKey);
-            if (!String.IsNullOrEmpty(xrBootSettings))
+            string buildTargetName = BuildPipeline.GetBuildTargetName(m_Target);
+            string xrBootSettings = EditorUserBuildSettings.GetPlatformSettings(buildTargetName, kXrBootSettingsKey);
+            if (!string.IsNullOrEmpty(xrBootSettings))
             {
                 // boot settings string format
                 // <boot setting>:<value>[;<boot setting>:<value>]*
@@ -45,28 +42,20 @@ namespace UnityEditor.XR.Management
                     var setting = bootSetting.Split(':');
                     if (setting.Length == 2 && !String.IsNullOrEmpty(setting[0]) && !String.IsNullOrEmpty(setting[1]))
                     {
-                        bootConfigSettings.Add(setting[0], setting[1]);
+                        m_BootConfigSettings.Add(setting[0], setting[1]);
                     }
                 }
             }
-
         }
 
         internal void SetValueForKey(string key, string value, bool replace = false)
         {
-            if (bootConfigSettings.ContainsKey(key))
-            {
-                bootConfigSettings[key] = value;
-            }
-            else
-            {
-                bootConfigSettings.Add(key, value);
-            }
+            m_BootConfigSettings[key] = value;
         }
 
         internal bool DeleteKey(string key)
         {
-            return bootConfigSettings.Remove(key);
+            return m_BootConfigSettings.Remove(key);
         }
 
         internal void WriteBootConfig()
@@ -74,8 +63,8 @@ namespace UnityEditor.XR.Management
             // boot settings string format
             // <boot setting>:<value>[;<boot setting>:<value>]*
             bool firstEntry = true;
-            var sb = new System.Text.StringBuilder();
-            foreach (var kvp in bootConfigSettings)
+            var sb = new StringBuilder();
+            foreach (var kvp in m_BootConfigSettings)
             {
                 if (!firstEntry)
                 {
@@ -85,7 +74,7 @@ namespace UnityEditor.XR.Management
                 firstEntry = false;
             }
 
-            string buildTargetName = BuildPipeline.GetBuildTargetName(m_target);
+            string buildTargetName = BuildPipeline.GetBuildTargetName(m_Target);
             EditorUserBuildSettings.SetPlatformSettings(buildTargetName, kXrBootSettingsKey, sb.ToString());
         }
     }
@@ -108,36 +97,12 @@ namespace UnityEditor.XR.Management
             public BuildTargetGroup buildTargetGroup;
         }
 
-        internal static readonly int s_CallbackOrder = 0;
-        public int callbackOrder
-        {
-            get { return s_CallbackOrder; }
-        }
+        internal static readonly int k_CallbackOrder = 0;
+        public int callbackOrder => k_CallbackOrder;
 
-        void CleanOldSettings()
+        static void CleanOldSettings()
         {
             BuildHelpers.CleanOldSettings<XRGeneralSettings>();
-        }
-
-        internal static bool TryGetSettingsPerBuildTarget(out XRGeneralSettingsPerBuildTarget buildTargetSettings)
-        {
-            // Fix for [1378643](https://fogbugz.unity3d.com/f/cases/1378643/)
-            // Ensure that if a settings asset exists in the project, it gets processed.
-            if (!EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out buildTargetSettings))
-            {
-                if (XRGeneralSettingsPerBuildTarget.TryFindSettingsAsset(out buildTargetSettings))
-                {
-                    // Asset found but not set. Set the configuration object. If it's empty it will get culled.
-                    EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, buildTargetSettings, true);
-                }
-                else
-                {
-                    // If no asset is found the processor should not run
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         public void OnPreprocessBuild(BuildReport report)
@@ -155,11 +120,11 @@ namespace UnityEditor.XR.Management
             if (!buildTargetSettings)
                 return;
 
-            XRGeneralSettings settings = buildTargetSettings.SettingsForBuildTarget(targetGroup);
+            var settings = buildTargetSettings.SettingsForBuildTarget(targetGroup);
             if (settings == null)
                 return;
 
-            XRManagerSettings loaderManager = settings.AssignedSettings;
+            var loaderManager = settings.Manager;
 
             if (loaderManager != null)
             {
@@ -200,7 +165,7 @@ namespace UnityEditor.XR.Management
                 bootConfig.WriteBootConfig();
             }
 
-            UnityEngine.Object[] preloadedAssets = PlayerSettings.GetPreloadedAssets();
+            var preloadedAssets = PlayerSettings.GetPreloadedAssets();
             var settingsIncludedInPreloadedAssets = preloadedAssets.Contains(settings);
 
             // If there are no loaders present in the current manager instance, then the settings will not be included in the current build.
@@ -216,20 +181,21 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        public static void VerifyGraphicsAPICompatibility(XRManagerSettings loaderManager, GraphicsDeviceType selectedDeviceType)
+        public static void VerifyGraphicsAPICompatibility(
+            XRManagerSettings loaderManager, GraphicsDeviceType selectedDeviceType)
         {
-            HashSet<GraphicsDeviceType> allLoaderGraphicsDeviceTypes = new HashSet<GraphicsDeviceType>();
+            var allLoaderGraphicsDeviceTypes = new HashSet<GraphicsDeviceType>();
             foreach (var loader in loaderManager.activeLoaders)
             {
-                List<GraphicsDeviceType> supporteDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(true);
+                var supportedDeviceTypes = loader.GetSupportedGraphicsDeviceTypes(true);
                 // To help with backward compatibility, if we find that any of the compatibility lists are empty we assume that at least one of the loaders does not implement the GetSupportedGraphicsDeviceTypes method
                 // Therefore we revert to the previous behavior of building the app regardless of gfx api settings.
-                if (supporteDeviceTypes.Count == 0)
+                if (supportedDeviceTypes.Count == 0)
                 {
                     allLoaderGraphicsDeviceTypes.Clear();
                     break;
                 }
-                foreach (var supportedGraphicsDeviceType in supporteDeviceTypes)
+                foreach (var supportedGraphicsDeviceType in supportedDeviceTypes)
                 {
                     allLoaderGraphicsDeviceTypes.Add(supportedGraphicsDeviceType);
                 }
@@ -240,8 +206,8 @@ namespace UnityEditor.XR.Management
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.AppendFormat(
-                        "The selected graphics API, {0}, is not supported by any of the current loaders. Please change the preferred Graphics API setting in Player Settings.\n",
-                        selectedDeviceType);
+                    "The selected graphics API, {0}, is not supported by any of the current loaders. Please change the preferred Graphics API setting in Player Settings.\n",
+                    selectedDeviceType);
 
                 foreach (var loader in loaderManager.activeLoaders)
                 {

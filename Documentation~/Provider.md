@@ -5,13 +5,13 @@ uid: xr-plug-in-management-provider
 
 ## XR Plug-in Management packages and Unity packages
 
-All **XR Plug-in Management** packages must also be full Unity packages. The package does not have to be registered or exist in any external repository or package server. It can live within the `Assets` folder. The only requirement is that you define the package with a `package.json` file and a unique package id.
+All **XR Plug-in Management** packages must also be full Unity packages. The package doesn't require registration, nor does it need to exist in any external repository or package server. It can live within the `Assets` folder. The only requirement is that you define the package with a `package.json` file and a unique package ID.
 
-For more information, see documentation on [Unity Packages](https://docs.unity3d.com/Manual/PackagesList.html).
+For more information, refer to the documentation on [Unity Packages](https://docs.unity3d.com/Manual/PackagesList.html).
 
 ## Lifecycle management
 
-This package enables you to manage the lifecycle of XR SDK subsystems without the need for boilerplate code. The `XRManagerSettings`class provides a scriptable object that your app can use to start, stop, initialize, and deinitialize a set of subsystems defined in an `XRLoader` instance.
+This package enables you to manage the lifecycle of XR SDK subsystems without the need for boilerplate code. The `XRManagerSettings` class provides a [ScriptableObject](https://docs.unity3d.com/Manual/class-ScriptableObject.html) that your app can use to start, stop, initialize, and deinitialize a set of subsystems defined in an `XRLoader` instance.
 
 Providers must create a subclass of `XRLoader` to make a Loader available for their particular runtime scheme.
 
@@ -32,7 +32,14 @@ public abstract class XRLoader : ScriptableObject
 }
 ```
 
-To handle subsystem management in a type-safe manner, derive from the `XRLoaderHelper` class. For an example, see *[Samples/SampleLoader.cs](/Samples/SampleLoader.cs)*.
+To handle subsystem management in a type-safe manner, derive from the `XRLoaderHelper` class. Refer to the included `SampleLoader.cs` script file.
+
+To access the sample scripts, open **Window** > **Package Management** > **Package Manager** in Unity. View the packages **In Project** and select **XR Plugin Management**, then the **Samples** tab, and then **Import**.
+
+![Import XR Plugin Management Samples](images/import-xr-plugin-management-samples.png)
+
+> [!NOTE]
+> After importing the samples, you can find the `SampleLoader.cs` script in the **Project** window in Unity, in `Assets\Samples\XR Plugin Management\[Version]\Example XR Management Implementation`.
 
 An `XRLoader` is a [ScriptableObject](https://docs.unity3d.com/Manual/class-ScriptableObject.html), which means you can create one or more instances of it. Each `XRLoader` subclass defines the subsystems and their load order, and manages the set of subsystems they require.
 
@@ -54,17 +61,17 @@ Application lifetime-based automatic lifecycle management hooks into the followi
 |Runtime initialization after assemblies loaded|Find the first Loader that succeeds initialization and set `ActiveLoader`.|
 |Runtime initialization before splash screen displays|Start all subsystems.|
 |OnDisable|Stop all subsystems.|
-|OnDestroy|Deintialize all subsystems and remove the `ActiveLoader` instance.|
+|OnDestroy|Deinitialize all subsystems and remove the `ActiveLoader` instance.|
 
 ## Configuring build and runtime settings through Unified Settings
 
-A provider might need additional settings to help manage build issues or runtime configuration. To do this, add an `XRConfigurationData` attribute to a ScriptableObject, and define a set of properties you want to surface to allow users to control configuration. Unity displays configuration options in the **XR** section of the **Unified Settings** window.
+A provider might need additional settings to help manage build issues or runtime configuration. To do this, add an `XRConfigurationData` attribute to a [ScriptableObject](https://docs.unity3d.com/Manual/class-ScriptableObject.html), and define a set of properties you want to surface to allow users to control configuration. Unity displays configuration options in the **XR** section of the **Unified Settings** window.
 
 Unity manages the lifecycle of one instance of the class marked with the attribute through the [EditorBuildSettings](https://docs.unity3d.com/ScriptReference/EditorBuildSettings.html) config object API. If you don't provide a dedicated UI, configuration settings are displayed in the **Unified Settings** window using the standard **Scriptable Object** UI Inspector. You can create a custom **Editor** for your configuration settings type, which then replaces the standard Inspector in the **Unified Settings** window.
 
 The provider needs to handle getting the settings from `EditorUserBuildSettings` into the built application. You can do this with a custom build processing script. If you only need to make sure that you have access to the same settings at runtime, you can derive from `XRBuildHelper<T>`. This is a generic abstract base class that takes the build settings stored in `EditorUserBuildSettings` and gets them into the built application for runtime access.
 
-The simplest build script for your package would look like this:
+The simplest build script for your package looks like this:
 
 ```csharp
 public class MyBuildProcessor : XRBuildHelper<MySettings>
@@ -88,7 +95,7 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 
     public override void OnPostprocessBuild(BuildReport report)
     {
-        base.OnPreprocessBuild(report);
+        base.OnPostprocessBuild(report);
         // Do your work here
     }
 }
@@ -116,7 +123,7 @@ public class MyBuildProcessor : XRBuildHelper<MySettings>
 }
 ```
 
-If you need more extensive support and/or complete control, you can make a copy of the `SampleBuildProcessor` in the `Samples/Editor` folder and work from there.
+If you need more extensive support or complete control, you can make a copy of the `SampleBuildProcessor` in the `Samples/Editor` folder and work from there.
 
 ## Package metadata
 
@@ -126,9 +133,9 @@ Your plug-in must provide metadata information for it to be usable by the **XR P
 * IXRPackageMetadata
 * IXRLoaderMetadata
 
-The system will use .Net reflection to find all types implementing the **IXRPackage** interface. It will then attempt to instantiate each one and populate the metadata store with the information provided by each instance.
+The system will use .NET reflection to find all types implementing the `IXRPackage` interface. It then attempts to instantiate each one and populate the metadata store with the information provided by each instance.
 
-You can only have one instance of **IXRPackage** within a given Unity package. The **IXRMetadata.packageId** field must return the same id as set in the package's `package.json` file.
+You can only have one instance of `IXRPackage` within a given Unity package. The `IXRMetadata.packageId` field must return the same ID as set in the package's `package.json` file.
 
 ## Example: Simple, minimal package information setup:
 
@@ -184,23 +191,23 @@ You can only have one instance of **IXRPackage** within a given Unity package. T
 
 ## Package initialization
 
-Implementing the Package Metadata allows the **XR Plug-in Management** system to auto create and initialize your loaders and settings instances. The system will pass any new instances of your settings to the `PopulateNewSettingsInstance` function to allow your plug-in to do post creation initialization of the new instance data if needed.
+Implementing the package metadata allows the **XR Plug-in Management** system to automatically create and initialize your loaders and settings instances. The system will pass any new instances of your settings to the `PopulateNewSettingsInstance` function to allow your plug-in to do post-creation initialization of the new instance data if needed.
 
 ## Providing a custom loader UI for the loader selection screen
 
-A package author can provide a custom UI for their loader within one or more build targets. See `XRCustomLoaderUI` for more information about the API. The image below was rendered by the sample provided in this package.
+A package author can provide a custom UI for their loader within one or more build targets. Refer to `XRCustomLoaderUI` for more information about the API. The sample provided in this package rendered the following image:
 
 ![Sample Loader UI](images/CustomLoaderUI.png)
 
-**Note:** If you're using the samples, make sure to add them to a Unity package. Otherwise, the XR Plug-in Management UI won't work correctly. See Unity documentation on [custom packages](https://docs.unity3d.com/Manual/CustomPackages.html) to learn more about custom package requirements.
+**Note:** If you're using the samples, make sure to add them to a Unity package so that the **XR Plug-in Management** UI works correctly. Refer to the Unity documentation on [custom packages](https://docs.unity3d.com/Manual/CustomPackages.html) to learn more about custom package requirements.
 
 ## Displaying plug-in notifications in the XR Plug-in Management window
 
-If your package loader needs to notify the user about upcoming changes to the package, XR Plug-in Management provides an API that allows packages to display a tooltip and icon inside the XR Plug-in Management window in the Unity Editor.
+The XR Plugin Management package provides an API that allows packages to display a tooltip and icon inside the **XR Plug-in Management** window in the Unity Editor. This is useful if your package loader needs to notify the user about upcoming changes to the package.
 
-![Example notification in the XR Plug-in Management windowI](images/XRPluginManagementNotificationIcons.png)
+![Example notification in the XR Plug-in Management window](images/XRPluginManagementNotificationIcons.png)
 
-To do this, use the `UnityEngine.XR.Management.PackageNotificationUtils` API.  The code example below shows The code example below shows how to register your package with an icon, tooltip, and optionally a URL. Clicking the icon will redirect the user to a resource with more information.
+To do this, use the `UnityEngine.XR.Management.PackageNotificationUtils` API.  The following code example shows how to register your package with an icon, tooltip, and optionally a URL. Clicking the icon will redirect the user to a resource with more information.
 
 ```csharp
 // The following sample assumes some package "com.unity.xr.foobar" has all
@@ -269,10 +276,10 @@ public IXRPackageMetadata metadata
 
 ```
 
-The code above should display a notification in the XR Plug-in Management window.
+The previous code will display a notification in the XR Plug-in Management window.
 
 **Note:** The code samples in `SampleMetadata.cs` contain further examples of how to use this API.
 
 ## Installing the XR Plug-in Management package
 
-Most XR SDK Provider packages typically include XR Plug-in Management, so you shouldn't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).
+Most XR SDK Provider packages typically include XR Plug-in Management, so you don't need to install it. If you do need to install it, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest/index.html).

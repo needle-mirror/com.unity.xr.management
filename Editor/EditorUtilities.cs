@@ -2,38 +2,25 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
 using UnityEngine;
 
 namespace UnityEditor.XR.Management
 {
-    internal static class EditorUtilities
+    static class EditorUtilities
     {
-        internal static readonly string[] s_DefaultGeneralSettingsPath = {"XR"};
-        internal static readonly string[] s_DefaultLoaderPath = {"XR","Loaders"};
-        internal static readonly string[] s_DefaultSettingsPath = {"XR","Settings"};
+        internal static readonly string[] k_DefaultGeneralSettingsPath = {"XR"};
+        internal static readonly string[] k_DefaultLoaderPath = {"XR","Loaders"};
+        internal static readonly string[] k_DefaultSettingsPath = {"XR","Settings"};
 
         internal static bool AssetDatabaseHasInstanceOfType(string type)
         {
-            var assets = AssetDatabase.FindAssets(String.Format("t:{0}", type));
+            var assets = AssetDatabase.FindAssets($"t:{type}");
             return assets.Any();
-        }
-
-        internal static T GetInstanceOfTypeFromAssetDatabase<T>() where T : class
-        {
-            var assets = AssetDatabase.FindAssets(String.Format("t:{0}", typeof(T).Name));
-            if (assets.Any())
-            {
-                string assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
-                var asset = AssetDatabase.LoadAssetAtPath(assetPath, typeof(T));
-                return asset as T;
-            }
-            return null;
         }
 
         internal static ScriptableObject GetInstanceOfTypeWithNameFromAssetDatabase(string typeName)
         {
-            var assets = AssetDatabase.FindAssets(String.Format("t:{0}", typeName));
+            var assets = AssetDatabase.FindAssets($"t:{typeName}");
             if (assets.Any())
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
@@ -49,21 +36,15 @@ namespace UnityEditor.XR.Management
                 return null;
 
             string path = root;
-            foreach( var pc in pathComponents)
+            foreach (var pc in pathComponents)
             {
-                string subFolder = Path.Combine(path, pc);
-                bool shouldCreate = true;
-                foreach (var f in AssetDatabase.GetSubFolders(path))
-                {
-                    if (String.Compare(Path.GetFullPath(f), Path.GetFullPath(subFolder), true) == 0)
-                    {
-                        shouldCreate = false;
-                        break;
-                    }
-                }
+                // AssetDatabase paths are always project-relative and use forward slashes
+                // so this line is fine
+                string subFolder = $"{path}/{pc}";
 
-                if (shouldCreate)
+                if (!AssetDatabase.IsValidFolder(subFolder))
                     AssetDatabase.CreateFolder(path, pc);
+
                 path = subFolder;
             }
 
@@ -95,12 +76,12 @@ namespace UnityEditor.XR.Management
 
         internal static ScriptableObject CreateScriptableObjectInstance(string typeName, string path)
         {
-            ScriptableObject obj = ScriptableObject.CreateInstance(typeName) as ScriptableObject;
+            var obj = ScriptableObject.CreateInstance(typeName);
             if (obj != null)
             {
                 if (!string.IsNullOrEmpty(path))
                 {
-                    string fileName = String.Format("{0}.asset", EditorUtilities.TypeNameToString(typeName));
+                    string fileName = $"{TypeNameToString(typeName)}.asset";
                     string targetPath = Path.Combine(path, fileName);
                     AssetDatabase.CreateAsset(obj, targetPath);
                     AssetDatabase.SaveAssets();
@@ -119,9 +100,9 @@ namespace UnityEditor.XR.Management
         /// <returns><see cref="string"/> of the XML file path.</returns>
         internal static string GetPackagePath(string packageName)
         {
-            var xrManagementPackageInfo = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
-                .Where(package => package.name == packageName)
-                .First();
+            var xrManagementPackageInfo = PackageManager.PackageInfo
+                .GetAllRegisteredPackages()
+                .First(package => package.name == packageName);
             return xrManagementPackageInfo.resolvedPath;
         }
     }

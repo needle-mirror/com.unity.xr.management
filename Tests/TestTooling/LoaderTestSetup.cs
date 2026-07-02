@@ -1,26 +1,21 @@
 using System.IO;
-
 using NUnit.Framework;
-
 using UnityEditor;
-
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.XR;
 using UnityEngine.XR.Management;
-
 
 namespace Unity.XR.TestTooling
 {
-    public abstract class LoaderTestSetup<L, S> : ManagementTestSetup, IPrebuildSetup, IPostBuildCleanup 
-        where L : XRLoader 
+    public abstract class LoaderTestSetup<L, S> : ManagementTestSetup, IPrebuildSetup, IPostBuildCleanup
+        where L : XRLoader
         where S : ScriptableObject
     {
         protected abstract string settingsKey { get; }
 
-        protected L loader = null;
-        protected S settings = null;
-        private bool isRunning = false;
+        protected L loader;
+        protected S settings;
+        bool m_IsRunning;
 
         public override void SetupTest()
         {
@@ -34,7 +29,7 @@ namespace Unity.XR.TestTooling
             loader = ScriptableObject.CreateInstance<L>();
             var path = GetAssetPathForComponents(s_TempSettingsPath);
             AssetDatabase.CreateAsset(loader, Path.Combine(path, $"Test_{typeof(L).Name}.asset"));
-            xrGeneralSettings.Manager.loaders.Add(loader);
+            xrGeneralSettings.Manager.currentLoaders.Add(loader);
 
             // Setup Settings
             settings = ScriptableObject.CreateInstance<S>();
@@ -46,9 +41,9 @@ namespace Unity.XR.TestTooling
 
         public override void TearDownTest()
         {
-            if (isRunning)
+            if (m_IsRunning)
                 StopAndShutdown();
-            xrGeneralSettings.Manager.loaders.Remove(loader);
+            xrGeneralSettings.Manager.currentLoaders.Remove(loader);
             loader = null;
 
             base.TearDownTest();
@@ -59,7 +54,7 @@ namespace Unity.XR.TestTooling
             if (loader != null)
             {
                 if (loader.Initialize())
-                    isRunning = loader.Start();
+                    m_IsRunning = loader.Start();
             }
         }
 
@@ -69,7 +64,7 @@ namespace Unity.XR.TestTooling
             {
                 loader.Stop();
                 loader.Deinitialize();
-                isRunning = false;
+                m_IsRunning = false;
             }
         }
 

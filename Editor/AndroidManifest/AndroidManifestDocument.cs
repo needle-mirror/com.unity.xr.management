@@ -9,17 +9,17 @@ namespace Unity.XR.Management.AndroidManifest.Editor
     /// <summary>
     /// This class holds information that should be displayed in an Editor tooltip for a given package.
     /// </summary>
-    internal class AndroidManifestDocument : XmlDocument
+    class AndroidManifestDocument : XmlDocument
     {
-        internal static readonly string k_androidXmlNamespace = "http://schemas.android.com/apk/res/android";
+        internal const string k_AndroidXmlNamespace = "http://schemas.android.com/apk/res/android";
+        const string k_NameAttribute = "name";
 
-        private readonly string m_Path;
-        private readonly XmlNamespaceManager m_nsMgr;
+        readonly string m_Path;
 
         internal AndroidManifestDocument()
         {
-            m_nsMgr = new XmlNamespaceManager(NameTable);
-            m_nsMgr.AddNamespace("android", k_androidXmlNamespace);
+            var namespaceManager = new XmlNamespaceManager(NameTable);
+            namespaceManager.AddNamespace("android", k_AndroidXmlNamespace);
         }
 
         internal AndroidManifestDocument(string path)
@@ -32,8 +32,8 @@ namespace Unity.XR.Management.AndroidManifest.Editor
                 Load(reader);
             }
 
-            m_nsMgr = new XmlNamespaceManager(NameTable);
-            m_nsMgr.AddNamespace("android", k_androidXmlNamespace);
+            var namespaceManager = new XmlNamespaceManager(NameTable);
+            namespaceManager.AddNamespace("android", k_AndroidXmlNamespace);
         }
 
         internal string Save()
@@ -45,11 +45,9 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         {
             // ensure the folder exists so that the XmlTextWriter doesn't fail
             Directory.CreateDirectory(Path.GetDirectoryName(path));
-            using (var writer = new XmlTextWriter(path, new UTF8Encoding(false)))
-            {
-                writer.Formatting = Formatting.Indented;
-                Save(writer);
-            }
+            using var writer = new XmlTextWriter(path, new UTF8Encoding(false));
+            writer.Formatting = Formatting.Indented;
+            Save(writer);
 
             return path;
         }
@@ -79,7 +77,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             // Apply attributes to leaf node
             foreach (var attributePair in attributes)
             {
-                node.SetAttribute(attributePair.Key, k_androidXmlNamespace, attributePair.Value);
+                node.SetAttribute(attributePair.Key, k_AndroidXmlNamespace, attributePair.Value);
             }
         }
 
@@ -174,7 +172,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
                 // Apply attributes to leaf node
                 foreach (var attributePair in attributes)
                 {
-                    node.SetAttribute(attributePair.Key, k_androidXmlNamespace, attributePair.Value);
+                    node.SetAttribute(attributePair.Key, k_AndroidXmlNamespace, attributePair.Value);
                 }
             }
         }
@@ -215,7 +213,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             // Apply attributes to leaf node
             foreach (var attributePair in attributes)
             {
-                node.SetAttribute(attributePair.Key, k_androidXmlNamespace, attributePair.Value);
+                node.SetAttribute(attributePair.Key, k_AndroidXmlNamespace, attributePair.Value);
             }
         }
 
@@ -232,7 +230,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             }
         }
 
-        private bool CheckNodeAttributesMatch(XmlNode node, Dictionary<string, string> attributes)
+        bool CheckNodeAttributesMatch(XmlNode node, Dictionary<string, string> attributes)
         {
             var nodeAttributes = node.Attributes;
             foreach (XmlAttribute attribute in nodeAttributes)
@@ -252,8 +250,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             {
                 foreach (var requirement in newElements)
                 {
-                    this
-                        .CreateNewElement(
+                    CreateNewElement(
                         requirement.ElementPath, requirement.Attributes);
                 }
             }
@@ -261,8 +258,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             {
                 foreach (var requirement in newElements)
                 {
-                    this
-                        .CreateNewElementIfDoesntExist(
+                    CreateNewElementIfDoesntExist(
                         requirement.ElementPath, requirement.Attributes);
                 }
             }
@@ -273,35 +269,68 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             foreach (var requirement in overrideElements)
             {
                 var matchingNodes = SelectNodes(string.Join("/", requirement.ElementPath));
-                if (matchingNodes.Count == 0)
+
+                // When the element specifies a name, scope the override to the node(s) with that name so that distinct
+                // elements sharing the same path aren't collapsed into one.
+                if (requirement.Attributes != null
+                    && requirement.Attributes.TryGetValue(k_NameAttribute, out var requirementName))
                 {
-                    this.CreateOrOverrideElement(
+                    var nodesWithMatchingName = matchingNodes
+                        .Cast<XmlElement>()
+                        .Where(node => NodeNameMatches(node, requirementName))
+                        .ToList();
+
+                    if (nodesWithMatchingName.Count == 0)
+                    {
+                        // No element with this name exists yet, so add it as a new sibling element.
+                        CreateNewElement(requirement.ElementPath, requirement.Attributes);
+                    }
+                    else
+                    {
+                        foreach (var node in nodesWithMatchingName)
+                        {
+                            OverrideNodeAttributes(node, requirement.Attributes);
+                        }
+                    }
+                }
+                else if (matchingNodes.Count == 0)
+                {
+                    CreateOrOverrideElement(
                         requirement.ElementPath, requirement.Attributes);
                 }
                 else
                 {
                     foreach (XmlElement node in matchingNodes)
                     {
-                        foreach (var attributePair in requirement.Attributes)
-                        {
-                            node.SetAttribute(attributePair.Key, k_androidXmlNamespace, attributePair.Value);
-                        }
+                        OverrideNodeAttributes(node, requirement.Attributes);
                     }
                 }
             }
+        }
+
+        void OverrideNodeAttributes(XmlElement node, Dictionary<string, string> attributes)
+        {
+            foreach (var attributePair in attributes)
+            {
+                node.SetAttribute(attributePair.Key, k_AndroidXmlNamespace, attributePair.Value);
+            }
+        }
+
+        bool NodeNameMatches(XmlElement node, string name)
+        {
+            return string.Equals(node.GetAttribute(k_NameAttribute, k_AndroidXmlNamespace), name);
         }
 
         internal void RemoveElements(IEnumerable<ManifestElement> removableElements)
         {
             foreach (var requirement in removableElements)
             {
-                this
-                    .RemoveMatchingElement(
+                RemoveMatchingElement(
                     requirement.ElementPath, requirement.Attributes);
             }
         }
 
-        private bool ElementExists(List<string> path, Dictionary<string, string> attributes)
+        bool ElementExists(List<string> path, Dictionary<string, string> attributes)
         {
             var existingNodeElements = SelectNodes(string.Join("/", path));
             foreach (XmlElement element in existingNodeElements)

@@ -1,26 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using UnityEngine;
 
 namespace UnityEditor.XR.Management
 {
-    internal class XRPackageInitializationSettings : ScriptableObject
+    class XRPackageInitializationSettings : ScriptableObject
     {
-        private static XRPackageInitializationSettings s_PackageSettings = null;
-        private static object s_Lock = new object();
+        static XRPackageInitializationSettings s_PackageSettings;
+        static object s_Lock = new();
 
         internal static string s_ProjectSettingsAssetName = "XRPackageSettings.asset";
         internal static string s_ProjectSettingsFolder = "../ProjectSettings";
         internal static string s_ProjectSettingsPath;
         internal static string s_PackageInitPath;
 
-
         [SerializeField]
-        private List<string> m_Settings = new List<string>();
+        List<string> m_Settings = new();
 
-        private XRPackageInitializationSettings(){ }
+        XRPackageInitializationSettings(){ }
 
         internal static XRPackageInitializationSettings Instance
         {
@@ -32,7 +30,7 @@ namespace UnityEditor.XR.Management
                     {
                         if (s_PackageSettings == null)
                         {
-                            s_PackageSettings = ScriptableObject.CreateInstance<XRPackageInitializationSettings>();
+                            s_PackageSettings = CreateInstance<XRPackageInitializationSettings>();
                             s_PackageSettings.LoadSettings();
                         }
                     }
@@ -41,10 +39,17 @@ namespace UnityEditor.XR.Management
             }
         }
 
-        void InitPaths()
+        static void InitPaths()
         {
-            if (String.IsNullOrEmpty(s_ProjectSettingsPath)) s_ProjectSettingsPath = Path.Combine(Application.dataPath, s_ProjectSettingsFolder);
-            if (String.IsNullOrEmpty(s_PackageInitPath)) s_PackageInitPath = Path.Combine(s_ProjectSettingsPath, s_ProjectSettingsAssetName);
+            if (string.IsNullOrEmpty(s_ProjectSettingsPath))
+            {
+                s_ProjectSettingsPath = Path.Combine(Application.dataPath, s_ProjectSettingsFolder);
+            }
+
+            if (string.IsNullOrEmpty(s_PackageInitPath))
+            {
+                s_PackageInitPath = Path.Combine(s_ProjectSettingsPath, s_ProjectSettingsAssetName);
+            }
         }
 
         void OnEnable()
@@ -57,14 +62,11 @@ namespace UnityEditor.XR.Management
             InitPaths();
             if (File.Exists(s_PackageInitPath))
             {
-                using (StreamReader sr = new StreamReader(s_PackageInitPath))
-                {
-                    string settings = sr.ReadToEnd();
-                    JsonUtility.FromJsonOverwrite(settings, this);
-                }
+                using var streamReader = new StreamReader(s_PackageInitPath);
+                string settings = streamReader.ReadToEnd();
+                JsonUtility.FromJsonOverwrite(settings, this);
             }
         }
-
 
         internal void SaveSettings()
         {
@@ -72,11 +74,9 @@ namespace UnityEditor.XR.Management
             if (!Directory.Exists(s_ProjectSettingsPath))
                 Directory.CreateDirectory(s_ProjectSettingsPath);
 
-            using (StreamWriter sw = new StreamWriter(s_PackageInitPath))
-            {
-                string settings = JsonUtility.ToJson(this, true);
-                sw.Write(settings);
-            }
+            using var streamWriter = new StreamWriter(s_PackageInitPath);
+            string settings = JsonUtility.ToJson(this, true);
+            streamWriter.Write(settings);
         }
 
         internal bool HasSettings(string key)

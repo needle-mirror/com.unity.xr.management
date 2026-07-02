@@ -12,9 +12,8 @@ namespace Unity.XR.Management.AndroidManifest.Editor
     /// Class that receives the build event when building an Android Gradle project,
     /// so the manifest element processing can be executed.
     /// </summary>
-    internal class AndroidManifestBuildEventReceiver : IPostGenerateGradleAndroidProject
+    class AndroidManifestBuildEventReceiver : IPostGenerateGradleAndroidProject
     {
-
         public int callbackOrder => 1;
 
         public void OnPostGenerateGradleAndroidProject(string gradleProjectPath)
@@ -25,7 +24,7 @@ namespace Unity.XR.Management.AndroidManifest.Editor
             processor.ProcessManifestRequirements(manifestProviders);
         }
 
-        private AndroidManifestProcessor CreateManifestProcessor(string gradleProjectPath)
+        static AndroidManifestProcessor CreateManifestProcessor(string gradleProjectPath)
         {
             var xrManagementPackagePath = EditorUtilities.GetPackagePath("com.unity.xr.management");
             var processor = new AndroidManifestProcessor(gradleProjectPath, xrManagementPackagePath, GetXRManagerSettings());
@@ -43,25 +42,22 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         /// and creates instances for each type into a single collection.
         /// </summary>
         /// <returns><see cref="System.Collections.Generic.List{T}"/> collection of <see cref="IAndroidManifestRequirementProvider"/> instances. All contained objects are unique.</returns>
-        private List<IAndroidManifestRequirementProvider> GetManifestProviders()
+        static List<IAndroidManifestRequirementProvider> GetManifestProviders()
         {
             return TypeCache
                 .GetTypesDerivedFrom<IAndroidManifestRequirementProvider>()
                 .Where(type => !type.IsInterface && !type.IsAbstract && !type.IsNestedPrivate)
-                .Select(providerType => Activator.CreateInstance(providerType)) // Instantiate providers
+                .Select(Activator.CreateInstance) // Instantiate providers
                 .OfType<IAndroidManifestRequirementProvider>()
                 .Distinct()
                 .ToList();
         }
 
-        private XRManagerSettings GetXRManagerSettings()
+        static XRManagerSettings GetXRManagerSettings()
         {
-            if (XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android))
-            {
-                return XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android).AssignedSettings;
-            }
-
-            return null;
+            return XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android)
+                ? XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android).Manager
+                : null;
         }
     }
 }

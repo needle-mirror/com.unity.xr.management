@@ -21,8 +21,6 @@ namespace UnityEditor.XR.Management
         /// </summary>
         public BuildTarget[] buildTargets { get; set; }
 
-        private XRSupportedBuildTargetAttribute() { }
-
         /// <summary>Constructor for attribute. We assume that all build targets for this group will be supported.</summary>
         /// <param name="buildTargetGroup">Build Target Group that will be supported.</param>
         public XRSupportedBuildTargetAttribute(BuildTargetGroup buildTargetGroup)

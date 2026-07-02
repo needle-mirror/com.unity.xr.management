@@ -1,16 +1,12 @@
 using NUnit.Framework;
-
 using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Management;
 using UnityEditor.XR.Management.Metadata;
-
 using Unity.XR.Management.TestPackage;
 using Unity.XR.Management.TestPackage.Editor;
 
@@ -20,9 +16,21 @@ namespace UnityEditor.XR.Management.Tests
     {
         internal static readonly string[] s_TempSettingsPath = { "Temp", "Test" };
 
-        XRGeneralSettingsPerBuildTarget m_TestSettingsPerBuildTarget = null;
-        XRGeneralSettings m_TestSettings = null;
-        XRManagerSettings m_Settings = null;
+        XRGeneralSettingsPerBuildTarget m_TestSettingsPerBuildTarget;
+        XRGeneralSettings m_TestSettings;
+        XRManagerSettings m_Settings;
+
+        internal static T GetInstanceOfTypeFromAssetDatabase<T>() where T : class
+        {
+            var assets = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+            if (assets.Any())
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
+                var asset = AssetDatabase.LoadAssetAtPath(assetPath, typeof(T));
+                return asset as T;
+            }
+            return null;
+        }
 
         [SetUp]
         public void SetUp()
@@ -31,14 +39,14 @@ namespace UnityEditor.XR.Management.Tests
 
             AssetDatabase.CreateFolder("Assets", "XR");
 
-            m_Settings = ScriptableObject.CreateInstance<XRManagerSettings>() as XRManagerSettings;
+            m_Settings = ScriptableObject.CreateInstance<XRManagerSettings>();
             m_Settings.name = "Actual testable settings.";
 
-            m_TestSettings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
+            m_TestSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
             m_TestSettings.Manager = m_Settings;
             m_TestSettings.name = "Standalone Settings Container.";
 
-            m_TestSettingsPerBuildTarget = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>() as XRGeneralSettingsPerBuildTarget;
+            m_TestSettingsPerBuildTarget = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
             m_TestSettingsPerBuildTarget.SetSettingsForBuildTarget(BuildTargetGroup.Standalone, m_TestSettings);
 
             var testPath = XRGeneralSettingsTests.GetAssetPathForComponents(s_TempSettingsPath);
@@ -52,11 +60,11 @@ namespace UnityEditor.XR.Management.Tests
                 testPath = Path.Combine(testPath, "Settings");
                 AssetDatabase.CreateAsset(m_Settings, Path.Combine(testPath, "Test_XRSettingsManager.asset"));
 
-                m_TestSettings.AssignedSettings = m_Settings;
+                m_TestSettings.Manager = m_Settings;
                 AssetDatabase.SaveAssets();
             }
 
-            EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_TestSettingsPerBuildTarget, true);
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_TestSettingsPerBuildTarget, true);
 
             XRPackageInitializationBootstrap.BeginPackageInitialization();
 
@@ -75,7 +83,7 @@ namespace UnityEditor.XR.Management.Tests
             AssetDatabase.DeleteAsset("Assets/XR");
         }
 
-        private string LoaderTypeNameForBuildTarget(BuildTargetGroup buildTargetGroup)
+        static string LoaderTypeNameForBuildTarget(BuildTargetGroup buildTargetGroup)
         {
             var loaders = XRPackageMetadataStore.GetLoadersForBuildTarget(buildTargetGroup);
             var filteredLoaders = from l in loaders where String.Compare(l.loaderType, typeof(TestLoaderOne).FullName) == 0 select l;
@@ -89,7 +97,7 @@ namespace UnityEditor.XR.Management.Tests
             return "";
         }
 
-        private bool AssignLoaderToSettings(XRManagerSettings settings, string loaderTypeName, BuildTargetGroup buildTargetGroup = BuildTargetGroup.Standalone)
+        bool AssignLoaderToSettings(string loaderTypeName, BuildTargetGroup buildTargetGroup = BuildTargetGroup.Standalone)
         {
             if (String.IsNullOrEmpty(loaderTypeName))
                 return false;
@@ -97,7 +105,7 @@ namespace UnityEditor.XR.Management.Tests
             return XRPackageMetadataStore.AssignLoader(m_Settings, loaderTypeName, buildTargetGroup);
         }
 
-        private bool SettingsHasLoaderOfType(XRManagerSettings settings, string loaderTypeName)
+        bool SettingsHasLoaderOfType(string loaderTypeName)
         {
             bool wasFound = false;
             foreach (var l in m_Settings.activeLoaders)
@@ -107,7 +115,6 @@ namespace UnityEditor.XR.Management.Tests
             }
             return wasFound;
         }
-
 
         [UnityTest]
         public IEnumerator TestLoaderAssignment()
@@ -129,7 +136,7 @@ namespace UnityEditor.XR.Management.Tests
 
             yield return null;
 
-            Assert.IsTrue(SettingsHasLoaderOfType(m_Settings, loaderTypeName));
+            Assert.IsTrue(SettingsHasLoaderOfType(loaderTypeName));
             Assert.IsTrue(TestLoaderBase.WasAssigned);
 
         }
@@ -140,18 +147,17 @@ namespace UnityEditor.XR.Management.Tests
             Assert.IsNotNull(m_Settings);
             string loaderTypeName = LoaderTypeNameForBuildTarget(BuildTargetGroup.Standalone);
             Assert.IsFalse(String.IsNullOrEmpty(loaderTypeName));
-            AssignLoaderToSettings(m_Settings, loaderTypeName);
-            Assert.IsTrue(SettingsHasLoaderOfType(m_Settings, loaderTypeName));
+            AssignLoaderToSettings(loaderTypeName);
+            Assert.IsTrue(SettingsHasLoaderOfType(loaderTypeName));
 
             m_Settings = null;
-            var settings = EditorUtilities.GetInstanceOfTypeFromAssetDatabase<XRManagerSettings>();
-            m_Settings =  settings as XRManagerSettings;
+            var settings = GetInstanceOfTypeFromAssetDatabase<XRManagerSettings>();
+            m_Settings =  settings;
             Assert.IsNotNull(m_Settings);
 
-            Assert.IsTrue(SettingsHasLoaderOfType(m_Settings, loaderTypeName));
+            Assert.IsTrue(SettingsHasLoaderOfType(loaderTypeName));
             Assert.IsTrue(TestLoaderBase.WasAssigned);
         }
-
 
         [Test]
         public void TestLoaderRemoval()
@@ -159,16 +165,16 @@ namespace UnityEditor.XR.Management.Tests
             Assert.IsNotNull(m_Settings);
             string loaderTypeName = LoaderTypeNameForBuildTarget(BuildTargetGroup.Standalone);
             Assert.IsFalse(String.IsNullOrEmpty(loaderTypeName));
-            AssignLoaderToSettings(m_Settings, loaderTypeName);
-            Assert.IsTrue(SettingsHasLoaderOfType(m_Settings, loaderTypeName));
+            AssignLoaderToSettings(loaderTypeName);
+            Assert.IsTrue(SettingsHasLoaderOfType(loaderTypeName));
 
             Assert.IsTrue(XRPackageMetadataStore.RemoveLoader(m_Settings, loaderTypeName, BuildTargetGroup.Standalone));
 
             m_Settings = null;
-            var settings = EditorUtilities.GetInstanceOfTypeFromAssetDatabase<XRManagerSettings>();
-            m_Settings = settings as XRManagerSettings;
+            var settings = GetInstanceOfTypeFromAssetDatabase<XRManagerSettings>();
+            m_Settings = settings;
             Assert.IsNotNull(m_Settings);
-            Assert.IsFalse(SettingsHasLoaderOfType(m_Settings, loaderTypeName));
+            Assert.IsFalse(SettingsHasLoaderOfType(loaderTypeName));
 
             Assert.IsTrue(TestLoaderBase.WasUnassigned);
         }

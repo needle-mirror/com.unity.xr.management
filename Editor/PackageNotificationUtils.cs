@@ -12,8 +12,6 @@ namespace UnityEditor.XR.Management
     /// </summary>
     public class PackageNotificationInfo
     {
-        private PackageNotificationInfo() {}
-
         /// <summary>
         /// Constructs a container for package notification information that displays in the XR Plug-in Management window.
         /// </summary>
@@ -65,13 +63,14 @@ namespace UnityEditor.XR.Management
         public readonly GUIContent userInterfaceIcon;
     }
 
-
     /// <summary>
     /// Static utility class for managing package notifications for packages.
     /// </summary>
     public static class PackageNotificationUtils
     {
-        static Dictionary<string, PackageNotificationInfo> s_RegisteredPackagesWithNotifications = new Dictionary<string, PackageNotificationInfo>();
+        const int k_RectPixelOffsetWidth = 5;
+
+        static Dictionary<string, PackageNotificationInfo> s_RegisteredPackagesWithNotifications = new();
 
         /// <summary>
         /// Dictionary of packages that have notification to report. When a package is added to the project,
@@ -95,15 +94,11 @@ namespace UnityEditor.XR.Management
         /// </param>
         public static void RegisterPackageNotificationInformation(string packageId, PackageNotificationInfo notificationInfo)
         {
-            if (s_RegisteredPackagesWithNotifications.ContainsKey(packageId))
-                s_RegisteredPackagesWithNotifications[packageId] = notificationInfo;
-            else
-                s_RegisteredPackagesWithNotifications.Add(packageId, notificationInfo);
+            s_RegisteredPackagesWithNotifications[packageId] = notificationInfo;
         }
 
-        const int k_RectPixelOffsetWidth = 5;
-
-        internal static void DrawNotificationIconUI(PackageNotificationInfo notificationInfo, Rect guiRect, int pixelOffset = k_RectPixelOffsetWidth)
+        internal static void DrawNotificationIconUI(
+            PackageNotificationInfo notificationInfo, Rect guiRect, int pixelOffset = k_RectPixelOffsetWidth)
         {
             var position = new Vector2(guiRect.xMax - (notificationInfo.userInterfaceIcon.image.width + pixelOffset), guiRect.y);
             var size = new Vector2(notificationInfo.userInterfaceIcon.image.width, guiRect.height);

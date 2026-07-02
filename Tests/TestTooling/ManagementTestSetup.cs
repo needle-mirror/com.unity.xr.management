@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-
 using UnityEditor;
 using UnityEditor.XR.Management;
-
 using UnityEngine;
 using UnityEngine.XR.Management;
 
@@ -23,19 +21,18 @@ namespace Unity.XR.TestTooling
         protected string testPathToGeneralSettings;
         protected string testPathToSettings;
 
-        private UnityEngine.Object currentSettings = null;
+        UnityEngine.Object m_CurrentSettings;
 
-        protected XRManagerSettings testManager = null;
-        protected XRGeneralSettings xrGeneralSettings = null;
-        protected XRGeneralSettingsPerBuildTarget buildTargetSettings = null;
+        protected XRManagerSettings testManager;
+        protected XRGeneralSettings xrGeneralSettings;
+        protected XRGeneralSettingsPerBuildTarget buildTargetSettings;
 
         public virtual void SetupTest()
         {
             testManager = ScriptableObject.CreateInstance<XRManagerSettings>();
 
-            xrGeneralSettings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
+            xrGeneralSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
             xrGeneralSettings.Manager = testManager;
-
 
             testPathToSettings = GetAssetPathForComponents(s_TempSettingsPath);
             testPathToSettings = Path.Combine(testPathToSettings, "Test_XRGeneralSettings.asset");
@@ -61,15 +58,14 @@ namespace Unity.XR.TestTooling
                 AssetDatabase.CreateAsset(buildTargetSettings, testPathToGeneralSettings);
                 AssetDatabase.SaveAssets();
 
-                EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out currentSettings);
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, buildTargetSettings, true);
+                EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out m_CurrentSettings);
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, buildTargetSettings, true);
             }
-
         }
 
         public virtual void TearDownTest()
         {
-            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
 
             if (!string.IsNullOrEmpty(testPathToGeneralSettings))
             {
@@ -80,7 +76,7 @@ namespace Unity.XR.TestTooling
             {
                 AssetDatabase.DeleteAsset(testPathToSettings);
             }
-            
+
             xrGeneralSettings.Manager = null;
             UnityEngine.Object.DestroyImmediate(xrGeneralSettings);
             xrGeneralSettings = null;
@@ -91,10 +87,10 @@ namespace Unity.XR.TestTooling
             UnityEngine.Object.DestroyImmediate(buildTargetSettings);
             buildTargetSettings = null;
 
-            if (currentSettings != null)
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, currentSettings, true);
+            if (m_CurrentSettings != null)
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_CurrentSettings, true);
             else
-                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
 
             AssetDatabase.DeleteAsset(Path.Combine("Assets","Temp"));
         }

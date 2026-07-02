@@ -11,7 +11,6 @@ namespace Unity.XR.Management.AndroidManifest.Editor
         /// <summary>
         /// Provides a <see cref="ManifestRequirement"/> object with the required Android manifest elements and its attributes needed to be
         /// added, overriden or removed.
-        ///
         /// </summary>
         /// <returns><see cref="ManifestRequirement"/> with element requirements data.</returns>
         ManifestRequirement ProvideManifestRequirement();

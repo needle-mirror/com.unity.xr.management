@@ -19,9 +19,15 @@ namespace UnityEngine.XR.Management
         const string k_VendorKey = "unity.xrmanagement";
         const string k_EventBuild = "xrmanagment_build";
 
-#if ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
+#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
         static bool s_Initialized = false;
-#endif //ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticsOnLoad()
+        {
+            s_Initialized = false;
+        }
+#endif // UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
 
         [Serializable]
         struct BuildEvent
@@ -59,27 +65,24 @@ namespace UnityEngine.XR.Management
         }
 #endif //UNITY_2023_2_OR_NEWER && ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
 
+#if UNITY_EDITOR
         static bool Initialize()
         {
 #if ENABLE_TEST_SUPPORT || !ENABLE_CLOUD_SERVICES_ANALYTICS || !UNITY_ANALYTICS
             return false;
-#elif UNITY_EDITOR && UNITY_2023_2_OR_NEWER
+#elif UNITY_2023_2_OR_NEWER
             return EditorAnalytics.enabled;
 #else
-
-#if UNITY_EDITOR
             if (!EditorAnalytics.enabled)
                 return false;
 
             if(AnalyticsResult.Ok != EditorAnalytics.RegisterEventWithLimit(k_EventBuild, k_MaxEventsPerHour, k_MaxNumberOfElements, k_VendorKey))
                 return false;
             s_Initialized = true;
-#endif //UNITY_EDITOR
             return s_Initialized;
 #endif //ENABLE_TEST_SUPPORT || !ENABLE_CLOUD_SERVICES_ANALYTICS || !UNITY_ANALYTICS
         }
 
-#if UNITY_EDITOR
         public static void SendBuildEvent(
             GUID guid, BuildTarget buildTarget, BuildTargetGroup buildTargetGroup, IEnumerable<XRLoader> loaders)
         {

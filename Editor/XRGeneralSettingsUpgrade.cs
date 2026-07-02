@@ -3,12 +3,16 @@ using UnityEngine.XR.Management;
 
 namespace UnityEditor.XR.Management
 {
-    /// <summary>Helper class to auto update settings across versions.</summary>
+    /// <summary>
+    /// Helper class to auto update settings across versions.
+    /// </summary>
     public static class XRGeneralSettingsUpgrade
     {
-        /// <summary>Worker API to do the actual upgrade</summary>
+        /// <summary>
+        /// Worker API to do the actual upgrade
+        /// </summary>
         /// <param name="path">Path to asset to upgrade</param>
-        /// <returns>True if settings were successfullly upgraded, else false.</returns>
+        /// <returns>True if settings were successfully upgraded, else false.</returns>
         public static bool UpgradeSettingsToPerBuildTarget(string path)
         {
             var generalSettings = GetXRGeneralSettingsInstance(path);
@@ -18,15 +22,14 @@ namespace UnityEditor.XR.Management
             if (!AssetDatabase.IsMainAsset(generalSettings))
                 return false;
 
-            XRGeneralSettings newSettings = ScriptableObject.CreateInstance<XRGeneralSettings>() as XRGeneralSettings;
+            var newSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
             newSettings.Manager = generalSettings.Manager;
-            generalSettings = null;
 
             AssetDatabase.RemoveObjectFromAsset(newSettings.Manager); // Remove object from asset, before deleting asset
 
             AssetDatabase.DeleteAsset(path);
 
-            XRGeneralSettingsPerBuildTarget buildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>() as XRGeneralSettingsPerBuildTarget;
+            var buildTargetSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
             AssetDatabase.CreateAsset(buildTargetSettings, path);
 
             buildTargetSettings.SetSettingsForBuildTarget(EditorUserBuildSettings.selectedBuildTargetGroup, newSettings);
@@ -38,7 +41,7 @@ namespace UnityEditor.XR.Management
             return true;
         }
 
-        private static XRGeneralSettings GetXRGeneralSettingsInstance(string pathToSettings)
+        static XRGeneralSettings GetXRGeneralSettingsInstance(string pathToSettings)
         {
             XRGeneralSettings ret = null;
             if (pathToSettings.Length > 0)
@@ -49,5 +52,4 @@ namespace UnityEditor.XR.Management
             return ret;
         }
     }
-
 }
