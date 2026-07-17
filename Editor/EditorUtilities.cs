@@ -49,21 +49,15 @@ namespace UnityEditor.XR.Management
                 return null;
 
             string path = root;
-            foreach( var pc in pathComponents)
+            foreach (var pc in pathComponents)
             {
-                string subFolder = Path.Combine(path, pc);
-                bool shouldCreate = true;
-                foreach (var f in AssetDatabase.GetSubFolders(path))
-                {
-                    if (String.Compare(Path.GetFullPath(f), Path.GetFullPath(subFolder), true) == 0)
-                    {
-                        shouldCreate = false;
-                        break;
-                    }
-                }
+                // AssetDatabase paths are always project-relative and use forward slashes
+                // so this line is fine
+                string subFolder = $"{path}/{pc}";
 
-                if (shouldCreate)
+                if (!AssetDatabase.IsValidFolder(subFolder))
                     AssetDatabase.CreateFolder(path, pc);
+
                 path = subFolder;
             }
 

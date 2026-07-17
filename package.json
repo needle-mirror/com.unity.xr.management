@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.management",
   "displayName": "XR Plugin Management",
-  "version": "4.6.0",
+  "version": "4.6.1",
   "unity": "2022.3",
   "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
   "keywords": [
@@ -22,13 +22,13 @@
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
     "type": "git",
-    "revision": "7e09bb3111da77539cdd80eca684c3abdb059158"
+    "revision": "19a0b72454d9f756c51b99505b83c0a8f199f891"
   },
   "_upm": {
-    "changelog": "### Changed\n\n- Changed help box stlye for the XR Plug-in Management view for improved readability.\n- The following methods of `XRLoaderHelper` have been changed from `protected` to `public`:\n  - `StartSubsystem<T>`\n  - `StopSubsystem<T>`\n  - `DestroySubsystem<T>`\n  - `CreateSubsystem<T>`\n\n### Fixed\n\n- Fixed an issue where we now use a manual for loop instead of a foreach loop to avoid exceptions if the list of loaders is modified.\n- Fixed an issue to show the correct name for Mock HMD loader when the package is not installed. ([XRMB-152](https://issuetracker.unity3d.com/product/unity/issues/guid/XRMB-152))\n- Fixed an issue to show the correct name for OpenXR loader when the package is not installed. ([UUM-137703](https://issuetracker.unity3d.com/issues/xr-plug-in-management-inconsistant-openxr-wording))\n\n\n### Removed\n\n- Removed Oculus XR plugin from known packages due to Oculus XR plugin deprecation."
+    "changelog": "### Fixed\n\n- Fix XR folder duplication when creating build profiles"
   },
   "upmCi": {
-    "footprint": "9d2b1e59dee03e6e7304523bfe3dcb416885b3f9"
+    "footprint": "f720971c8580d234943300f5892b904599d62d0f"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.6/manual/index.html",
   "samples": [
